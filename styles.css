@@ -5,13 +5,13 @@
   --neon-cyan: #2ef0ff;
   --neon-amber: #ffb020;
   /* Flat TD-style solids (no gradients) */
-  --td-blue: #005ea5;
-  --td-green: #00703c;
+  --td-blue: #0033A2;
+  --td-green: #006928;
   --ink: #f4f6f8;
   --mute: #9aa3ad;
-  --sign-radius: 14px;
-  --sign-border: 5px;
-  --exit-radius: 8px;
+  --sign-radius: 8px;
+  --sign-border: 4px;
+  --exit-radius: 2px;
 }
 
 *,
@@ -46,7 +46,7 @@ body {
 
 .mast__meta {
   margin: 0 0 0.75rem;
-  font-family: "Barlow Condensed", "Noto Sans TC", sans-serif;
+  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.28em;
@@ -136,11 +136,10 @@ body {
 }
 
 .sign__arrow {
-  width: 0;
-  height: 0;
-  border-top: 0.9rem solid transparent;
-  border-bottom: 0.9rem solid transparent;
-  border-left: 1.2rem solid #ffffff;
+  width: 18px;
+  height: 36px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .sign__stack {
@@ -159,10 +158,10 @@ body {
 }
 
 .sign__en {
-  font-family: "Barlow Condensed", "Noto Sans TC", sans-serif;
+  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
   font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: none;
   color: #ffffff;
 }
@@ -179,7 +178,7 @@ body {
   color: #000000;
   border: none;
   border-radius: var(--exit-radius);
-  font-family: "Barlow Condensed", "Noto Sans TC", sans-serif;
+  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 1.35rem;
   letter-spacing: 0.02em;
@@ -220,7 +219,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: "Transport Heavy", "Transport Medium", "Noto Sans", sans-serif;
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   color: var(--mute);
