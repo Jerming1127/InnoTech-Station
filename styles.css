@@ -1,28 +1,39 @@
+/* Transport fonts (Road Sign Factory) */
 @font-face {
-  font-family: "Transport Medium";
+  font-family: "TransportMedium";
   src: url("fonts/TransportMedium.woff2") format("woff2");
-  font-weight: 500;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "TransportHeavy";
+  src: url("fonts/TransportHeavy.woff2") format("woff2");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 :root {
+  /* Page / neon (titles only — signs have no neon) */
   --night: #070708;
   --night-2: #101114;
   --neon-pink: #ff2ea6;
   --neon-cyan: #2ef0ff;
   --neon-amber: #ffb020;
-  /* Flat TD-style solids (no gradients) */
-  --td-blue: #0033A2;
-  --td-green: #006928;
   --ink: #f4f6f8;
   --mute: #9aa3ad;
-  /* RSF: 1 sw = x-height / 4 */
-  --x-height: 0.95rem;
-  --sw: calc(var(--x-height) / 4);
-  --sign-radius: calc(3 * var(--sw));
-  --sign-border: calc(1.5 * var(--sw));
-  --exit-radius: 2px;
+
+  /* RSF colour scheme */
+  --bg-blue: #0033A2;
+  --bg-green: #006928;
+  --bg-white: #ffffff;
+  --ink-white: #ffffff;
+  --ink-black: #000000;
+  --zh: "Noto Sans HK", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+
+  /* Nav demo scale: 1 sw ≈ xHeight/4; reference §4 uses ~9px */
+  --sw: 9px;
 }
 
 *,
@@ -38,7 +49,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  font-family: var(--zh);
   background: var(--night);
   color: var(--ink);
 }
@@ -49,6 +60,7 @@ body {
   background: var(--night);
 }
 
+/* —— Neon masthead (titles only) —— */
 .mast {
   max-width: 52rem;
   margin: 0 auto 2.5rem;
@@ -57,8 +69,8 @@ body {
 
 .mast__meta {
   margin: 0 0 0.75rem;
-  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
-  font-weight: 600;
+  font-family: "TransportMedium", "Noto Sans", sans-serif;
+  font-weight: 400;
   font-size: 0.85rem;
   letter-spacing: 0.28em;
   color: var(--mute);
@@ -107,97 +119,164 @@ body {
   font-size: 0.82rem;
 }
 
-.signs {
-  display: grid;
-  gap: 0.85rem;
+/* —— Stack border (RSF StackBorderTemplate) —— */
+.stack {
+  --fg: var(--ink-white);
+  --bd: var(--ink-white);
+  --bg: var(--bg-blue);
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  border: calc(1.5 * var(--sw)) solid var(--bd);
+  border-radius: calc(3 * var(--sw));
+  padding:
+    calc(2.5 * var(--sw))
+    calc(2.5 * var(--sw))
+    calc(1.5 * var(--sw));
+  /* flat face: no gradients, no neon */
 }
 
-.sign {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+.stack--blue {
+  --bg: var(--bg-blue);
+  --fg: var(--ink-white);
+  --bd: var(--ink-white);
+}
+
+.stack--green {
+  --bg: var(--bg-green);
+  --fg: var(--ink-white);
+  --bd: var(--ink-white);
+}
+
+.stack__body {
+  display: flex;
   align-items: center;
-  gap: calc(2 * var(--sw));
-  min-height: 0;
-  padding: calc(2.5 * var(--sw)) calc(2.5 * var(--sw)) calc(1.5 * var(--sw));
-  text-decoration: none;
-  color: #fff;
-  border-radius: var(--sign-radius);
-  border: var(--sign-border) solid #ffffff;
-  box-shadow: none;
-  transition: transform 0.15s ease;
+  gap: calc(1.5 * var(--sw));
 }
 
-.sign:hover,
-.sign:focus-visible {
-  transform: translateX(4px);
-  outline: none;
+.stack__text {
+  display: flex;
+  flex-direction: column;
+  gap: calc(0.35 * var(--sw));
+  min-width: 0;
 }
 
-.sign:focus-visible {
-  outline: 3px solid var(--neon-amber);
-  outline-offset: 3px;
+.en {
+  font-family: "TransportMedium", sans-serif;
+  font-size: calc(4 * var(--sw));
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.sign--blue {
-  background: var(--td-blue);
+.zh {
+  font-family: var(--zh);
+  font-size: calc(4 * var(--sw));
+  font-weight: 900;
+  line-height: 1.15;
 }
 
-.sign--green {
-  background: var(--td-green);
-}
-
-.sign__arrow {
-  width: calc(4 * var(--x-height));
-  height: calc(2 * var(--x-height));
+.stack-arrow {
   flex-shrink: 0;
   display: block;
 }
 
-.sign__stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.12rem;
-  min-width: 0;
-}
-
-.sign__zh {
-  font-size: calc(1.6 * var(--x-height));
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-  color: #ffffff;
-}
-
-.sign__en {
-  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
-  font-size: var(--x-height);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: #ffffff;
-}
-
-/* Exit patch: RSF ExitBorderTemplate (black fill, white legend + border) */
-.sign__exit {
-  box-sizing: border-box;
+/* —— ExitBorderTemplate: black fill, white ~0.5sw border, EXIT/出 + code —— */
+.exit-plate {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: calc(6.7 * var(--sw));
-  min-width: calc(6.7 * var(--sw));
-  padding: calc(0.3 * var(--sw)) calc(0.5 * var(--sw));
-  background: #000000;
-  color: #ffffff;
-  border: calc(0.5 * var(--sw)) solid #ffffff;
-  border-radius: var(--exit-radius);
-  box-shadow: none;
-  font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
-  font-weight: 500;
-  font-size: var(--x-height);
-  letter-spacing: 0.02em;
-  line-height: 1;
+  gap: calc(0.6 * var(--sw));
+  background: #000;
+  border: calc(0.5 * var(--sw)) solid #fff;
+  border-radius: 0;
+  padding:
+    calc(0.3 * var(--sw))
+    calc(0.5 * var(--sw))
+    0
+    calc(0.5 * var(--sw));
+  height: calc(6.7 * var(--sw));
+  box-sizing: border-box;
+  color: #fff;
+  flex-shrink: 0;
 }
 
+.exit-plate__mark {
+  height: calc(5.8 * var(--sw));
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.exit-plate__code {
+  font-family: "TransportHeavy", sans-serif;
+  font-size: calc(5.2 * var(--sw));
+  line-height: 1;
+  font-weight: 700;
+  color: #fff;
+  padding: 0 calc(0.2 * var(--sw)) calc(0.35 * var(--sw));
+  letter-spacing: 0.02em;
+}
+
+/* —— Nav 2×2 (reference §4) —— */
+.nav-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  max-width: 720px;
+  width: 100%;
+}
+
+.nav-sign {
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 0;
+  width: 100%;
+  transition: transform 0.15s ease;
+}
+
+.nav-sign:hover,
+.nav-sign:focus-visible {
+  transform: translateX(4px);
+  outline: none;
+}
+
+.nav-sign:focus-visible {
+  outline: 3px solid var(--neon-amber);
+  outline-offset: 3px;
+}
+
+.nav-sign .stack__body {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.nav-sign .stack__text {
+  flex: 1;
+}
+
+.nav-sign .zh {
+  font-size: calc(3.2 * var(--sw));
+}
+
+.nav-sign .en {
+  font-size: calc(2.4 * var(--sw));
+}
+
+.nav-sign .exit-plate {
+  height: calc(5.2 * var(--sw));
+  margin-left: auto;
+}
+
+.nav-sign .exit-plate__code {
+  font-size: calc(3.6 * var(--sw));
+}
+
+.nav-sign .exit-plate__mark {
+  height: calc(4.4 * var(--sw));
+}
+
+/* —— Board + foot (unchanged feel) —— */
 .board {
   max-width: 52rem;
   margin: 2.25rem auto 0;
@@ -232,7 +311,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: "Transport Heavy", "Transport Medium", "Noto Sans", sans-serif;
+  font-family: "TransportHeavy", "TransportMedium", "Noto Sans", sans-serif;
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   color: var(--mute);
@@ -247,13 +326,13 @@ body {
 }
 
 @media (min-width: 720px) {
-  .signs {
-    grid-template-columns: 1fr 1fr;
+  .nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sign {
+  .nav-sign {
     transition: none;
   }
 }
