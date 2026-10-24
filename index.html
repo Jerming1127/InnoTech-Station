@@ -20,67 +20,58 @@
     <main>
       <section class="junction" aria-label="主目錄">
         <p class="junction__hint">請選擇前往方向 · SELECT DESTINATION</p>
-        <!-- v0.5 橫細牌：StackArrow + 中英 + 編號出口（無 EXIT／出） -->
+        <!-- v0.5 橫細牌 · 對齊 rsf-reference.html ① -->
         <nav class="nav-grid" aria-label="暫定分頁">
-          <!-- A1 blue -->
-          <a class="nav-sign stack stack--blue" href="#classroom">
-            <div class="stack__body">
-              <svg class="stack-arrow" width="28" height="28" viewBox="-10 -2 20 20" aria-hidden="true">
-                <g transform="rotate(90 0 8)">
-                  <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-                </g>
-              </svg>
-              <div class="stack__text">
-                <span class="zh">課堂示範</span>
-                <span class="en">Classroom</span>
-              </div>
-              <div class="exit-plate" aria-label="Exit A1"><span class="exit-plate__code">A1</span></div>
+          <a class="nav-sign" href="#classroom" title="課堂示範 A1">
+            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
+              <g transform="rotate(90 0 8)">
+                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
+              </g>
+            </svg>
+            <div class="nav-sign__text">
+              <span class="zh">課堂示範</span>
+              <span class="en">Classroom</span>
             </div>
+            <span class="exit-code">A1</span>
           </a>
-          <!-- A2 blue -->
-          <a class="nav-sign stack stack--blue" href="#practice">
-            <div class="stack__body">
-              <svg class="stack-arrow" width="28" height="28" viewBox="-10 -2 20 20" aria-hidden="true">
-                <g transform="rotate(90 0 8)">
-                  <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-                </g>
-              </svg>
-              <div class="stack__text">
-                <span class="zh">互動練習</span>
-                <span class="en">Practice</span>
-              </div>
-              <div class="exit-plate" aria-label="Exit A2"><span class="exit-plate__code">A2</span></div>
+
+          <a class="nav-sign" href="#practice" title="互動練習 A2">
+            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
+              <g transform="rotate(90 0 8)">
+                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
+              </g>
+            </svg>
+            <div class="nav-sign__text">
+              <span class="zh">互動練習</span>
+              <span class="en">Practice</span>
             </div>
+            <span class="exit-code">A2</span>
           </a>
-          <!-- E green -->
-          <a class="nav-sign stack stack--green" href="#resources">
-            <div class="stack__body">
-              <svg class="stack-arrow" width="28" height="28" viewBox="-10 -2 20 20" aria-hidden="true">
-                <g transform="rotate(90 0 8)">
-                  <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-                </g>
-              </svg>
-              <div class="stack__text">
-                <span class="zh">教學資源</span>
-                <span class="en">Resources</span>
-              </div>
-              <div class="exit-plate" aria-label="Exit E"><span class="exit-plate__code">E</span></div>
+
+          <a class="nav-sign nav-sign--green" href="#resources" title="教學資源 E">
+            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
+              <g transform="rotate(90 0 8)">
+                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
+              </g>
+            </svg>
+            <div class="nav-sign__text">
+              <span class="zh">教學資源</span>
+              <span class="en">Resources</span>
             </div>
+            <span class="exit-code">E</span>
           </a>
-          <!-- B blue -->
-          <a class="nav-sign stack stack--blue" href="#gallery">
-            <div class="stack__body">
-              <svg class="stack-arrow" width="28" height="28" viewBox="-10 -2 20 20" aria-hidden="true">
-                <g transform="rotate(90 0 8)">
-                  <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-                </g>
-              </svg>
-              <div class="stack__text">
-                <span class="zh">學生作品</span>
-                <span class="en">Gallery</span>
-              </div>
-              <div class="exit-plate" aria-label="Exit B"><span class="exit-plate__code">B</span></div>
+
+          <a class="nav-sign" href="#gallery" title="學生作品 B">
+            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
+              <g transform="rotate(90 0 8)">
+                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
+              </g>
+            </svg>
+            <div class="nav-sign__text">
+              <span class="zh">學生作品</span>
+              <span class="en">Gallery</span>
             </div>
+            <span class="exit-code">B</span>
           </a>
         </nav>
         <p class="junction__note">分頁名稱暫定，之後可改 · Tabs are placeholders</p>

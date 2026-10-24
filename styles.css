@@ -29,9 +29,21 @@
   --ink-black: #000000;
   --zh: "Noto Sans HK", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
 
-  /* v0.5 橫細牌：固定幼邊，唔再用 9px sw 撐粗框 */
-  --sign-border: 2px;
+  /* 橫細導向鈕 · rsf-reference.html ① */
+  --nav-h: 64px;
+  --sign-border: 2.5px;
   --sign-radius: 6px;
+  --nav-pad-y: 8px;
+  --nav-pad-x: 10px;
+  --nav-gap: 10px;
+  --zh-size: 15px;
+  --en-size: 11px;
+  --arrow-w: 28px;
+  --arrow-h: 28px;
+  --exit-h: 28px;
+  --exit-border: 1.5px;
+  --exit-pad-x: 6px;
+  --exit-fs: 15px;
 }
 
 *,
@@ -116,110 +128,38 @@ body {
   font-size: 0.82rem;
 }
 
-/* —— v0.5 橫細方向掣 —— */
-.stack {
-  --fg: var(--ink-white);
-  --bd: var(--ink-white);
-  --bg: var(--bg-blue);
-  display: inline-flex;
-  flex-direction: column;
-  background: var(--bg);
-  color: var(--fg);
-  border: var(--sign-border) solid var(--bd);
-  border-radius: var(--sign-radius);
-  padding: 0.55rem 0.7rem;
-  min-height: 3.25rem;
-}
-
-.stack--blue {
-  --bg: var(--bg-blue);
-  --fg: var(--ink-white);
-  --bd: var(--ink-white);
-}
-
-.stack--green {
-  --bg: var(--bg-green);
-  --fg: var(--ink-white);
-  --bd: var(--ink-white);
-}
-
-.stack__body {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  width: 100%;
-}
-
-.stack__text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.zh {
-  font-family: var(--zh);
-  font-size: 1.1rem;
-  font-weight: 900;
-  line-height: 1.15;
-  white-space: nowrap;
-}
-
-.en {
-  font-family: "TransportMedium", sans-serif;
-  font-size: 0.8rem;
-  line-height: 1.05;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-
-.stack-arrow {
-  flex-shrink: 0;
-  display: block;
-  width: 28px;
-  height: 28px;
-}
-
-/* 出口：黑底白邊白字編號 only（橫細牌無 EXIT／出） */
-.exit-plate {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  background: #000;
-  color: #fff;
-  border: 1.5px solid #fff;
-  border-radius: 2px;
-  padding: 0.15rem 0.45rem;
-  flex-shrink: 0;
-  box-sizing: border-box;
-}
-
-.exit-plate__code {
-  font-family: "TransportMedium", "TransportHeavy", "Noto Sans", sans-serif;
-  font-size: 1rem;
-  line-height: 1;
-  font-weight: 500;
-  color: #fff;
-  letter-spacing: 0.02em;
-}
-
+/* —— PRIMARY 橫細導向鈕（金樣①） —— */
 .nav-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
-  max-width: 720px;
+  gap: 14px;
+  max-width: 560px;
   width: 100%;
 }
 
 .nav-sign {
+  --fg: var(--ink-white);
+  --bd: var(--ink-white);
+  --bg: var(--bg-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  height: var(--nav-h);
+  min-height: var(--nav-h);
+  max-height: 72px;
+  padding: var(--nav-pad-y) var(--nav-pad-x);
+  background: var(--bg);
+  color: var(--fg);
+  border: var(--sign-border) solid var(--bd);
+  border-radius: var(--sign-radius);
   text-decoration: none;
   cursor: pointer;
-  min-height: 0;
-  width: 100%;
+  overflow: hidden;
   transition: transform 0.15s ease;
+}
+
+.nav-sign--green {
+  --bg: var(--bg-green);
 }
 
 .nav-sign:hover,
@@ -231,6 +171,64 @@ body {
 .nav-sign:focus-visible {
   outline: 3px solid var(--neon-amber);
   outline-offset: 3px;
+}
+
+.nav-sign__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-sign .zh {
+  font-family: var(--zh);
+  font-size: var(--zh-size);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-sign .en {
+  font-family: "TransportMedium", sans-serif;
+  font-size: var(--en-size);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.95;
+}
+
+.nav-sign__arrow {
+  flex-shrink: 0;
+  width: var(--arrow-w);
+  height: var(--arrow-h);
+  display: block;
+}
+
+.exit-code {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--exit-h);
+  min-width: var(--exit-h);
+  padding: 0 var(--exit-pad-x);
+  background: #000;
+  color: #fff;
+  border: var(--exit-border) solid #fff;
+  border-radius: 0;
+  font-family: "TransportMedium", sans-serif;
+  font-size: var(--exit-fs);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .board {
@@ -281,7 +279,7 @@ body {
   box-shadow: 0 0 10px var(--neon-pink);
 }
 
-@media (min-width: 720px) {
+@media (min-width: 560px) {
   .nav-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
