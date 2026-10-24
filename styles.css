@@ -40,10 +40,10 @@
   --en-size: 11px;
   --arrow-w: 28px;
   --arrow-h: 28px;
-  --exit-h: 28px;
-  --exit-border: 1.5px;
-  --exit-pad-x: 6px;
-  --exit-fs: 15px;
+  /* Route shield (symbolTemplate Route1–4 · 9×9 sw) */
+  --route-w: 32px;
+  --route-h: 36px;
+  --route-yellow: #E9B500;
 }
 
 *,
@@ -212,23 +212,13 @@ body {
   display: block;
 }
 
-.exit-code {
+/* RSF Route Shield · TPDM 3.5.7 · fill #E9B500 */
+.route-shield {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--exit-h);
-  min-width: calc(var(--exit-fs) * 1.15);
-  padding: 0 var(--exit-pad-x);
-  background: #000;
-  color: #fff;
-  border: var(--exit-border) solid #fff;
-  border-radius: 0;
-  font-family: "TransportMedium", sans-serif;
-  font-size: var(--exit-fs);
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: 0.02em;
+  width: var(--route-w);
+  height: var(--route-h);
+  display: block;
+  overflow: visible;
 }
 
 .board {
