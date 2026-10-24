@@ -218,7 +218,7 @@ body {
   align-items: center;
   justify-content: center;
   height: var(--exit-h);
-  min-width: var(--exit-h);
+  min-width: calc(var(--exit-fs) * 1.15);
   padding: 0 var(--exit-pad-x);
   background: #000;
   color: #fff;
