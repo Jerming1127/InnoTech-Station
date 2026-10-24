@@ -174,10 +174,11 @@ body {
   min-width: 2.75rem;
   min-height: 2.35rem;
   padding: 0.2rem 0.55rem;
-  background: #ffffff;
-  color: #000000;
-  border: none;
+  background: #000000;
+  color: #ffffff;
+  border: 2px solid #ffffff;
   border-radius: var(--exit-radius);
+  box-shadow: none;
   font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 1.35rem;
