@@ -4,13 +4,14 @@
   --neon-pink: #ff2ea6;
   --neon-cyan: #2ef0ff;
   --neon-amber: #ffb020;
-  --td-blue: #0057b8;
-  --td-blue-edge: #003d82;
-  --td-green: #006b3f;
-  --td-green-edge: #004d2e;
+  /* Flat TD-style solids (no gradients) */
+  --td-blue: #005ea5;
+  --td-green: #00703c;
   --ink: #f4f6f8;
   --mute: #9aa3ad;
-  --sign-radius: 2px;
+  --sign-radius: 14px;
+  --sign-border: 5px;
+  --exit-radius: 8px;
 }
 
 *,
@@ -34,10 +35,7 @@ body {
 .night {
   min-height: 100vh;
   padding: clamp(1.5rem, 4vw, 3rem);
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 46, 166, 0.12), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(46, 240, 255, 0.08), transparent 50%),
-    linear-gradient(180deg, #0b0b0d 0%, var(--night) 40%, #050506 100%);
+  background: var(--night);
 }
 
 .mast {
@@ -100,56 +98,55 @@ body {
 
 .signs {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .sign {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1rem;
-  min-height: 4.25rem;
-  padding: 0.85rem 1.1rem 0.85rem 0.9rem;
+  gap: 0.95rem;
+  min-height: 4.5rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
   text-decoration: none;
   color: #fff;
   border-radius: var(--sign-radius);
-  border: 3px solid rgba(255, 255, 255, 0.92);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-  transition: transform 0.15s ease, filter 0.15s ease;
+  border: var(--sign-border) solid #ffffff;
+  box-shadow: none;
+  transition: transform 0.15s ease;
 }
 
 .sign:hover,
 .sign:focus-visible {
-  transform: translateX(6px);
-  filter: brightness(1.08);
+  transform: translateX(4px);
   outline: none;
 }
 
 .sign:focus-visible {
-  box-shadow: 0 0 0 3px var(--night), 0 0 0 6px var(--neon-amber);
+  outline: 3px solid var(--neon-amber);
+  outline-offset: 3px;
 }
 
 .sign--blue {
-  background: linear-gradient(180deg, #1a6fd0 0%, var(--td-blue) 55%, var(--td-blue-edge) 100%);
+  background: var(--td-blue);
 }
 
 .sign--green {
-  background: linear-gradient(180deg, #0e8a55 0%, var(--td-green) 55%, var(--td-green-edge) 100%);
+  background: var(--td-green);
 }
 
 .sign__arrow {
   width: 0;
   height: 0;
-  border-top: 0.85rem solid transparent;
-  border-bottom: 0.85rem solid transparent;
-  border-left: 1.15rem solid #fff;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.25));
+  border-top: 0.9rem solid transparent;
+  border-bottom: 0.9rem solid transparent;
+  border-left: 1.2rem solid #ffffff;
 }
 
 .sign__stack {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.12rem;
   min-width: 0;
 }
 
@@ -158,6 +155,7 @@ body {
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1.15;
+  color: #ffffff;
 }
 
 .sign__en {
@@ -165,18 +163,26 @@ body {
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.92;
+  text-transform: none;
+  color: #ffffff;
 }
 
-.sign__code {
-  font-family: "Barlow Condensed", sans-serif;
+/* Right exit / route patch: white plate, black legend (TD-style) */
+.sign__exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.35rem;
+  padding: 0.2rem 0.55rem;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: var(--exit-radius);
+  font-family: "Barlow Condensed", "Noto Sans TC", sans-serif;
   font-weight: 700;
   font-size: 1.35rem;
-  letter-spacing: 0.04em;
-  padding: 0.15rem 0.45rem;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  border-radius: 2px;
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
@@ -189,7 +195,7 @@ body {
   padding: 1.15rem 1.25rem;
   background: var(--night-2);
   border-left: 6px solid var(--neon-amber);
-  border-radius: 2px;
+  border-radius: 8px;
 }
 
 .board__h {
@@ -204,7 +210,6 @@ body {
 .board__plate p {
   margin: 0;
   line-height: 1.7;
-  
   color: #d7dce2;
   max-width: 42rem;
 }
