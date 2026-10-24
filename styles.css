@@ -15,7 +15,6 @@
 }
 
 :root {
-  /* Page / neon (titles only — signs have no neon) */
   --night: #070708;
   --night-2: #101114;
   --neon-pink: #ff2ea6;
@@ -24,16 +23,15 @@
   --ink: #f4f6f8;
   --mute: #9aa3ad;
 
-  /* RSF colour scheme */
   --bg-blue: #0033A2;
   --bg-green: #006928;
-  --bg-white: #ffffff;
   --ink-white: #ffffff;
   --ink-black: #000000;
   --zh: "Noto Sans HK", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
 
-  /* Nav demo scale: 1 sw ≈ xHeight/4; reference §4 uses ~9px */
-  --sw: 9px;
+  /* v0.5 橫細牌：固定幼邊，唔再用 9px sw 撐粗框 */
+  --sign-border: 2px;
+  --sign-radius: 6px;
 }
 
 *,
@@ -60,7 +58,6 @@ body {
   background: var(--night);
 }
 
-/* —— Neon masthead (titles only) —— */
 .mast {
   max-width: 52rem;
   margin: 0 auto 2.5rem;
@@ -119,7 +116,7 @@ body {
   font-size: 0.82rem;
 }
 
-/* —— Stack border (RSF StackBorderTemplate) —— */
+/* —— v0.5 橫細方向掣 —— */
 .stack {
   --fg: var(--ink-white);
   --bd: var(--ink-white);
@@ -128,13 +125,10 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--fg);
-  border: calc(1.5 * var(--sw)) solid var(--bd);
-  border-radius: calc(3 * var(--sw));
-  padding:
-    calc(2.5 * var(--sw))
-    calc(2.5 * var(--sw))
-    calc(1.5 * var(--sw));
-  /* flat face: no gradients, no neon */
+  border: var(--sign-border) solid var(--bd);
+  border-radius: var(--sign-radius);
+  padding: 0.55rem 0.7rem;
+  min-height: 3.25rem;
 }
 
 .stack--blue {
@@ -152,77 +146,70 @@ body {
 .stack__body {
   display: flex;
   align-items: center;
-  gap: calc(1.5 * var(--sw));
+  gap: 0.65rem;
+  width: 100%;
 }
 
 .stack__text {
   display: flex;
   flex-direction: column;
-  gap: calc(0.35 * var(--sw));
+  gap: 0.1rem;
   min-width: 0;
-}
-
-.en {
-  font-family: "TransportMedium", sans-serif;
-  font-size: calc(4 * var(--sw));
-  line-height: 1.05;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  flex: 1;
 }
 
 .zh {
   font-family: var(--zh);
-  font-size: calc(4 * var(--sw));
+  font-size: 1.1rem;
   font-weight: 900;
   line-height: 1.15;
+  white-space: nowrap;
+}
+
+.en {
+  font-family: "TransportMedium", sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .stack-arrow {
   flex-shrink: 0;
   display: block;
+  width: 28px;
+  height: 28px;
 }
 
-/* —— ExitBorderTemplate: black fill, white ~0.5sw border, EXIT/出 + code —— */
+/* 出口：黑底白邊白字編號 only（橫細牌無 EXIT／出） */
 .exit-plate {
   display: inline-flex;
   align-items: center;
-  gap: calc(0.6 * var(--sw));
+  justify-content: center;
+  margin-left: auto;
   background: #000;
-  border: calc(0.5 * var(--sw)) solid #fff;
-  border-radius: 0;
-  padding:
-    calc(0.3 * var(--sw))
-    calc(0.5 * var(--sw))
-    0
-    calc(0.5 * var(--sw));
-  height: calc(6.7 * var(--sw));
-  box-sizing: border-box;
   color: #fff;
+  border: 1.5px solid #fff;
+  border-radius: 2px;
+  padding: 0.15rem 0.45rem;
   flex-shrink: 0;
-}
-
-.exit-plate__mark {
-  height: calc(5.8 * var(--sw));
-  width: auto;
-  display: block;
-  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .exit-plate__code {
-  font-family: "TransportHeavy", sans-serif;
-  font-size: calc(5.2 * var(--sw));
+  font-family: "TransportMedium", "TransportHeavy", "Noto Sans", sans-serif;
+  font-size: 1rem;
   line-height: 1;
-  font-weight: 700;
+  font-weight: 500;
   color: #fff;
-  padding: 0 calc(0.2 * var(--sw)) calc(0.35 * var(--sw));
   letter-spacing: 0.02em;
 }
 
-/* —— Nav 2×2 (reference §4) —— */
 .nav-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 0.75rem;
   max-width: 720px;
   width: 100%;
 }
@@ -246,37 +233,6 @@ body {
   outline-offset: 3px;
 }
 
-.nav-sign .stack__body {
-  width: 100%;
-  justify-content: flex-start;
-}
-
-.nav-sign .stack__text {
-  flex: 1;
-}
-
-.nav-sign .zh {
-  font-size: calc(3.2 * var(--sw));
-}
-
-.nav-sign .en {
-  font-size: calc(2.4 * var(--sw));
-}
-
-.nav-sign .exit-plate {
-  height: calc(5.2 * var(--sw));
-  margin-left: auto;
-}
-
-.nav-sign .exit-plate__code {
-  font-size: calc(3.6 * var(--sw));
-}
-
-.nav-sign .exit-plate__mark {
-  height: calc(4.4 * var(--sw));
-}
-
-/* —— Board + foot (unchanged feel) —— */
 .board {
   max-width: 52rem;
   margin: 2.25rem auto 0;
