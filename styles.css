@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Transport Medium";
+  src: url("fonts/TransportMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --night: #070708;
   --night-2: #101114;
@@ -9,8 +17,11 @@
   --td-green: #006928;
   --ink: #f4f6f8;
   --mute: #9aa3ad;
-  --sign-radius: 8px;
-  --sign-border: 4px;
+  /* RSF: 1 sw = x-height / 4 */
+  --x-height: 0.95rem;
+  --sw: calc(var(--x-height) / 4);
+  --sign-radius: calc(3 * var(--sw));
+  --sign-border: calc(1.5 * var(--sw));
   --exit-radius: 2px;
 }
 
@@ -105,9 +116,9 @@ body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 0.95rem;
-  min-height: 4.5rem;
-  padding: 0.75rem 0.75rem 0.75rem 1rem;
+  gap: calc(2 * var(--sw));
+  min-height: 0;
+  padding: calc(2.5 * var(--sw)) calc(2.5 * var(--sw)) calc(1.5 * var(--sw));
   text-decoration: none;
   color: #fff;
   border-radius: var(--sign-radius);
@@ -136,8 +147,8 @@ body {
 }
 
 .sign__arrow {
-  width: 18px;
-  height: 36px;
+  width: calc(4 * var(--x-height));
+  height: calc(2 * var(--x-height));
   flex-shrink: 0;
   display: block;
 }
@@ -150,7 +161,7 @@ body {
 }
 
 .sign__zh {
-  font-size: clamp(1.25rem, 3.5vw, 1.65rem);
+  font-size: calc(1.6 * var(--x-height));
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1.15;
@@ -159,29 +170,30 @@ body {
 
 .sign__en {
   font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
-  font-size: 0.95rem;
+  font-size: var(--x-height);
   font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: none;
   color: #ffffff;
 }
 
-/* Right exit / route patch: white plate, black legend (TD-style) */
+/* Exit patch: RSF ExitBorderTemplate (black fill, white legend + border) */
 .sign__exit {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.75rem;
-  min-height: 2.35rem;
-  padding: 0.2rem 0.55rem;
+  min-height: calc(6.7 * var(--sw));
+  min-width: calc(6.7 * var(--sw));
+  padding: calc(0.3 * var(--sw)) calc(0.5 * var(--sw));
   background: #000000;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: calc(0.5 * var(--sw)) solid #ffffff;
   border-radius: var(--exit-radius);
   box-shadow: none;
   font-family: "Transport Medium", "Transport", "Noto Sans", "Noto Sans TC", sans-serif;
-  font-weight: 700;
-  font-size: 1.35rem;
+  font-weight: 500;
+  font-size: var(--x-height);
   letter-spacing: 0.02em;
   line-height: 1;
 }
