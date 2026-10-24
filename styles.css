@@ -13,6 +13,21 @@
   font-style: normal;
   font-display: swap;
 }
+/* RSF Chinese Medium (500) — local, for Flag overlay */
+@font-face {
+  font-family: "Noto Sans TC";
+  src: url("fonts/NotoSansTC-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans HK";
+  src: url("fonts/NotoSansHK-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --night: #070708;
@@ -22,27 +37,22 @@
   --neon-amber: #ffb020;
   --ink: #f4f6f8;
   --mute: #9aa3ad;
-
-  --bg-blue: #0033A2;
-  --bg-green: #006928;
   --ink-white: #ffffff;
   --ink-black: #000000;
   --zh: "Noto Sans HK", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
 
-  /* 橫細導向鈕 · rsf-reference.html ① */
-  --nav-h: 64px;
-  --sign-border: 2.5px;
-  --sign-radius: 6px;
-  --nav-pad-y: 8px;
-  --nav-pad-x: 10px;
-  --nav-gap: 10px;
-  --zh-size: 15px;
-  --en-size: 11px;
-  --arrow-w: 28px;
-  --arrow-h: 28px;
-  /* Route shield (symbolTemplate Route1–4 · 9×9 sw) */
-  --route-w: 28px;
-  --route-h: 28px;
+  /* TPDM Flag gold v7 metrics at 461×138 plate */
+  --flag-w: 461px;
+  --xh: 21px;
+  --en-fs: calc(1.88 * var(--xh));
+  --zh-fs: calc(2.25 * var(--xh));
+  --gap: 14px;
+  --shield: 63px;
+  --inset-l: 21.6%;
+  --inset-r: 7.5%;
+  --inset-t: 9%;
+  --inset-b: 12%;
+  --digit-nudge-y: calc(0.08 * var(--shield));
   --route-yellow: #E9B500;
 }
 
@@ -71,7 +81,7 @@ body {
 }
 
 .mast {
-  max-width: 52rem;
+  max-width: 60rem;
   margin: 0 auto 2.5rem;
   text-align: left;
 }
@@ -112,7 +122,7 @@ body {
 }
 
 .junction {
-  max-width: 52rem;
+  max-width: 60rem;
   margin: 0 auto;
 }
 
@@ -128,101 +138,130 @@ body {
   font-size: 0.82rem;
 }
 
-/* —— PRIMARY 橫細導向鈕（金樣①） —— */
+/* —— v0.7 Flag Left CSS overlay（TPDM 金樣 v7） —— */
 .nav-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  max-width: 560px;
+  grid-template-columns: repeat(2, minmax(0, var(--flag-w)));
+  gap: 20px 28px;
+  justify-content: start;
   width: 100%;
 }
 
-.nav-sign {
-  --fg: var(--ink-white);
-  --bd: var(--ink-white);
-  --bg: var(--bg-blue);
-  display: flex;
-  align-items: center;
-  gap: var(--nav-gap);
-  height: var(--nav-h);
-  min-height: var(--nav-h);
-  max-height: 72px;
-  padding: var(--nav-pad-y) var(--nav-pad-x);
-  background: var(--bg);
-  color: var(--fg);
-  border: var(--sign-border) solid var(--bd);
-  border-radius: var(--sign-radius);
+.flag {
+  position: relative;
+  display: block;
+  width: min(100%, var(--flag-w));
+  max-width: var(--flag-w);
   text-decoration: none;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.15s ease;
+  color: #fff;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+  container-type: inline-size;
+  container-name: flag;
+  /* Scale metrics with plate width so mobile keeps gold ratios */
+  --xh: calc(21 / 461 * 100cqw);
+  --en-fs: calc(1.88 * var(--xh));
+  --zh-fs: calc(2.25 * var(--xh));
+  --gap: calc(14 / 461 * 100cqw);
+  --shield: calc(63 / 461 * 100cqw);
+  --digit-nudge-y: calc(0.08 * var(--shield));
+  transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-.nav-sign--green {
-  --bg: var(--bg-green);
-}
-
-.nav-sign:hover,
-.nav-sign:focus-visible {
+.flag:hover,
+.flag:focus-visible {
   transform: translateX(4px);
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35)) brightness(1.06);
   outline: none;
 }
 
-.nav-sign:focus-visible {
+.flag:focus-visible {
   outline: 3px solid var(--neon-amber);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
-.nav-sign__text {
+.flag__plate {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: top;
+}
+
+.flag__overlay {
+  position: absolute;
+  left: var(--inset-l);
+  right: var(--inset-r);
+  top: var(--inset-t);
+  bottom: var(--inset-b);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--gap);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.flag__text {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1px;
+  gap: 0;
+  line-height: 1;
   flex: 1;
   min-width: 0;
 }
 
-.nav-sign .zh {
-  font-family: var(--zh);
-  font-size: var(--zh-size);
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nav-sign .en {
+/* RSF EN: Transport Medium, 1.88 × xh */
+.flag__text .en {
   font-family: "TransportMedium", sans-serif;
-  font-size: var(--en-size);
+  font-size: var(--en-fs);
   font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  line-height: 1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: 0.95;
+  color: #ffffff;
 }
 
-.nav-sign__arrow {
-  flex-shrink: 0;
-  width: var(--arrow-w);
-  height: var(--arrow-h);
-  display: block;
+/* RSF ZH: Noto Sans TC Medium (500), 2.25 × xh */
+.flag__text .zh {
+  font-family: "Noto Sans TC", "Noto Sans HK", sans-serif;
+  font-size: var(--zh-fs);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: #ffffff;
+  margin-top: calc(-0.30 * var(--xh));
 }
 
-/* RSF Route Shield · TPDM 3.5.7 · fill #E9B500 */
-.route-shield {
+.flag__shield {
+  position: relative;
   flex-shrink: 0;
-  width: var(--route-w);
-  height: var(--route-h);
+  width: var(--shield);
+  height: var(--shield);
+}
+
+.flag__shield img {
   display: block;
-  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+.flag__shield .num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  font-family: "TransportHeavy", sans-serif;
+  font-size: calc(7.52 / 9 * var(--shield));
+  font-weight: 700;
+  color: #000;
+  line-height: 1;
+  transform: translateY(var(--digit-nudge-y));
 }
 
 .board {
-  max-width: 52rem;
+  max-width: 60rem;
   margin: 2.25rem auto 0;
 }
 
@@ -250,7 +289,7 @@ body {
 }
 
 .foot {
-  max-width: 52rem;
+  max-width: 60rem;
   margin: 2.75rem auto 0;
   display: flex;
   align-items: center;
@@ -269,14 +308,14 @@ body {
   box-shadow: 0 0 10px var(--neon-pink);
 }
 
-@media (min-width: 560px) {
+@media (max-width: 720px) {
   .nav-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, var(--flag-w));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nav-sign {
+  .flag {
     transition: none;
   }
 }

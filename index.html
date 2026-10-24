@@ -20,86 +20,78 @@
     <main>
       <section class="junction" aria-label="主目錄">
         <p class="junction__hint">請選擇前往方向 · SELECT DESTINATION</p>
-        <!-- v0.6 橫細牌 + RSF Route Shield 1–4 -->
+        <!-- v0.7 Flag Left PNG + CSS overlay（TPDM 金樣 v7） -->
         <nav class="nav-grid" aria-label="暫定分頁">
-          <a class="nav-sign" href="#classroom" title="課堂示範 · 幹綫 1">
-            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
-              <g transform="rotate(90 0 8)">
-                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-              </g>
-            </svg>
-            <div class="nav-sign__text">
-              <span class="zh">課堂示範</span>
-              <span class="en">Classroom</span>
-            </div>
-            <svg class="route-shield" viewBox="-4.5 0 9 9" aria-label="幹綫 1" role="img">
-              <path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/>
-              <text x="0" y="6.05" text-anchor="middle" font-family="TransportHeavy, sans-serif" font-size="7.52" font-weight="700" fill="#000000">1</text>
-            </svg>
+          <a class="flag" href="#classroom" title="Classroom · 課堂示範 · 幹綫 1">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Classroom</span>
+                <span class="zh">課堂示範</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 1" role="img">
+                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <span class="num">1</span>
+              </span>
+            </span>
           </a>
 
-          <a class="nav-sign" href="#practice" title="互動練習 · 幹綫 2">
-            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
-              <g transform="rotate(90 0 8)">
-                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-              </g>
-            </svg>
-            <div class="nav-sign__text">
-              <span class="zh">互動練習</span>
-              <span class="en">Practice</span>
-            </div>
-            <svg class="route-shield" viewBox="-4.5 0 9 9" aria-label="幹綫 2" role="img">
-              <path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/>
-              <text x="0" y="6.05" text-anchor="middle" font-family="TransportHeavy, sans-serif" font-size="7.52" font-weight="700" fill="#000000">2</text>
-            </svg>
+          <a class="flag" href="#practice" title="Practice · 互動練習 · 幹綫 2">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Practice</span>
+                <span class="zh">互動練習</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 2" role="img">
+                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <span class="num">2</span>
+              </span>
+            </span>
           </a>
 
-          <a class="nav-sign nav-sign--green" href="#resources" title="教學資源 · 幹綫 3">
-            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
-              <g transform="rotate(90 0 8)">
-                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-              </g>
-            </svg>
-            <div class="nav-sign__text">
-              <span class="zh">教學資源</span>
-              <span class="en">Resources</span>
-            </div>
-            <svg class="route-shield" viewBox="-4.5 0 9 9" aria-label="幹綫 3" role="img">
-              <path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/>
-              <text x="0" y="6.05" text-anchor="middle" font-family="TransportHeavy, sans-serif" font-size="7.52" font-weight="700" fill="#000000">3</text>
-            </svg>
+          <a class="flag" href="#resources" title="Resources · 教學資源 · 幹綫 3">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Resources</span>
+                <span class="zh">教學資源</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 3" role="img">
+                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <span class="num">3</span>
+              </span>
+            </span>
           </a>
 
-          <a class="nav-sign" href="#gallery" title="學生作品 · 幹綫 4">
-            <svg class="nav-sign__arrow" viewBox="-10 -2 20 20" aria-hidden="true">
-              <g transform="rotate(90 0 8)">
-                <path fill="#fff" d="M0 0 L4 4 L4 8 L1.333 5.333 L1.333 16 L-1.333 16 L-1.333 5.333 L-4 8 L-4 4 Z"/>
-              </g>
-            </svg>
-            <div class="nav-sign__text">
-              <span class="zh">學生作品</span>
-              <span class="en">Gallery</span>
-            </div>
-            <svg class="route-shield" viewBox="-4.5 0 9 9" aria-label="幹綫 4" role="img">
-              <path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/>
-              <text x="0" y="6.05" text-anchor="middle" font-family="TransportHeavy, sans-serif" font-size="7.52" font-weight="700" fill="#000000">4</text>
-            </svg>
+          <a class="flag" href="#gallery" title="Gallery · 學生作品 · 幹綫 4">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Gallery</span>
+                <span class="zh">學生作品</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 4" role="img">
+                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <span class="num">4</span>
+              </span>
+            </span>
           </a>
         </nav>
-        <p class="junction__note">分頁名稱暫定，之後可改 · Tabs are placeholders · 幹綫盾跟 RSF Route Shield</p>
+        <p class="junction__note">分頁名稱暫定，之後可改 · Tabs are placeholders · Flag 導向牌跟 TPDM 金樣 v7 · 幹綫盾 1–4</p>
       </section>
 
       <section class="board" id="about">
         <div class="board__plate">
           <h2 class="board__h">本站說明</h2>
-          <p>呢度係創科／DT／電腦科網頁主頁草稿。大標題跟霓虹招牌感覺；目錄跟香港運輸署方向指示牌（藍＝一般方向，綠＝快速／重點）；右邊係路線盾形標誌（幹綫 1–4）。</p>
+          <p>呢度係創科／DT／電腦科網頁主頁草稿。大標題跟霓虹招牌感覺；目錄用 TPDM Flag 導向牌（透明 Flag Left 底圖 + CSS 叠中英字），右邊係幹綫盾（黃底盾形 + Transport Heavy 數字 1–4）。</p>
         </div>
       </section>
     </main>
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.6
+      GitHub Pages · 靜態站 · 草稿 v0.7
     </footer>
   </div>
 </body>
