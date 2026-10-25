@@ -881,3 +881,57 @@ a.gantry:focus-visible {
     transition: none;
   }
 }
+
+/* —— v0.16 station-board scroll pin（1.1 屏 · sticky + 輕 JS） —— */
+.pin-scene {
+  position: relative;
+  height: 210vh;
+  margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+}
+.pin-sticky {
+  position: sticky;
+  top: 72px;
+  height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 1rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  overflow: hidden;
+  background: var(--ground-2);
+}
+.pin-sticky .station-board {
+  margin: 0;
+  padding: 0;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+.pin-sticky .station-board__zh {
+  font-size: clamp(4.2rem, 14vw, 7.5rem);
+  letter-spacing: 0.14em;
+}
+.pin-sticky .station-board__en {
+  margin-top: 0.75rem;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+@media (max-width: 720px) {
+  .pin-sticky {
+    top: 64px;
+    height: calc(100vh - 64px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pin-scene {
+    height: auto;
+  }
+  .pin-sticky {
+    position: static;
+    height: auto;
+    padding: clamp(2.75rem, 8vw, 4.5rem) clamp(1.5rem, 4vw, 3rem) clamp(2.25rem, 6vw, 3.5rem);
+  }
+  .pin-sticky .station-board {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
