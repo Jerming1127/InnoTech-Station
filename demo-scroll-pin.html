@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=0.15-demo-pin" />
+  <link rel="stylesheet" href="styles.css?v=0.15-demo-pin2" />
   <style>
     /* —— lightweight scroll-pin demo (no GSAP) —— */
     .demo-banner {
@@ -25,10 +25,10 @@
     }
     .demo-banner a { color: #9ec9ff; }
 
-    /* Tall scene = how much wheel travel before release (~1.35 viewport) */
+    /* Tall scene = wheel travel before release (~1.1 viewport) */
     .pin-scene {
       position: relative;
-      height: 235vh;
+      height: 210vh;
       margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
       /* bleed to page edges under .page padding */
     }
@@ -50,6 +50,14 @@
       padding: 0;
       transform-origin: center center;
       will-change: transform, opacity;
+    }
+    .pin-sticky .station-board__zh {
+      font-size: clamp(4.2rem, 14vw, 7.5rem);
+      letter-spacing: 0.14em;
+    }
+    .pin-sticky .station-board__en {
+      margin-top: 0.75rem;
+      font-size: clamp(1.35rem, 3vw, 2rem);
     }
     .pin-hint {
       margin: 1.75rem 0 0;
@@ -143,7 +151,7 @@
     </section>
 
     <div class="pin-after">
-      <p class="pin-after__label">↓ 已鬆開 · 下面係原本 Flag／Gantry（demo 摘要）</p>
+      <p class="pin-after__label">↓ 已鬆開 · Flag + 有用連結</p>
       <section class="junction" aria-label="主目錄">
         <nav class="nav-grid" aria-label="暫定分頁">
           <a class="flag" href="./#classroom" title="Classroom · 課堂示範 · 幹綫 1">
@@ -199,7 +207,53 @@
             </span>
           </a>
         </nav>
-        <p class="junction__note">Demo only · 正式站未改 · 用 sticky 全頁釘住站牌，滾動進度做輕微縮放；唔使 GSAP。</p>
+        <nav class="gantry-wrap" aria-label="有用連結">
+          <a class="gantry" href="./#links" title="Useful Links · 有用連結" aria-label="Useful Links · 有用連結">
+            <div class="gantry__top">
+              <div class="gantry__side gantry__side--left"></div>
+              <span class="gantry__text"><span class="en">Useful Links</span><span class="zh">有用連結</span></span>
+              <div class="gantry__side gantry__side--right">
+        <svg class="gantry__express" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="44" height="44" aria-hidden="true" focusable="false">
+          <path fill="#ff0000" d="M 0 0 L 3.75 0 A 0.75 0.75 0 0 1 4.5 0.75 L 4.5 8.25 A 0.75 0.75 0 0 1 3.75 9 L -3.75 9 A 0.75 0.75 0 0 1 -4.5 8.25 L -4.5 0.75 A 0.75 0.75 0 0 1 -3.75 0 Z"/>
+          <path fill="#ffffff" d="M 0 0.25 L -3.75 0.25 A 0.5 0.5 0 0 0 -4.25 0.75 L -4.25 8.25 A 0.5 0.5 0 0 0 -3.75 8.75 L 3.75 8.75 A 0.5 0.5 0 0 0 4.25 8.25 L 4.25 0.75 A 0.5 0.5 0 0 0 3.75 0.25 Z"/>
+          <path fill="#ff0000" d="M 0.25 1.25 L 0.75 1.25 L 0.972 2.75 L 0.25 2.75 Z"/>
+          <path fill="#ff0000" d="M -0.25 1.25 L -0.25 2.75 L -0.972 2.75 L -0.75 1.25 Z"/>
+          <path fill="#ff0000" d="M 0 3.25 L 3.5 3.25 L 3.5 3.75 L 3 3.75 A 0.25 0.25 0 0 0 2.75 4 L 2.75 4.75 L 2.25 4.75 L 2.05 3.94 A 0.25 0.25 0 0 0 1.8 3.75 L -1.8 3.75 A 0.25 0.25 0 0 0 -2.05 3.94 L -2.25 4.75 L -2.75 4.75 L -2.75 4 A 0.25 0.25 0 0 0 -3 3.75 L -3.5 3.75 L -3.5 3.25 Z"/>
+          <path fill="#ff0000" d="M 0.25 4.25 L 1.194 4.25 L 1.5 8 L 0.25 8 Z"/>
+          <path fill="#ff0000" d="M -0.25 4.25 L -0.25 8 L -1.5 8 L -1.194 4.25 Z"/>
+        </svg>
+              </div>
+            </div>
+            <div class="gantry__bottom">
+              <hr class="gantry__divider" />
+              <div class="gantry__lanes">
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+              </div>
+            </div>
+          </a>
+        </nav>
+
+        <p class="junction__note">Demo · 1.1 屏 pin · 站牌放大 · 已補有用連結 · 正式站未改。</p>
       </section>
     </div>
 
