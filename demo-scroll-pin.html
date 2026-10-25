@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo · 站牌 Scroll Pin · 創科站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=0.15-demo-pin" />
+  <style>
+    /* —— lightweight scroll-pin demo (no GSAP) —— */
+    .demo-banner {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      margin: 0;
+      padding: 0.55rem 1rem;
+      font-family: var(--zh), var(--en);
+      font-size: 0.85rem;
+      text-align: center;
+      color: #fff;
+      background: #002B54;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    .demo-banner a { color: #9ec9ff; }
+
+    /* Tall scene = how much wheel travel before release (~1.35 viewport) */
+    .pin-scene {
+      position: relative;
+      height: 235vh;
+      margin: 0 calc(-1 * clamp(1.5rem, 4vw, 3rem));
+      /* bleed to page edges under .page padding */
+    }
+    .pin-sticky {
+      position: sticky;
+      top: 72px; /* under top-nav */
+      height: calc(100vh - 72px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      padding: 1rem clamp(1.5rem, 4vw, 3rem) 2rem;
+      overflow: hidden;
+      background: var(--ground-2);
+    }
+    .pin-sticky .station-board {
+      margin: 0;
+      padding: 0;
+      transform-origin: center center;
+      will-change: transform, opacity;
+    }
+    .pin-hint {
+      margin: 1.75rem 0 0;
+      font-family: var(--zh), var(--en);
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      color: var(--mute);
+      opacity: 0.85;
+      transition: opacity 0.2s ease;
+    }
+    .pin-progress {
+      position: absolute;
+      left: 50%;
+      bottom: 1.25rem;
+      transform: translateX(-50%);
+      width: min(12rem, 40vw);
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(10, 26, 58, 0.12);
+      overflow: hidden;
+    }
+    .pin-progress__bar {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #002B54;
+      border-radius: 2px;
+    }
+    .pin-after {
+      max-width: 60rem;
+      margin: 0 auto;
+      padding-top: 0.5rem;
+    }
+    .pin-after__label {
+      margin: 0 0 1rem;
+      font-family: var(--zh), var(--en);
+      font-size: 0.85rem;
+      color: var(--mute);
+    }
+
+    @media (max-width: 720px) {
+      .pin-sticky { top: 64px; height: calc(100vh - 64px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pin-scene { height: auto; }
+      .pin-sticky {
+        position: static;
+        height: auto;
+        padding: 2rem clamp(1.5rem, 4vw, 3rem);
+      }
+      .pin-sticky .station-board {
+        transform: none !important;
+        opacity: 1 !important;
+      }
+      .pin-progress, .pin-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="demo-banner">
+    Demo：站牌 Scroll Pin（sticky + 輕 JS）· 唔改主站 ·
+    <a href="./">返主頁</a>
+  </p>
+
+  <nav class="top-nav" aria-label="主導航" id="top-nav">
+    <div class="top-nav__inner">
+      <a class="top-nav__mark" href="./">創科站 · DT</a>
+      <ul class="top-nav__links" id="top-nav-menu">
+        <li><a href="./#classroom">課堂示範</a></li>
+        <li><a href="./#practice">互動練習</a></li>
+        <li><a href="./#resources">教學資源</a></li>
+        <li><a href="./#gallery">學生作品</a></li>
+      </ul>
+      <div class="top-nav__spacer" aria-hidden="true"></div>
+    </div>
+  </nav>
+
+  <div class="page">
+    <section class="pin-scene" id="pin-scene" aria-label="站名牌滾動釘屏">
+      <div class="pin-sticky" id="pin-sticky">
+        <header class="station-board" id="pin-board" aria-label="站名牌">
+          <h1 class="station-board__zh">創科站</h1>
+          <p class="station-board__en">InnoTech</p>
+        </header>
+        <p class="pin-hint" id="pin-hint">向下滾 · 站牌先卡住，再鬆開</p>
+        <div class="pin-progress" aria-hidden="true">
+          <span class="pin-progress__bar" id="pin-bar"></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="pin-after">
+      <p class="pin-after__label">↓ 已鬆開 · 下面係原本 Flag／Gantry（demo 摘要）</p>
+      <section class="junction" aria-label="主目錄">
+        <nav class="nav-grid" aria-label="暫定分頁">
+          <a class="flag" href="./#classroom" title="Classroom · 課堂示範 · 幹綫 1">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Classroom</span>
+                <span class="zh">課堂示範</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 1" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+          </a>
+          <a class="flag" href="./#practice" title="Practice · 互動練習 · 幹綫 2">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Practice</span>
+                <span class="zh">互動練習</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 2" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">2</span>
+              </span>
+            </span>
+          </a>
+          <a class="flag" href="./#resources" title="Resources · 教學資源 · 幹綫 3">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Resources</span>
+                <span class="zh">教學資源</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 3" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">3</span>
+              </span>
+            </span>
+          </a>
+          <a class="flag" href="./#gallery" title="Gallery · 學生作品 · 幹綫 4">
+            <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Gallery</span>
+                <span class="zh">學生作品</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 4" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">4</span>
+              </span>
+            </span>
+          </a>
+        </nav>
+        <p class="junction__note">Demo only · 正式站未改 · 用 sticky 全頁釘住站牌，滾動進度做輕微縮放；唔使 GSAP。</p>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <span class="foot__dot" aria-hidden="true"></span>
+      Demo scroll-pin · 草稿
+    </footer>
+  </div>
+
+  <script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+
+  var scene = document.getElementById('pin-scene');
+  var board = document.getElementById('pin-board');
+  var bar = document.getElementById('pin-bar');
+  var hint = document.getElementById('pin-hint');
+  if (!scene || !board) return;
+
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var rect = scene.getBoundingClientRect();
+    var total = scene.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+    // progress 0→1 while sticky is pinned (scene top going from 0 to -(total))
+    var scrolled = Math.min(Math.max(-rect.top, 0), total);
+    var p = scrolled / total;
+
+    // slight settle: scale 1 → 0.92, opacity stays readable
+    var scale = 1 - p * 0.08;
+    board.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    board.style.opacity = String((1 - p * 0.12).toFixed(3));
+    if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
+    if (hint) hint.style.opacity = String(Math.max(0, 1 - p * 1.4).toFixed(3));
+  }
+
+  function onScroll() {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+})();
+  </script>
+  <script src="nav-fade.js" defer></script>
+</body>
+</html>
