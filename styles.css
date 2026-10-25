@@ -628,7 +628,7 @@ body {
   }
 }
 
-/* —— v0.14.9 Gantry：ExpresswayRed 右上錨點放大（唔改 Flag） —— */
+/* —— v0.15 Gantry：cache-bust + SVG 尺寸加固（唔改 Flag） —— */
 .gantry-wrap {
   display: block;
   width: 100%;
@@ -677,6 +677,8 @@ a.gantry {
   border-radius: var(--g-radius-outer);
   padding: var(--g-pad-top) var(--g-pad-x) var(--g-pad-y);
   gap: 0; /* top grows; bottom locks via margin-top:auto */
+  overflow: hidden; /* clip ExpresswayRed if CSS late / SVG intrinsic size */
+  isolation: isolate;
   filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
   transition: transform 0.15s ease, filter 0.15s ease;
 }
@@ -759,11 +761,15 @@ a.gantry:focus-visible {
   right: var(--g-mark-inset);
   z-index: 2;
   flex-shrink: 0;
+  width: var(--g-express-h);
   height: var(--g-express-h);
-  width: auto;
-  aspect-ratio: 9 / 9;
+  max-width: 48px;
+  max-height: 48px;
+  aspect-ratio: 1 / 1;
   display: block;
   margin: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* Divider + arrow row locked as one lower band → follows board bottom */
