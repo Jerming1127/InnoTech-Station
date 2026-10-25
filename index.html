@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <nav class="top-nav" aria-label="主導航">
+  <nav class="top-nav" aria-label="主導航" id="top-nav">
     <div class="top-nav__inner">
       <a class="top-nav__mark" href="#">創科站 · DT</a>
       <ul class="top-nav__links">
@@ -25,12 +25,11 @@
   <div class="page">
     <header class="station-board" aria-label="站名牌">
       <h1 class="station-board__zh">創科站</h1>
-      <p class="station-board__en">Chuangke Station</p>
+      <p class="station-board__en">InnoTech</p>
     </header>
 
     <main>
       <section class="junction" aria-label="主目錄">
-        <p class="junction__hint">請選擇前往方向 · SELECT DESTINATION</p>
         <!-- v0.7 Flag Left PNG + CSS overlay（TPDM 金樣 v7） -->
         <nav class="nav-grid" aria-label="暫定分頁">
           <a class="flag" href="#classroom" title="Classroom · 課堂示範 · 幹綫 1">
@@ -102,8 +101,9 @@
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.11
+      GitHub Pages · 靜態站 · 草稿 v0.12.1
     </footer>
   </div>
+  <script src="nav-fade.js" defer></script>
 </body>
 </html>

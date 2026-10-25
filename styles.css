@@ -79,22 +79,22 @@ body {
 }
 
 .page {
-  min-height: calc(100vh - 44px);
+  min-height: calc(100vh - 62px);
   padding: clamp(1.5rem, 4vw, 3rem);
   background: var(--ground-2);
 }
 
-/* —— v0.9 MTR PIDS-style top navigation bar —— */
+/* —— v0.12 MTR PIDS-style top navigation (bigger, button hover, scroll fade) —— */
 .top-nav {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 40;
   width: 100%;
-  height: 44px;
+  height: 62px;
   background: var(--mtr-navy);
   color: #fff;
   display: flex;
   align-items: center;
+  will-change: opacity;
 }
 
 .top-nav__inner {
@@ -105,33 +105,36 @@ body {
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.85rem;
 }
 
 .top-nav__mark {
   flex-shrink: 0;
   font-family: var(--zh), var(--en);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 1.2rem;
   letter-spacing: 0.06em;
   color: #fff;
   text-decoration: none;
   white-space: nowrap;
   line-height: 1;
+  padding: 0.6rem 0.95rem;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.top-nav__mark:hover,
-.top-nav__mark:focus-visible {
-  color: #ffffff;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  outline: none;
+.top-nav__mark:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  text-decoration: none;
 }
 
 .top-nav__mark:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
   outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 2px;
+  outline-offset: 2px;
+  text-decoration: none;
 }
 
 .top-nav__links {
@@ -140,7 +143,7 @@ body {
   padding: 0;
   display: flex;
   align-items: center;
-  gap: 0.15rem 1.1rem;
+  gap: 0.25rem;
   flex: 1;
   min-width: 0;
   overflow-x: auto;
@@ -155,26 +158,30 @@ body {
 .top-nav__links a {
   font-family: var(--en);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 1.15rem;
   letter-spacing: 0.03em;
   color: rgba(255, 255, 255, 0.92);
   text-decoration: none;
   white-space: nowrap;
   line-height: 1;
-  padding: 0.35rem 0;
-  border-bottom: 1.5px solid transparent;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border-bottom: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .top-nav__links a:hover {
   color: #fff;
-  border-bottom-color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.16);
+  border-bottom-color: transparent;
 }
 
 .top-nav__links a:focus-visible {
   color: #fff;
+  background: rgba(255, 255, 255, 0.22);
   outline: 2px solid #fff;
-  outline-offset: 3px;
-  border-radius: 2px;
+  outline-offset: 2px;
+  border-radius: 6px;
   border-bottom-color: transparent;
 }
 
@@ -182,7 +189,7 @@ body {
   flex-shrink: 0;
   margin-left: auto;
   font-family: var(--en);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1;
@@ -191,18 +198,25 @@ body {
 @media (max-width: 560px) {
   .top-nav {
     height: auto;
-    min-height: 44px;
+    min-height: 62px;
   }
 
   .top-nav__inner {
     flex-wrap: wrap;
     row-gap: 0.35rem;
-    padding-top: 0.45rem;
-    padding-bottom: 0.45rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   .top-nav__meta {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav__mark,
+  .top-nav__links a {
+    transition: none;
   }
 }
 
@@ -243,7 +257,6 @@ body {
   margin: 0 auto;
 }
 
-.junction__hint,
 .junction__note {
   margin: 0 0 1rem;
   font-family: var(--zh), var(--en);
