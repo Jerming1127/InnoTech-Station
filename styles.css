@@ -41,7 +41,9 @@
   --ink-white: #ffffff;
   --ink-black: #000000;
   --neon-amber: #ffb020; /* kept for Flag :focus-visible */
-  --zh: "Noto Sans HK", "Noto Sans TC", "PingFang HK", "Microsoft JhengHei", sans-serif;
+  /* Non-flag UI ≈ 港鐵：地鐵宋→Noto Serif TC；Myriad→Source Sans 3 */
+  --zh: "Noto Serif TC", "Source Han Serif TC", "Songti TC", serif;
+  --en: "Source Sans 3", "Myriad Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* TPDM Flag gold v7 metrics at 461×138 plate */
   --flag-w: 461px;
@@ -71,7 +73,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: var(--zh);
+  font-family: var(--zh), var(--en);
   background: var(--ground-2);
   color: var(--ink);
 }
@@ -108,8 +110,8 @@ body {
 
 .top-nav__mark {
   flex-shrink: 0;
-  font-family: var(--zh);
-  font-weight: 500;
+  font-family: var(--zh), var(--en);
+  font-weight: 600;
   font-size: 0.92rem;
   letter-spacing: 0.06em;
   color: #fff;
@@ -151,8 +153,8 @@ body {
 }
 
 .top-nav__links a {
-  font-family: "TransportMedium", sans-serif;
-  font-weight: 400;
+  font-family: var(--en);
+  font-weight: 600;
   font-size: 0.88rem;
   letter-spacing: 0.03em;
   color: rgba(255, 255, 255, 0.92);
@@ -179,7 +181,7 @@ body {
 .top-nav__meta {
   flex-shrink: 0;
   margin-left: auto;
-  font-family: "TransportMedium", sans-serif;
+  font-family: var(--en);
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.7);
@@ -204,7 +206,7 @@ body {
   }
 }
 
-/* —— v0.8 PatternPaste-style station board header —— */
+/* —— v0.10 PatternPaste station board + MTR-like (Serif TC / Source Sans 3) —— */
 .station-board {
   max-width: 60rem;
   margin: 0 auto 2.5rem;
@@ -242,7 +244,7 @@ body {
 }
 
 .station-board__wordmark {
-  font-family: "TransportHeavy", "TransportMedium", sans-serif;
+  font-family: var(--en);
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -263,7 +265,7 @@ body {
   margin: 0;
   font-family: var(--zh);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--ink);
   letter-spacing: 0.06em;
   text-align: right;
@@ -279,7 +281,7 @@ body {
 .station-board__zh {
   margin: 0;
   font-family: var(--zh);
-  font-weight: 900;
+  font-weight: 700;
   font-size: clamp(2.6rem, 9vw, 4.75rem);
   line-height: 1.02;
   letter-spacing: 0.06em;
@@ -288,8 +290,8 @@ body {
 
 .station-board__en {
   margin: 0;
-  font-family: "TransportMedium", sans-serif;
-  font-weight: 400;
+  font-family: var(--en);
+  font-weight: 600;
   font-size: clamp(1rem, 2.4vw, 1.35rem);
   letter-spacing: 0.04em;
   color: var(--ink);
@@ -298,7 +300,7 @@ body {
 
 .station-board__aside {
   margin: 0 0 0.35rem;
-  font-family: "TransportMedium", sans-serif;
+  font-family: var(--en);
   font-size: 0.85rem;
   font-weight: 400;
   line-height: 1.35;
@@ -310,7 +312,7 @@ body {
 .station-board__meta-l,
 .station-board__meta-r {
   margin: 0;
-  font-family: "TransportMedium", sans-serif;
+  font-family: var(--en);
   font-size: 0.8rem;
   font-weight: 400;
   letter-spacing: 0.02em;
@@ -329,6 +331,7 @@ body {
 .junction__hint,
 .junction__note {
   margin: 0 0 1rem;
+  font-family: var(--zh), var(--en);
   font-size: 0.92rem;
   color: var(--mute);
 }
@@ -475,8 +478,9 @@ body {
 
 .board__h {
   margin: 0 0 0.55rem;
+  font-family: var(--zh);
   font-size: 1.05rem;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--ink);
 }
@@ -494,7 +498,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-family: "TransportHeavy", "TransportMedium", "Noto Sans", sans-serif;
+  font-family: var(--en);
   font-size: 0.9rem;
   letter-spacing: 0.12em;
   color: var(--mute);
