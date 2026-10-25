@@ -6,20 +6,37 @@
   <title>創科站 · DT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <nav class="top-nav" aria-label="主導航" id="top-nav">
     <div class="top-nav__inner">
+      <button
+        type="button"
+        class="top-nav__menu-btn"
+        id="top-nav-menu-btn"
+        aria-expanded="false"
+        aria-controls="top-nav-menu"
+        aria-label="Menu"
+      >
+        <span class="top-nav__burger" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
       <a class="top-nav__mark" href="#">創科站 · DT</a>
-      <ul class="top-nav__links">
-        <li><a href="#classroom">Classroom</a></li>
-        <li><a href="#practice">Practice</a></li>
-        <li><a href="#resources">Resources</a></li>
-        <li><a href="#gallery">Gallery</a></li>
+      <ul class="top-nav__links" id="top-nav-menu">
+        <li><a href="#classroom" data-zh="課堂示範" data-en="Classroom">課堂示範</a></li>
+        <li><a href="#practice" data-zh="互動練習" data-en="Practice">互動練習</a></li>
+        <li><a href="#resources" data-zh="教學資源" data-en="Resources">教學資源</a></li>
+        <li><a href="#gallery" data-zh="學生作品" data-en="Gallery">學生作品</a></li>
       </ul>
-      <span class="top-nav__meta" aria-hidden="true">HK</span>
+      <div class="top-nav__spacer" aria-hidden="true"></div>
+      <div class="top-nav__lang" role="group" aria-label="Language">
+        <button type="button" class="top-nav__lang-btn is-active" data-lang="zh" aria-pressed="true">中</button>
+        <button type="button" class="top-nav__lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="top-nav__backdrop" id="top-nav-backdrop" hidden></div>
     </div>
   </nav>
   <div class="page">
@@ -40,7 +57,7 @@
                 <span class="zh">課堂示範</span>
               </span>
               <span class="flag__shield" aria-label="幹綫 1" role="img">
-                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
                 <span class="num">1</span>
               </span>
             </span>
@@ -54,7 +71,7 @@
                 <span class="zh">互動練習</span>
               </span>
               <span class="flag__shield" aria-label="幹綫 2" role="img">
-                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
                 <span class="num">2</span>
               </span>
             </span>
@@ -68,7 +85,7 @@
                 <span class="zh">教學資源</span>
               </span>
               <span class="flag__shield" aria-label="幹綫 3" role="img">
-                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
                 <span class="num">3</span>
               </span>
             </span>
@@ -82,7 +99,7 @@
                 <span class="zh">學生作品</span>
               </span>
               <span class="flag__shield" aria-label="幹綫 4" role="img">
-                <img src="route-shield-blank-transparent.png" alt="" width="63" height="63" />
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
                 <span class="num">4</span>
               </span>
             </span>
@@ -101,7 +118,7 @@
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.12.1
+      GitHub Pages · 靜態站 · 草稿 v0.13.2.2
     </footer>
   </div>
   <script src="nav-fade.js" defer></script>
