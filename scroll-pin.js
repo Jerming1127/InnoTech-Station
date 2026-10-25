@@ -1,6 +1,7 @@
 (function () {
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) return;
+  var mobile = window.matchMedia('(max-width: 720px)').matches;
+  if (reduce || mobile) return;
 
   var scene = document.getElementById('pin-scene');
   var board = document.getElementById('pin-board');
@@ -15,7 +16,8 @@
     var scrolled = Math.min(Math.max(-rect.top, 0), total);
     var p = scrolled / total;
     var scale = 1 - p * 0.08;
-    board.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    /* keep optical lift while scaling */
+    board.style.transform = 'translateY(-6vh) scale(' + scale.toFixed(4) + ')';
     board.style.opacity = String((1 - p * 0.12).toFixed(3));
   }
 
