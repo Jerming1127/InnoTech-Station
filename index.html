@@ -10,11 +10,35 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="night">
-    <header class="mast">
-      <p class="mast__meta">HONG KONG · WAYFINDING</p>
-      <h1 class="neon-title" data-text="創科站">創科站</h1>
-      <p class="neon-sub">DT · 電腦 · 網頁設計</p>
+  <nav class="top-nav" aria-label="主導航">
+    <div class="top-nav__inner">
+      <a class="top-nav__mark" href="#">創科站 · DT</a>
+      <ul class="top-nav__links">
+        <li><a href="#classroom">Classroom</a></li>
+        <li><a href="#practice">Practice</a></li>
+        <li><a href="#resources">Resources</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+      </ul>
+      <span class="top-nav__meta" aria-hidden="true">HK</span>
+    </div>
+  </nav>
+  <div class="page">
+    <header class="station-board" aria-label="站頭">
+      <div class="station-board__rail station-board__rail--top">
+        <a class="station-board__wordmark" href="#">DT · ICT</a>
+        <p class="station-board__tagline">電腦 · 網頁設計</p>
+      </div>
+      <div class="station-board__rail station-board__rail--mid">
+        <div class="station-board__name">
+          <h1 class="station-board__zh">創科站</h1>
+          <p class="station-board__en">Chuangke Station</p>
+        </div>
+        <p class="station-board__aside">Find your<br />next stop.</p>
+      </div>
+      <div class="station-board__rail station-board__rail--bot">
+        <p class="station-board__meta-l">Hong Kong · DT / ICT</p>
+        <p class="station-board__meta-r">Draft v0.9 · GitHub Pages</p>
+      </div>
     </header>
 
     <main>
@@ -84,14 +108,14 @@
       <section class="board" id="about">
         <div class="board__plate">
           <h2 class="board__h">本站說明</h2>
-          <p>呢度係創科／DT／電腦科網頁主頁草稿。大標題跟霓虹招牌感覺；目錄用 TPDM Flag 導向牌（透明 Flag Left 底圖 + CSS 叠中英字），右邊係幹綫盾（黃底盾形 + Transport Heavy 數字 1–4）。</p>
+          <p>呢度係創科／DT／電腦科網頁主頁草稿。站頭跟 PatternPaste station-board（淺底路線牌）；目錄用 TPDM Flag 導向牌（透明 Flag Left 底圖 + CSS 叠中英字），右邊係幹綫盾（黃底盾形 + Transport Heavy 數字 1–4）。</p>
         </div>
       </section>
     </main>
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.7
+      GitHub Pages · 靜態站 · 草稿 v0.9
     </footer>
   </div>
 </body>
