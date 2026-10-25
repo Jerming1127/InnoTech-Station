@@ -34,7 +34,7 @@
   --mtr-navy: #002B54;
   /* v0.8 light station-board tokens */
   --ground: #ffffff;
-  --ground-2: #f7f7f5;
+  --ground-2: #e8e9eb;
   --ink: #121212;
   --mute: #5c5c5c;
   --rule: #121212;
@@ -206,121 +206,36 @@ body {
   }
 }
 
-/* —— v0.10 PatternPaste station board + MTR-like (Serif TC / Source Sans 3) —— */
+/* —— v0.11 West Kowloon–style station name (centred, no frame) —— */
 .station-board {
   max-width: 60rem;
-  margin: 0 auto 2.5rem;
-  background: var(--ground);
-  border: 1.5px solid var(--rule);
-  border-radius: 6px;
-  overflow: hidden;
-  color: var(--ink);
-}
-
-.station-board__rail {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.7rem 1.15rem;
-}
-
-.station-board__rail--top {
-  border-bottom: 1.5px solid var(--rule);
-  padding-top: 0.85rem;
-  padding-bottom: 0.75rem;
-}
-
-.station-board__rail--mid {
-  align-items: flex-end;
-  padding: 1.35rem 1.15rem 1.25rem;
-  border-bottom: 1.5px solid var(--rule);
-  min-height: clamp(5.5rem, 14vw, 8.5rem);
-}
-
-.station-board__rail--bot {
-  padding-top: 0.65rem;
-  padding-bottom: 0.7rem;
-}
-
-.station-board__wordmark {
-  font-family: var(--en);
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1.5px solid var(--ink);
-  padding-bottom: 0.1rem;
-  line-height: 1.2;
-}
-
-.station-board__wordmark:hover,
-.station-board__wordmark:focus-visible {
-  opacity: 0.75;
-  outline: none;
-}
-
-.station-board__tagline {
-  margin: 0;
-  font-family: var(--zh);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--ink);
-  letter-spacing: 0.06em;
-  text-align: right;
-}
-
-.station-board__name {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
+  margin: 0 auto 2.75rem;
+  padding: clamp(2.75rem, 8vw, 4.5rem) 1.25rem clamp(2.25rem, 6vw, 3.5rem);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: center;
+  color: #0a1a3a;
 }
 
 .station-board__zh {
   margin: 0;
   font-family: var(--zh);
   font-weight: 700;
-  font-size: clamp(2.6rem, 9vw, 4.75rem);
-  line-height: 1.02;
-  letter-spacing: 0.06em;
-  color: var(--ink);
+  font-size: clamp(3.2rem, 10vw, 5.5rem);
+  line-height: 1.05;
+  letter-spacing: 0.12em;
+  color: #0a1a3a;
 }
 
 .station-board__en {
-  margin: 0;
+  margin: 0.55rem 0 0;
   font-family: var(--en);
   font-weight: 600;
-  font-size: clamp(1rem, 2.4vw, 1.35rem);
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  line-height: 1.2;
-}
-
-.station-board__aside {
-  margin: 0 0 0.35rem;
-  font-family: var(--en);
-  font-size: 0.85rem;
-  font-weight: 400;
-  line-height: 1.35;
-  text-align: right;
-  color: var(--ink);
-  flex-shrink: 0;
-}
-
-.station-board__meta-l,
-.station-board__meta-r {
-  margin: 0;
-  font-family: var(--en);
-  font-size: 0.8rem;
-  font-weight: 400;
+  font-size: clamp(1.05rem, 2.2vw, 1.45rem);
   letter-spacing: 0.02em;
-  color: var(--ink);
-}
-
-.station-board__meta-r {
-  text-align: right;
+  line-height: 1.25;
+  color: #0a1a3a;
 }
 
 .junction {
@@ -517,16 +432,6 @@ body {
     grid-template-columns: minmax(0, var(--flag-w));
   }
 
-  .station-board__rail--mid {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .station-board__aside {
-    width: 100%;
-    text-align: left;
-    margin: 0.35rem 0 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
