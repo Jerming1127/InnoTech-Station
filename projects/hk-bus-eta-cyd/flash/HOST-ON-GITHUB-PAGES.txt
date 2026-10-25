@@ -1,0 +1,10 @@
+Drop this folder's CONTENTS into:
+  InnoTech-Station/projects/hk-bus-eta-cyd/flash/
+
+Public URL (HTTPS required for Web Serial):
+  https://jerming1127.github.io/InnoTech-Station/projects/hk-bus-eta-cyd/flash/
+
+Must keep relative paths:
+  flash/index.html
+  flash/manifest.json
+  flash/firmware/*.bin

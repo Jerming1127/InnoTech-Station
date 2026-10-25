@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HK Bus ETA CYD — 一鍵燒錄 1.4.7</title>
+  <script
+    type="module"
+    src="https://unpkg.com/esp-web-tools@10.0.1/dist/web/install-button.js?module"
+  ></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --card: #1a2332;
+      --text: #e7ecf3;
+      --muted: #9aa7b8;
+      --accent: #3b82f6;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
+    .ver {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    ol {
+      margin: 0 0 22px;
+      padding-left: 1.25rem;
+      color: var(--text);
+    }
+    ol li { margin: 8px 0; }
+    .note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 3px solid var(--warn);
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 22px;
+    }
+    .note strong { color: var(--warn); }
+    esp-web-install-button {
+      display: block;
+      text-align: center;
+    }
+    esp-web-install-button button,
+    .flash-btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 10px;
+      width: 100%;
+      letter-spacing: 0.02em;
+    }
+    esp-web-install-button button:hover,
+    .flash-btn:hover { filter: brightness(1.08); }
+    .unsupported {
+      display: none;
+      text-align: center;
+      color: #fca5a5;
+      font-size: 0.95rem;
+      padding: 12px;
+      background: rgba(239,68,68,.12);
+      border-radius: 8px;
+    }
+    .foot {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>巴士報站 · 一鍵燒錄</h1>
+    <div class="ver">韌體版本 1.4.7 · CYD ESP32（4MB）</div>
+
+    <ol>
+      <li>請用 <strong>Chrome</strong> 或 <strong>Edge</strong> 開啟本頁（不支援 Safari／Firefox）。</li>
+      <li>用 USB 線接上螢幕模組（CYD）。</li>
+      <li>按下方「一鍵燒錄」，在彈出視窗選取對應的序列埠（COM）。</li>
+      <li>等候進度完成即可。</li>
+    </ol>
+
+    <div class="note">
+      <strong>注意：</strong>本頁必須以 <strong>HTTPS</strong> 或 <strong>localhost</strong> 開啟，Web Serial 才會生效。
+      首次燒錄建議選「清除並安裝」（Erase）。燒錄會覆寫裝置上的韌體與字型資料。
+    </div>
+
+    <esp-web-install-button manifest="./manifest.json">
+      <button slot="activate" class="flash-btn">一鍵燒錄</button>
+      <span slot="unsupported" class="unsupported" style="display:block">
+        此瀏覽器不支援 Web Serial。請改用 Chrome 或 Edge，並以 HTTPS／localhost 開啟。
+      </span>
+    </esp-web-install-button>
+
+    <p class="foot">ESP Web Tools · 分區：bootloader 0x1000 · app 0x10000 · LittleFS 0x3D0000</p>
+  </div>
+</body>
+</html>

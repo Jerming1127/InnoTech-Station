@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>巴士報站 · HK Bus ETA CYD · 創科站</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css?v=0.18" />
+</head>
+<body>
+  <nav class="top-nav" aria-label="主導航" id="top-nav">
+    <div class="top-nav__inner">
+      <a class="top-nav__mark" href="../../">← 創科站 · DT</a>
+      <ul class="top-nav__links" id="top-nav-menu">
+        <li><a href="../../#resources">教學資源</a></li>
+        <li><a href="./flash/">一鍵燒錄</a></li>
+        <li><a href="./downloads/hk-bus-eta-cyd-v1.4.7-firmware.zip">下載 zip</a></li>
+      </ul>
+      <div class="top-nav__spacer" aria-hidden="true"></div>
+    </div>
+  </nav>
+  <div class="page page--project">
+    <header class="station-board station-board--project">
+      <h1 class="station-board__zh">巴士報站</h1>
+      <p class="station-board__en">HK Bus ETA CYD</p>
+    </header>
+
+    <main>
+      <section class="board" aria-label="專案概要">
+        <div class="board__plate">
+          <div class="project-meta">
+            <h2 class="board__h">ESP32-2432S028（CYD）韌體</h2>
+            <span class="ver-badge">v1.4.7</span>
+          </div>
+          <p>座枱 CYD 顯示九巴／城巴實時到站；手機 Wi‑Fi 設定；天文台溫度；LVF4 繁中 UI。揀路線後精簡字型。</p>
+          <p class="project-actions">
+            <a class="btn btn--primary" href="./flash/">一鍵燒錄（Chrome／Edge）</a>
+            <a class="btn" href="./downloads/hk-bus-eta-cyd-v1.4.7-firmware.zip">下載韌體 zip</a>
+            <a class="btn btn--ghost" href="./README.md">完整 README</a>
+          </p>
+        </div>
+      </section>
+
+      <section class="board" aria-label="畫面預覽">
+        <div class="board__plate">
+          <h2 class="board__h">設定頁預覽</h2>
+          <figure class="project-shot">
+            <img src="./screenshot-web.png" alt="HK Bus ETA CYD 網頁設定畫面" width="960" height="540" loading="lazy" />
+          </figure>
+        </div>
+      </section>
+
+      <section class="board" id="flash-note" aria-label="一鍵燒錄">
+        <div class="board__plate">
+          <h2 class="board__h">一鍵燒錄</h2>
+          <p>用 Chrome 或 Edge 經 Web Serial 直接寫入板子（免裝 Arduino）。</p>
+          <p class="project-actions">
+            <a class="btn btn--primary" href="./flash/">開啟燒錄頁</a>
+          </p>
+          <p class="muted">燒錄頁路徑：<code>projects/hk-bus-eta-cyd/flash/</code>。需 HTTPS＋支援 Web Serial 嘅瀏覽器。</p>
+        </div>
+      </section>
+
+      <section class="board" aria-label="手動燒錄摘要">
+        <div class="board__plate">
+          <h2 class="board__h">手動燒錄摘要</h2>
+          <ul class="project-list">
+            <li>板型：<strong>ESP32 Dev Module</strong> · Flash <strong>4MB</strong></li>
+            <li>工具：esptool 或 Arduino IDE 2.x</li>
+            <li>flash_args 位址：
+              <code>0x1000</code> bootloader ·
+              <code>0x8000</code> partitions ·
+              <code>0xe000</code> boot_app0 ·
+              <code>0x10000</code> app
+            </li>
+            <li>亦可一次寫入 <code>merged.bin</code></li>
+            <li>網頁設定 UI 需另傳 <strong>LittleFS</strong>（zip 內含 <code>littlefs.bin</code>）</li>
+          </ul>
+          <p>細節見同目錄 <a href="./README.md">README.md</a>。zip 內含各 .bin、flash_args、截圖。</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span class="foot__dot" aria-hidden="true"></span>
+      創科站 · 巴士報站 v1.4.7 · 草稿 v0.18
+    </footer>
+  </div>
+  <script src="../../nav-fade.js" defer></script>
+</body>
+</html>
