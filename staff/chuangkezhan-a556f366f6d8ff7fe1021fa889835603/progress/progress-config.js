@@ -1,5 +1,5 @@
 /**
- * 課堂進度 — Google Sheet (read-only) + class×week matrix.
+ * 上課日子教學進度表 — Google Sheet (read-only) + class×week matrix.
  *
  * HOW TO PLUG A SHEET CSV URL:
  * 1. Open your progress Google Sheet (school account).
@@ -17,6 +17,8 @@
  *    browser fetch; if blocked, host a mirror or use a CORS-friendly publish URL.
  *
  * Empty SHEET_CSV_URL → local editable grid (localStorage), with on-screen note.
+ *
+ * WEEK9_DEFAULTS: only fill empty week-9 cells (never overwrite user text).
  */
 (function (global) {
   "use strict";
@@ -36,5 +38,15 @@
       { id: "2b", short: "2B", days: "二、三" },
       { id: "3b", short: "3B", days: "一、四" },
     ],
+
+    /**
+     * Soft seed for week 9 — applied only when that cell is empty.
+     * 1A intentionally omitted（今日冇 Inno Tech／唔 seed 物料竹籤）.
+     */
+    WEEK9_DEFAULTS: {
+      "1b": "物料工作紙＋竹籤整傢俬｜1B 班房 M104",
+      "2a": "第二堂 DRAR（外間導師）｜W102",
+      "1c": "教到 5.2B；重溫多邊形面積｜M103",
+    },
   };
 })(window);

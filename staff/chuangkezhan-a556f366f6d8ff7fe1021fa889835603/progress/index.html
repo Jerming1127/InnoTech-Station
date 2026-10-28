@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>課堂進度 · 職員區</title>
+  <title>上課日子教學進度表 · 職員區</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -32,7 +32,7 @@
 
       <div class="prog-hero">
         <div>
-          <h1>課堂進度</h1>
+          <h1>上課日子教學進度表</h1>
           <p class="muted" style="margin:0.25rem 0 0">六班 × 18 週一覽（含 1C）。優先讀 Google Sheet CSV；未設定則本機可編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
@@ -254,7 +254,22 @@
     return grid;
   }
 
-  var state = loadLocal();
+  function applyWeek9Defaults(grid) {
+    var seeds = cfg.WEEK9_DEFAULTS || {};
+    var changed = false;
+    Object.keys(seeds).forEach(function (cid) {
+      if (!grid.cells[cid]) grid.cells[cid] = {};
+      var cur = grid.cells[cid][9];
+      if (cur == null || !String(cur).trim()) {
+        grid.cells[cid][9] = String(seeds[cid]);
+        changed = true;
+      }
+    });
+    grid.__week9Seeded = changed;
+    return grid;
+  }
+
+  var state = applyWeek9Defaults(loadLocal());
 
   function renderMatrix() {
     var head = document.getElementById("matrix-head");
@@ -318,6 +333,10 @@
 
   function enterLocalMode(note) {
     sheetMode = false;
+    if (state && state.__week9Seeded) {
+      persistLocal(true);
+      state.__week9Seeded = false;
+    }
     document.getElementById("btn-reload-sheet").hidden = !sheetUrl;
     document.getElementById("btn-import-wrap").hidden = false;
     showNote(note || "設定 Sheet CSV 網址後自動載入（見 progress-config.js）。而家用本機可編輯格。");

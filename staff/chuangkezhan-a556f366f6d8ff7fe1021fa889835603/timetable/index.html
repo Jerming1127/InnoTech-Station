@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>一週時間表 · 職員區</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../staff.css" />
+</head>
+<body>
+  <div id="staff-gate"></div>
+
+  <div id="staff-app" hidden>
+    <div class="wrap wrap--wide">
+      <header class="topbar">
+        <a class="topbar__brand" href="../">← 職員區</a>
+        <div class="topbar__spacer"></div>
+        <div class="topbar__actions">
+          <span class="user-chip" id="staff-user-chip" hidden></span>
+          <button type="button" class="btn btn-sm" id="btn-logout">登出</button>
+        </div>
+      </header>
+
+      <h1>一週時間表</h1>
+      <p class="muted">分頁：星期日（鎖匙＋小息當值）｜逢星期一至五課堂。Inno Tech 唔寫 ITLC。唔顯示學生姓名。</p>
+
+      <div class="tt-tabs" id="tt-tabs" role="tablist" aria-label="日子"></div>
+      <div class="tt-panel card" id="tt-panel" role="tabpanel"></div>
+
+      <p class="footnote">資料來自 timetable-config.js。鎖匙只列已知；空白＝待主人填。</p>
+    </div>
+  </div>
+
+  <script src="../auth-config.js"></script>
+  <script src="../auth.js"></script>
+  <script src="timetable-config.js"></script>
+  <script>
+(function () {
+  "use strict";
+
+  var cfg = window.TimetableConfig || {};
+  var days = cfg.DAYS || [];
+  var activeKey = "sun";
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function findDay(key) {
+    for (var i = 0; i < days.length; i++) if (days[i].key === key) return days[i];
+    return null;
+  }
+
+  function renderTabs() {
+    var tabs = document.getElementById("tt-tabs");
+    tabs.innerHTML = "";
+    days.forEach(function (day) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tt-tab" + (day.key === activeKey ? " is-active" : "");
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", day.key === activeKey ? "true" : "false");
+      btn.textContent = day.label;
+      btn.addEventListener("click", function () {
+        activeKey = day.key;
+        renderTabs();
+        renderPanel();
+      });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderOverview(panel) {
+    var keys = cfg.KEYS || [];
+    var html = "";
+    html += "<h2 class=\"tt-panel__title\">星期日 · 總覽</h2>";
+    html += "<p class=\"muted\" style=\"margin-top:0\">鎖匙表、小息當值同週間概覽。課堂詳情見「逢星期×」分頁。</p>";
+
+    html += "<h3 class=\"tt-subh\">鎖匙表</h3>";
+    html += "<ul class=\"tt-keys\">";
+    keys.forEach(function (k) {
+      var room = k.room ? escapeHtml(k.room) : "<span class=\"tt-room-empty\">（未填）</span>";
+      html +=
+        "<li><span class=\"tt-class\">" +
+        escapeHtml(k.class) +
+        "</span><span class=\"tt-room\">" +
+        room +
+        "</span></li>";
+    });
+    html += "</ul>";
+
+    html += "<h3 class=\"tt-subh\">小息當值</h3>";
+    html += "<p class=\"tt-break-note\">" + escapeHtml(cfg.BREAK_NOTE || "") + "</p>";
+
+    html += "<h3 class=\"tt-subh\">週間概覽</h3>";
+    html += "<ul class=\"tt-overview\">";
+    days.forEach(function (d) {
+      if (d.kind !== "schedule") return;
+      var n = (d.slots || []).length;
+      var duty = d.breakDuty ? " · <strong>小息當值</strong>" : "";
+      html +=
+        "<li><button type=\"button\" class=\"tt-jump\" data-jump=\"" +
+        escapeHtml(d.key) +
+        "\">" +
+        escapeHtml(d.label) +
+        "</button> — " +
+        n +
+        " 節" +
+        duty +
+        "</li>";
+    });
+    html += "</ul>";
+    panel.innerHTML = html;
+    panel.querySelectorAll("[data-jump]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeKey = btn.getAttribute("data-jump");
+        renderTabs();
+        renderPanel();
+      });
+    });
+  }
+
+  function renderSchedule(panel, day) {
+    var html = "";
+    html += "<h2 class=\"tt-panel__title\">" + escapeHtml(day.label) + "</h2>";
+    if (day.breakDuty) {
+      html +=
+        "<p class=\"tt-break-banner\">小息一：主人需要當值（本日本暫定小息當值日；時間可稍後補）</p>";
+    }
+    html += "<ul class=\"tt-slots\">";
+    (day.slots || []).forEach(function (slot) {
+      var room = slot.room
+        ? escapeHtml(slot.room)
+        : "<span class=\"tt-room-empty\">（課室待填）</span>";
+      var time = slot.time
+        ? escapeHtml(slot.time)
+        : "<span class=\"tt-room-empty\">（時間待填）</span>";
+      html +=
+        '<li class="tt-slot">' +
+        '<span class="tt-time">' +
+        time +
+        "</span>" +
+        '<span class="tt-class">' +
+        escapeHtml(slot.class) +
+        "</span>" +
+        '<span class="tt-subject">' +
+        escapeHtml(slot.subject) +
+        "</span>" +
+        '<span class="tt-room">' +
+        room +
+        "</span></li>";
+    });
+    html += "</ul>";
+    panel.innerHTML = html;
+  }
+
+  function renderPanel() {
+    var panel = document.getElementById("tt-panel");
+    var day = findDay(activeKey) || days[0];
+    if (!day) {
+      panel.innerHTML = "<p class=\"muted\">未有時間表資料。</p>";
+      return;
+    }
+    if (day.kind === "overview") renderOverview(panel);
+    else renderSchedule(panel, day);
+  }
+
+  function init() {
+    renderTabs();
+    renderPanel();
+  }
+
+  StaffAuth.requireAuth({ onUnlock: init });
+  document.getElementById("btn-logout").addEventListener("click", function () {
+    StaffAuth.logout();
+    location.reload();
+  });
+})();
+  </script>
+</body>
+</html>

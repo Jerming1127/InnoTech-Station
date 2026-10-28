@@ -25,7 +25,45 @@
       </header>
 
       <h1>私人工具</h1>
-      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。須 Google 登入。資料只存本機瀏覽器（進度亦可讀 Sheet）。</p>
+      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。須 Google 登入。含今日課堂、一週時間表、上課日子教學進度表。資料只存本機瀏覽器（進度亦可讀 Sheet）。</p>
+
+      <section class="tl-section card" id="today-lessons" aria-labelledby="tl-heading">
+        <div class="tl-section__head">
+          <div>
+            <h2 id="tl-heading">上課日子教學進度表</h2>
+            <p class="muted tl-subtitle">今日／未完成 · <span data-tl-date></span>（Asia/Hong_Kong）</p>
+          </div>
+        </div>
+
+        <div class="tl-list" data-tl-list></div>
+        <p class="muted tl-empty" data-tl-empty hidden>今日未有課堂項目。可用下面表單新增。</p>
+
+        <form class="tl-form" data-tl-form>
+          <p class="section-label">新增一堂</p>
+          <div class="row-fields cols-3">
+            <label class="field">
+              <span>班別</span>
+              <select name="class" required>
+                <option value="1A">1A</option>
+                <option value="1B" selected>1B</option>
+                <option value="1C">1C</option>
+                <option value="2A">2A</option>
+                <option value="2B">2B</option>
+                <option value="3B">3B</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>內容</span>
+              <input name="content" type="text" placeholder="例如：第二堂 DRAR" required autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>課室</span>
+              <input name="room" type="text" placeholder="例如：W102／1B 班房 M104" autocomplete="off" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">新增</button>
+        </form>
+      </section>
 
       <div class="card-grid">
         <a class="app-card" href="leaderboard/">
@@ -34,8 +72,13 @@
           <p class="app-card__arrow">開啟 →</p>
         </a>
         <a class="app-card" href="progress/">
-          <p class="app-card__title">課堂進度</p>
+          <p class="app-card__title">上課日子教學進度表</p>
           <p class="app-card__desc">六班（含 1C）× 18 週矩陣。可接 Google Sheet CSV；未設定則本機編輯。</p>
+          <p class="app-card__arrow">開啟 →</p>
+        </a>
+        <a class="app-card" href="timetable/">
+          <p class="app-card__title">一週時間表</p>
+          <p class="app-card__desc">星期一至五：時間／班別／科目／課室。常規週 seed；本機可參考。</p>
           <p class="app-card__arrow">開啟 →</p>
         </a>
       </div>
@@ -46,8 +89,13 @@
 
   <script src="auth-config.js"></script>
   <script src="auth.js"></script>
+  <script src="today-lessons.js"></script>
   <script>
-    StaffAuth.requireAuth();
+    StaffAuth.requireAuth({
+      onUnlock: function () {
+        if (window.TodayLessons) TodayLessons.mount("#today-lessons");
+      },
+    });
     document.getElementById("btn-logout").addEventListener("click", function () {
       StaffAuth.logout();
       location.reload();

@@ -1011,3 +1011,231 @@ h2 {
   outline: 2px solid rgba(37, 99, 235, 0.35);
   background: #fff;
 }
+
+/* —— 今日課堂／未完成（hub） —— */
+.tl-section {
+  margin-bottom: 1.25rem;
+}
+.tl-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.tl-section__head h2 {
+  margin: 0;
+}
+.tl-subtitle {
+  margin: 0.2rem 0 0 !important;
+  font-size: 0.88rem !important;
+}
+.tl-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+.tl-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.75rem 0.85rem;
+}
+.tl-card.is-done {
+  opacity: 0.62;
+}
+.tl-card.is-done .tl-card__content {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.tl-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+.tl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #1a2332;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.tl-room {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.tl-card__content {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.tl-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tl-form {
+  border-top: 1px dashed var(--line);
+  padding-top: 0.85rem;
+  margin-top: 0.25rem;
+}
+.tl-empty {
+  margin: 0 0 0.75rem !important;
+}
+.section-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+/* Hub: three cards */
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 900px) {
+  .wrap .card-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* —— 一週時間表 —— */
+.tt-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.85rem;
+}
+.tt-tab {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tt-tab:hover {
+  background: #f0f3f7;
+}
+.tt-tab.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tt-panel {
+  min-height: 12rem;
+}
+.tt-panel__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.2rem;
+}
+.tt-subh {
+  margin: 1rem 0 0.45rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.tt-keys,
+.tt-overview,
+.tt-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tt-keys li,
+.tt-overview li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+}
+.tt-keys li:last-child,
+.tt-overview li:last-child,
+.tt-slots li:last-child {
+  border-bottom: none;
+}
+.tt-slot {
+  display: grid;
+  grid-template-columns: 7.5rem 3rem 1fr minmax(5rem, 7rem);
+  gap: 0.4rem 0.65rem;
+  align-items: start;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+@media (max-width: 640px) {
+  .tt-slot {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tt-slot .tt-subject {
+    grid-column: 1 / -1;
+  }
+}
+.tt-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--muted);
+}
+.tt-class {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 8px;
+  background: #e8eef8;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.tt-subject {
+  font-weight: 600;
+}
+.tt-room {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.tt-room-empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+.tt-break-note,
+.tt-break-banner {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  border-radius: 10px;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+.tt-jump {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+.tt-jump:hover {
+  text-decoration: underline;
+}
