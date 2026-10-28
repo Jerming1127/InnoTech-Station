@@ -31,35 +31,29 @@
       <div class="prog-hero">
         <div>
           <h1>課堂進度</h1>
-          <p class="muted" style="margin:0.25rem 0 0">以<strong>班別</strong>同<strong>星期</strong>為單位。登入後可直接加／改／刪，自動儲存本機。唔存學生姓名。</p>
+          <p class="muted" style="margin:0.25rem 0 0">班別同星期已固定（Work 26-27 創科課）。揀班 → 填各週進度即可，自動儲存。唔存學生姓名。</p>
         </div>
         <p class="stamp" id="save-stamp"><span class="autosave-dot" id="save-dot" hidden></span><span id="save-text">尚未有內容</span></p>
       </div>
 
-      <section class="card" style="padding-bottom:0.85rem">
-        <p class="section-label">班別</p>
-        <div class="class-tabs" id="class-tabs"></div>
-        <div class="row" id="class-actions">
-          <button type="button" class="btn btn-primary btn-sm" id="btn-add-class">＋ 新增班別</button>
-          <button type="button" class="btn btn-sm" id="btn-rename-class" disabled>改名</button>
-          <button type="button" class="btn btn-danger btn-sm" id="btn-del-class" disabled>刪除班別</button>
-        </div>
+      <section class="card" style="padding-bottom:1rem">
+        <p class="section-label">班別（Inno Tech）</p>
+        <div class="class-tabs" id="class-tabs" role="tablist" aria-label="班別"></div>
+        <details class="muted" style="margin-top:0.65rem;font-size:0.85rem">
+          <summary style="cursor:pointer">其他班別（選用）</summary>
+          <div class="row" style="margin-top:0.55rem">
+            <button type="button" class="btn btn-sm" id="btn-add-other">＋ 新增其他班別</button>
+            <button type="button" class="btn btn-danger btn-sm" id="btn-del-other" disabled>刪除目前其他班別</button>
+          </div>
+        </details>
       </section>
 
       <div id="weeks-panel">
-        <div class="row" style="margin-bottom:0.75rem;justify-content:space-between">
-          <p class="section-label" style="margin:0">各週進度</p>
-          <button type="button" class="btn btn-primary btn-sm" id="btn-add-week" disabled>＋ 新增一週</button>
+        <div class="row" style="margin-bottom:0.75rem;justify-content:space-between;align-items:center">
+          <p class="section-label" style="margin:0">各週進度（共 <span id="week-count">18</span> 週）</p>
+          <p class="muted" style="margin:0;font-size:0.82rem" id="class-hint"></p>
         </div>
         <div class="week-list" id="week-list"></div>
-        <div class="prog-empty" id="empty-no-class">
-          <strong>尚未有班別</strong>
-          按「新增班別」開始（例如 1A）。內容全空，由你之後填寫。
-        </div>
-        <div class="prog-empty" id="empty-no-weeks" hidden>
-          <strong>呢個班未有星期</strong>
-          按「新增一週」加入第 1 週，再填進度內容。
-        </div>
       </div>
 
       <p class="footnote">靜態 GitHub Pages 嘅前端密碼唔係銀行級保安；靠私人連結＋密碼＋資料留喺本機瀏覽器。日常喺瀏覽器直接改；匯出 JSON 作備份。</p>
@@ -71,55 +65,159 @@
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "innotech-staff-progress-v2";
+  var STORAGE_KEY = "innotech-staff-progress-v3";
+  var WEEK_COUNT = 18;
   var saveTimer = null;
+
+  /** Fixed from Work 26-27 weekly Inno Tech timetable */
+  var PRESETS = [
+    { id: "preset-1a", name: "1A Inno Tech", short: "1A", days: "四、五" },
+    { id: "preset-1b", name: "1B Inno Tech", short: "1B", days: "三、五" },
+    { id: "preset-2a", name: "2A Inno Tech", short: "2A", days: "二、三" },
+    { id: "preset-2b", name: "2B Inno Tech", short: "2B", days: "二、三" },
+    { id: "preset-3b", name: "3B Inno Tech", short: "3B", days: "一、四" },
+  ];
 
   function uid() {
     return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
   }
 
+  function makeWeeks() {
+    var weeks = [];
+    for (var n = 1; n <= WEEK_COUNT; n++) {
+      weeks.push({ id: "w" + n, n: n, label: "", dates: "", body: "" });
+    }
+    return weeks;
+  }
+
+  function seedPresets() {
+    return PRESETS.map(function (p) {
+      return {
+        id: p.id,
+        name: p.name,
+        short: p.short,
+        days: p.days,
+        preset: true,
+        weeks: makeWeeks(),
+      };
+    });
+  }
+
   function blankState() {
-    return { version: 2, classes: [], activeClassId: null, updatedAt: null };
+    var classes = seedPresets();
+    return {
+      version: 3,
+      classes: classes,
+      activeClassId: classes[0].id,
+      updatedAt: null,
+    };
+  }
+
+  function ensureWeeks(cls) {
+    if (!Array.isArray(cls.weeks)) cls.weeks = makeWeeks();
+    // pad / trim to WEEK_COUNT while keeping bodies
+    var byN = {};
+    cls.weeks.forEach(function (w) {
+      if (w && w.n) byN[w.n] = w;
+    });
+    var next = [];
+    for (var n = 1; n <= WEEK_COUNT; n++) {
+      if (byN[n]) {
+        byN[n].n = n;
+        if (!byN[n].id) byN[n].id = "w" + n;
+        next.push(byN[n]);
+      } else {
+        next.push({ id: "w" + n, n: n, label: "", dates: "", body: "" });
+      }
+    }
+    cls.weeks = next;
+  }
+
+  function mergePresets(state) {
+    var map = {};
+    (state.classes || []).forEach(function (c) {
+      map[c.id] = c;
+    });
+    var merged = [];
+    PRESETS.forEach(function (p) {
+      if (map[p.id]) {
+        map[p.id].name = p.name;
+        map[p.id].short = p.short;
+        map[p.id].days = p.days;
+        map[p.id].preset = true;
+        ensureWeeks(map[p.id]);
+        merged.push(map[p.id]);
+        delete map[p.id];
+      } else {
+        merged.push({
+          id: p.id,
+          name: p.name,
+          short: p.short,
+          days: p.days,
+          preset: true,
+          weeks: makeWeeks(),
+        });
+      }
+    });
+    // keep optional custom classes
+    Object.keys(map).forEach(function (id) {
+      var c = map[id];
+      c.preset = false;
+      ensureWeeks(c);
+      merged.push(c);
+    });
+    state.classes = merged;
+    var ids = {};
+    merged.forEach(function (c) { ids[c.id] = true; });
+    if (!state.activeClassId || !ids[state.activeClassId]) {
+      state.activeClassId = merged[0].id;
+    }
+    return state;
   }
 
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        // migrate legacy single-doc if present
-        var legacy = localStorage.getItem("innotech-staff-progress");
-        if (legacy) {
-          try {
-            var old = JSON.parse(legacy);
-            if (old && (old.body || old.title)) {
-              var c = {
-                id: uid(),
-                name: "預設班別",
-                weeks: [
-                  {
-                    id: uid(),
-                    n: 1,
-                    label: old.title || "",
-                    dates: "",
-                    body: old.body || "",
-                  },
-                ],
-              };
-              return {
-                version: 2,
-                classes: [c],
-                activeClassId: c.id,
-                updatedAt: old.updatedAt || null,
-              };
-            }
-          } catch (e) {}
+      if (raw) {
+        var data = JSON.parse(raw);
+        if (data && Array.isArray(data.classes)) {
+          data.version = 3;
+          return mergePresets(data);
         }
-        return blankState();
       }
-      var data = JSON.parse(raw);
-      if (!data || !Array.isArray(data.classes)) return blankState();
-      data.version = 2;
-      return data;
+      // soft-migrate bodies from v2 if same class names exist
+      var v2 = localStorage.getItem("innotech-staff-progress-v2");
+      if (v2) {
+        try {
+          var old = JSON.parse(v2);
+          var seeded = blankState();
+          if (old && Array.isArray(old.classes)) {
+            old.classes.forEach(function (oc) {
+              var match = null;
+              seeded.classes.forEach(function (sc) {
+                if (
+                  sc.name === oc.name ||
+                  (oc.name && sc.short && oc.name.indexOf(sc.short) === 0)
+                ) {
+                  match = sc;
+                }
+              });
+              if (match && Array.isArray(oc.weeks)) {
+                oc.weeks.forEach(function (ow) {
+                  if (!ow || !ow.n || ow.n < 1 || ow.n > WEEK_COUNT) return;
+                  var tw = match.weeks[ow.n - 1];
+                  if (!tw) return;
+                  if (ow.body) tw.body = ow.body;
+                  if (ow.label) tw.label = ow.label;
+                  if (ow.dates) tw.dates = ow.dates;
+                });
+              }
+            });
+          }
+          return seeded;
+        } catch (e) {}
+      }
+      return blankState();
     } catch (e) {
       return blankState();
     }
@@ -153,7 +251,7 @@
     }
     dot.classList.remove("is-pending");
     if (!state.updatedAt) {
-      text.textContent = "尚未有內容";
+      text.textContent = "內容空白 · 改完會自動儲存";
       return;
     }
     try {
@@ -176,17 +274,10 @@
   var state = load();
 
   function activeClass() {
-    if (!state.activeClassId) return null;
     for (var i = 0; i < state.classes.length; i++) {
       if (state.classes[i].id === state.activeClassId) return state.classes[i];
     }
-    return null;
-  }
-
-  function renumberWeeks(cls) {
-    (cls.weeks || []).forEach(function (w, i) {
-      w.n = i + 1;
-    });
+    return state.classes[0] || null;
   }
 
   function renderClassTabs() {
@@ -196,7 +287,19 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "class-tab" + (c.id === state.activeClassId ? " is-active" : "");
-      btn.textContent = c.name;
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", c.id === state.activeClassId ? "true" : "false");
+      var label = document.createElement("span");
+      label.className = "class-tab__name";
+      label.textContent = c.short || c.name;
+      btn.appendChild(label);
+      if (c.days) {
+        var sub = document.createElement("span");
+        sub.className = "class-tab__days";
+        sub.textContent = "星期" + c.days;
+        btn.appendChild(sub);
+      }
+      btn.title = c.name + (c.days ? " · 星期" + c.days : "");
       btn.addEventListener("click", function () {
         state.activeClassId = c.id;
         persist(true);
@@ -204,34 +307,28 @@
       });
       tabs.appendChild(btn);
     });
-    var has = !!activeClass();
-    document.getElementById("btn-rename-class").disabled = !has;
-    document.getElementById("btn-del-class").disabled = !has;
-    document.getElementById("btn-add-week").disabled = !has;
+    var cls = activeClass();
+    document.getElementById("btn-del-other").disabled = !(cls && !cls.preset);
+    var hint = document.getElementById("class-hint");
+    if (cls) {
+      hint.textContent = cls.name + (cls.days ? " · 逢星期" + cls.days : "");
+    } else {
+      hint.textContent = "";
+    }
   }
 
   function renderWeeks() {
     var list = document.getElementById("week-list");
-    var emptyClass = document.getElementById("empty-no-class");
-    var emptyWeeks = document.getElementById("empty-no-weeks");
     list.innerHTML = "";
+    document.getElementById("week-count").textContent = String(WEEK_COUNT);
     var cls = activeClass();
-    if (!state.classes.length) {
-      emptyClass.hidden = false;
-      emptyWeeks.hidden = true;
-      return;
-    }
-    emptyClass.hidden = true;
-    if (!cls || !(cls.weeks || []).length) {
-      emptyWeeks.hidden = false;
-      return;
-    }
-    emptyWeeks.hidden = true;
+    if (!cls) return;
+    ensureWeeks(cls);
 
-    cls.weeks.forEach(function (w, idx) {
+    cls.weeks.forEach(function (w) {
       var card = document.createElement("article");
       card.className = "week-card";
-      card.dataset.weekId = w.id;
+      card.id = "week-" + w.n;
 
       var head = document.createElement("div");
       head.className = "week-card__head";
@@ -247,8 +344,9 @@
       var labelIn = document.createElement("input");
       labelIn.type = "text";
       labelIn.className = "week-label";
-      labelIn.placeholder = "主題／標題（選填）";
+      labelIn.placeholder = "主題（選填）";
       labelIn.value = w.label || "";
+      labelIn.setAttribute("aria-label", "第" + w.n + "週主題");
       labelIn.addEventListener("input", function () {
         w.label = labelIn.value;
         persist();
@@ -260,93 +358,44 @@
       datesIn.className = "week-dates";
       datesIn.placeholder = "日期（選填）";
       datesIn.value = w.dates || "";
+      datesIn.setAttribute("aria-label", "第" + w.n + "週日期");
       datesIn.addEventListener("input", function () {
         w.dates = datesIn.value;
         persist();
       });
       meta.appendChild(datesIn);
       head.appendChild(meta);
-
-      var actions = document.createElement("div");
-      actions.className = "week-card__actions";
-
-      var up = document.createElement("button");
-      up.type = "button";
-      up.className = "btn btn-sm";
-      up.textContent = "↑";
-      up.title = "上移";
-      up.disabled = idx === 0;
-      up.addEventListener("click", function () {
-        if (idx === 0) return;
-        var tmp = cls.weeks[idx - 1];
-        cls.weeks[idx - 1] = cls.weeks[idx];
-        cls.weeks[idx] = tmp;
-        renumberWeeks(cls);
-        persist(true);
-        renderAll();
-      });
-      actions.appendChild(up);
-
-      var down = document.createElement("button");
-      down.type = "button";
-      down.className = "btn btn-sm";
-      down.textContent = "↓";
-      down.title = "下移";
-      down.disabled = idx === cls.weeks.length - 1;
-      down.addEventListener("click", function () {
-        if (idx >= cls.weeks.length - 1) return;
-        var tmp = cls.weeks[idx + 1];
-        cls.weeks[idx + 1] = cls.weeks[idx];
-        cls.weeks[idx] = tmp;
-        renumberWeeks(cls);
-        persist(true);
-        renderAll();
-      });
-      actions.appendChild(down);
-
-      var del = document.createElement("button");
-      del.type = "button";
-      del.className = "btn btn-danger btn-sm";
-      del.textContent = "刪週";
-      del.addEventListener("click", function () {
-        if (!confirm("刪除第 " + w.n + " 週？")) return;
-        cls.weeks = cls.weeks.filter(function (x) { return x.id !== w.id; });
-        renumberWeeks(cls);
-        persist(true);
-        renderAll();
-      });
-      actions.appendChild(del);
-      head.appendChild(actions);
       card.appendChild(head);
 
       var body = document.createElement("div");
       body.className = "week-card__body";
       var ta = document.createElement("textarea");
-      ta.placeholder = "喺度寫本週進度（例如教咗咩、功課、備註）。純文字即可。";
+      ta.placeholder = "本週進度、教咗咩、功課、備註…（純文字，改完自動儲存）";
       ta.value = w.body || "";
+      ta.setAttribute("aria-label", "第" + w.n + "週進度");
       ta.addEventListener("input", function () {
         w.body = ta.value;
         persist();
+        updateFilledState(card, w);
       });
       body.appendChild(ta);
-
-      var foot = document.createElement("div");
-      foot.className = "week-card__foot";
-      var hint = document.createElement("p");
-      hint.className = "hint";
-      hint.textContent = "改完會自動儲存到本機瀏覽器";
-      foot.appendChild(hint);
-      body.appendChild(foot);
       card.appendChild(body);
 
+      updateFilledState(card, w);
       list.appendChild(card);
     });
+  }
+
+  function updateFilledState(card, w) {
+    var filled = !!(w.body && String(w.body).trim());
+    card.classList.toggle("is-filled", filled);
   }
 
   function renderAll() {
     renderClassTabs();
     renderWeeks();
     if (state.updatedAt) setStamp(true);
+    else setStamp(true);
   }
 
   function initUi() {
@@ -355,61 +404,33 @@
       location.reload();
     });
 
-    document.getElementById("btn-add-class").addEventListener("click", function () {
-      var name = prompt("班別名稱（例如 1A、2B）");
+    document.getElementById("btn-add-other").addEventListener("click", function () {
+      var name = prompt("其他班別名稱");
       if (name == null) return;
       name = String(name).trim();
       if (!name) return;
-      var c = { id: uid(), name: name, weeks: [] };
+      var c = {
+        id: uid(),
+        name: name,
+        short: name,
+        days: "",
+        preset: false,
+        weeks: makeWeeks(),
+      };
       state.classes.push(c);
       state.activeClassId = c.id;
       persist(true);
       renderAll();
     });
 
-    document.getElementById("btn-rename-class").addEventListener("click", function () {
+    document.getElementById("btn-del-other").addEventListener("click", function () {
       var cls = activeClass();
-      if (!cls) return;
-      var name = prompt("班別新名稱", cls.name);
-      if (name == null) return;
-      name = String(name).trim();
-      if (!name) return;
-      cls.name = name;
-      persist(true);
-      renderAll();
-    });
-
-    document.getElementById("btn-del-class").addEventListener("click", function () {
-      var cls = activeClass();
-      if (!cls) return;
-      if (!confirm("刪除班別「" + cls.name + "」同埋所有星期內容？")) return;
+      if (!cls || cls.preset) return;
+      if (!confirm("刪除「" + cls.name + "」？")) return;
       state.classes = state.classes.filter(function (c) { return c.id !== cls.id; });
-      state.activeClassId = state.classes.length ? state.classes[0].id : null;
+      state.activeClassId = state.classes[0].id;
       persist(true);
       renderAll();
-    });
-
-    document.getElementById("btn-add-week").addEventListener("click", function () {
-      var cls = activeClass();
-      if (!cls) return;
-      cls.weeks = cls.weeks || [];
-      cls.weeks.push({
-        id: uid(),
-        n: cls.weeks.length + 1,
-        label: "",
-        dates: "",
-        body: "",
-      });
-      renumberWeeks(cls);
-      persist(true);
-      renderAll();
-      var cards = document.querySelectorAll(".week-card");
-      if (cards.length) {
-        var last = cards[cards.length - 1];
-        last.scrollIntoView({ behavior: "smooth", block: "center" });
-        var ta = last.querySelector("textarea");
-        if (ta) ta.focus();
-      }
     });
 
     document.getElementById("btn-export").addEventListener("click", function () {
@@ -417,7 +438,7 @@
       var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "innotech-progress-backup.json";
+      a.download = "innotech-progress-v3-backup.json";
       a.click();
       URL.revokeObjectURL(a.href);
     });
@@ -430,39 +451,14 @@
       reader.onload = function () {
         try {
           var data = JSON.parse(String(reader.result || ""));
-          if (!data || typeof data !== "object") throw new Error("格式不正確");
-          if (!confirm("匯入會覆蓋本機現有進度，確定？")) return;
-          if (Array.isArray(data.classes)) {
-            state = {
-              version: 2,
-              classes: data.classes,
-              activeClassId: data.activeClassId || (data.classes[0] && data.classes[0].id) || null,
-              updatedAt: data.updatedAt || new Date().toISOString(),
-            };
-          } else if (data.body != null || data.title != null) {
-            // legacy single doc
-            var c = {
-              id: uid(),
-              name: "匯入班別",
-              weeks: [
-                {
-                  id: uid(),
-                  n: 1,
-                  label: data.title || "",
-                  dates: "",
-                  body: data.body || "",
-                },
-              ],
-            };
-            state = {
-              version: 2,
-              classes: [c],
-              activeClassId: c.id,
-              updatedAt: data.updatedAt || new Date().toISOString(),
-            };
-          } else {
-            throw new Error("缺少 classes");
-          }
+          if (!data || !Array.isArray(data.classes)) throw new Error("格式不正確");
+          if (!confirm("匯入會覆蓋本機進度內容（班別結構會與預設合併），確定？")) return;
+          state = mergePresets({
+            version: 3,
+            classes: data.classes,
+            activeClassId: data.activeClassId || null,
+            updatedAt: data.updatedAt || new Date().toISOString(),
+          });
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
           setStamp(true);

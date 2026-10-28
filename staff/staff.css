@@ -622,3 +622,29 @@ h2 {
 .autosave-dot.is-pending {
   background: var(--warn);
 }
+
+.class-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  line-height: 1.25;
+  padding: 0.5rem 0.95rem;
+}
+.class-tab__name {
+  font-weight: 700;
+}
+.class-tab__days {
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 0.75;
+}
+.class-tab.is-active .class-tab__days {
+  opacity: 0.9;
+}
+.week-card.is-filled {
+  border-color: #bfdbfe;
+}
+.week-card.is-filled .week-card__badge {
+  background: #dbeafe;
+}
