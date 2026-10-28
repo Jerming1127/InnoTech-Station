@@ -23,7 +23,7 @@
 
   global.StaffAuthConfig = {
     /** Google OAuth 2.0 Web Client ID */
-    CLIENT_ID: "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID",
+    CLIENT_ID: "759864941513-kpf94t1ved3o96fcspsi4t5qrslt6o89.apps.googleusercontent.com",
 
     /**
      * Emails allowed into staff tools (compared lowercased).
