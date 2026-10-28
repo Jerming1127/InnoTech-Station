@@ -30,8 +30,8 @@
      * Add one string per line, e.g. "colleague@gmail.com",
      */
     ALLOWED_EMAILS: [
-      "jerming@asia.com",
-      // "next-staff@gmail.com",
+      "cheungwm@chusheklun.edu.hk",
+      // add more later, e.g. "other@gmail.com",
     ],
   };
 })(window);
