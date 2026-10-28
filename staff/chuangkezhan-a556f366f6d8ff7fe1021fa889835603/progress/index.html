@@ -33,7 +33,7 @@
       <div class="prog-hero">
         <div>
           <h1>上課日子教學進度表</h1>
-          <p class="muted" style="margin:0.25rem 0 0">六班 × 18 週一覽（含 1C）。優先讀學校 Google Sheet CSV（唯讀）；未設網址則本機可編輯。</p>
+          <p class="muted" style="margin:0.25rem 0 0">18 週 × 六班一覽（含 1C；列＝週次、欄＝班別）。優先讀學校 Google Sheet CSV（唯讀）；未設網址則本機可編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
@@ -41,7 +41,7 @@
       <p class="sheet-note" id="sheet-note" hidden></p>
 
       <div class="matrix-scroll">
-        <table class="prog-matrix" id="prog-matrix" aria-label="班別 × 週進度">
+        <table class="prog-matrix" id="prog-matrix" aria-label="週次 × 班別進度">
           <thead id="matrix-head"></thead>
           <tbody id="matrix-body"></tbody>
         </table>
@@ -222,33 +222,77 @@
     return rows;
   }
 
+  function findClassByShort(short) {
+    var s = String(short || "").trim().toUpperCase();
+    if (!s) return null;
+    var found = null;
+    CLASSES.forEach(function (c) {
+      if (c.short === s || s.indexOf(c.short) === 0) found = c;
+    });
+    return found;
+  }
+
+  function parseWeekNum(label, fallback) {
+    var m = String(label || "").match(/(\d+)/);
+    if (m) {
+      var n = parseInt(m[1], 10);
+      if (n >= 1 && n <= WEEK_COUNT) return n;
+    }
+    if (fallback >= 1 && fallback <= WEEK_COUNT) return fallback;
+    return 0;
+  }
+
+  function headerLooksLikeClasses(header) {
+    var hits = 0;
+    for (var i = 1; i < header.length; i++) {
+      if (findClassByShort(header[i])) hits++;
+    }
+    return hits >= 2;
+  }
+
   function applyCsv(text) {
     var rows = parseCsv(text);
     if (!rows.length) throw new Error("CSV 空白");
     var grid = blankGrid();
-    var header = rows[0].map(function (h) { return String(h || "").trim(); });
+    var header = rows[0].map(function (x) { return String(x || "").trim(); });
+    var h0 = header[0] || "";
+
+    /* Preferred: weeks × classes — header 週次/week + 1A…3B columns */
+    if (headerLooksLikeClasses(header) || /週|week|^w$/i.test(h0)) {
+      var classCols = [];
+      for (var c = 1; c < header.length; c++) {
+        var cls = findClassByShort(header[c]);
+        if (cls) classCols.push({ col: c, cls: cls });
+      }
+      if (!classCols.length) throw new Error("CSV 未辨識班別欄");
+      for (var r = 1; r < rows.length; r++) {
+        var week = parseWeekNum(rows[r][0], r);
+        if (!week) continue;
+        classCols.forEach(function (cc) {
+          var val = rows[r][cc.col];
+          grid.cells[cc.cls.id][week] = val == null ? "" : String(val);
+        });
+      }
+      return grid;
+    }
+
+    /* Legacy fallback: classes × weeks — header 班別 + W1…W18 */
     var weekCols = [];
-    for (var c = 1; c < header.length; c++) {
-      var h = header[c];
-      var m = h.match(/(\d+)/);
-      var n = m ? parseInt(m[1], 10) : c;
-      if (n >= 1 && n <= WEEK_COUNT) weekCols.push({ col: c, week: n });
+    for (var c2 = 1; c2 < header.length; c2++) {
+      var n = parseWeekNum(header[c2], c2);
+      if (n) weekCols.push({ col: c2, week: n });
     }
     if (!weekCols.length) {
       for (var w = 1; w <= WEEK_COUNT && w < header.length; w++) {
         weekCols.push({ col: w, week: w });
       }
     }
-    for (var r = 1; r < rows.length; r++) {
-      var short = String(rows[r][0] || "").trim().toUpperCase();
-      var cls = null;
-      CLASSES.forEach(function (c) {
-        if (c.short === short || short.indexOf(c.short) === 0) cls = c;
-      });
-      if (!cls) continue;
+    for (var r2 = 1; r2 < rows.length; r2++) {
+      var cls2 = findClassByShort(rows[r2][0]);
+      if (!cls2) continue;
       weekCols.forEach(function (wc) {
-        var val = rows[r][wc.col];
-        grid.cells[cls.id][wc.week] = val == null ? "" : String(val);
+        var val2 = rows[r2][wc.col];
+        grid.cells[cls2.id][wc.week] = val2 == null ? "" : String(val2);
       });
     }
     return grid;
@@ -274,49 +318,63 @@
   function renderMatrix() {
     var head = document.getElementById("matrix-head");
     var body = document.getElementById("matrix-body");
-    var hr = "<tr><th class=\"sticky-col\">班別</th>";
-    for (var w = 1; w <= WEEK_COUNT; w++) {
-      hr += "<th>W" + w + "</th>";
-    }
+    var hr = "<tr><th class=\"sticky-col\">週次</th>";
+    CLASSES.forEach(function (c) {
+      var days = c.days
+        ? '<span class="matrix-days">星期' + c.days + "</span>"
+        : "";
+      hr +=
+        "<th><span class=\"matrix-class\">" +
+        c.short +
+        "</span>" +
+        days +
+        "</th>";
+    });
     hr += "</tr>";
     head.innerHTML = hr;
     body.innerHTML = "";
 
-    CLASSES.forEach(function (c) {
-      var tr = document.createElement("tr");
-      var th = document.createElement("th");
-      th.className = "sticky-col";
-      var days = c.days ? '<span class="matrix-days">星期' + c.days + "</span>" : "";
-      th.innerHTML = '<span class="matrix-class">' + c.short + "</span>" + days;
-      tr.appendChild(th);
+    for (var week = 1; week <= WEEK_COUNT; week++) {
+      (function (wn) {
+        var tr = document.createElement("tr");
+        var th = document.createElement("th");
+        th.className = "sticky-col";
+        th.innerHTML =
+          '<span class="matrix-class">W' +
+          wn +
+          '</span><span class="matrix-days">第' +
+          wn +
+          "週</span>";
+        tr.appendChild(th);
 
-      for (var week = 1; week <= WEEK_COUNT; week++) {
-        (function (cid, wn) {
-          var td = document.createElement("td");
-          var val = (state.cells[cid] && state.cells[cid][wn]) || "";
-          if (sheetMode) {
-            td.className = "matrix-cell" + (val ? " is-filled" : "");
-            td.textContent = val;
-            td.title = val;
-          } else {
-            var ta = document.createElement("textarea");
-            ta.className = "matrix-input";
-            ta.rows = 2;
-            ta.value = val;
-            ta.setAttribute("aria-label", c.short + " 第" + wn + "週");
-            ta.addEventListener("input", function () {
-              state.cells[cid][wn] = ta.value;
-              td.classList.toggle("is-filled", !!String(ta.value).trim());
-              persistLocal();
-            });
-            td.className = "matrix-cell" + (val ? " is-filled" : "");
-            td.appendChild(ta);
-          }
-          tr.appendChild(td);
-        })(c.id, week);
-      }
-      body.appendChild(tr);
-    });
+        CLASSES.forEach(function (c) {
+          (function (cid, short) {
+            var td = document.createElement("td");
+            var val = (state.cells[cid] && state.cells[cid][wn]) || "";
+            if (sheetMode) {
+              td.className = "matrix-cell" + (val ? " is-filled" : "");
+              td.textContent = val;
+              td.title = val;
+            } else {
+              var ta = document.createElement("textarea");
+              ta.className = "matrix-input";
+              ta.rows = 2;
+              ta.value = val;
+              ta.setAttribute("aria-label", "第" + wn + "週 " + short);
+              ta.addEventListener("input", function () {
+                state.cells[cid][wn] = ta.value;
+                td.classList.toggle("is-filled", !!String(ta.value).trim());
+                persistLocal();
+              });
+              td.className = "matrix-cell" + (val ? " is-filled" : "");
+              td.appendChild(ta);
+            }
+            tr.appendChild(td);
+          })(c.id, c.short);
+        });
+        body.appendChild(tr);
+      })(week);
+    }
   }
 
   function showNote(msg, isErr) {

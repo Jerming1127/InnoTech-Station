@@ -1,12 +1,13 @@
 /**
- * 上課日子教學進度表 — Google Sheet (read-only) + class×week matrix.
+ * 上課日子教學進度表 — Google Sheet (read-only) + week×class matrix.
  *
  * HOW TO PLUG A SHEET CSV URL:
  * 1. Open your school Google Sheet for progress (學校帳戶).
- * 2. Layout expected (first sheet / gid you publish):
- *      Row 1 header: 班別, W1, W2, … W18   (or 第1週…第18週 — see parser)
- *      Rows: 1A, 1B, 1C, 2A, 2B, 3B  (first column = class short name)
- *      Cells = week progress text (plain).
+ * 2. Layout expected (first sheet / gid you publish) — weeks as rows, classes as columns:
+ *      Row 1 header: 週次, 1A, 1B, 1C, 2A, 2B, 3B
+ *      Rows: W1…W18（或 第1週…第18週）— first column = week label
+ *      Cells = that week’s progress text per class (plain).
+ *      (Legacy class×week CSV still parsed as fallback.)
  * 3. Publish CSV (pick one):
  *    A) File → Share → Publish to web → choose the sheet tab → CSV → Publish
  *       Copy the published CSV link.
