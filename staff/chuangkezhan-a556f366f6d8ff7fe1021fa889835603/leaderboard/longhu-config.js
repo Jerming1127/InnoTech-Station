@@ -1,12 +1,12 @@
 /**
- * 農虎榜 — reason catalogs + class tabs (no real student names).
+ * 龍虎榜 — reason catalogs + class tabs (no real student names).
  * Edit labels / suggested points (1–4) anytime; reload page to apply.
  */
 (function (global) {
   "use strict";
 
-  global.FarmerConfig = {
-    /** Fixed class tabs — 農虎榜 deliberately excludes 1C */
+  global.LonghuConfig = {
+    /** Fixed class tabs — 龍虎榜 deliberately excludes 1C */
     CLASSES: [
       { id: "1a", short: "1A", name: "1A" },
       { id: "1b", short: "1B", name: "1B" },

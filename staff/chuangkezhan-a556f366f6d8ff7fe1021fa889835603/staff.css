@@ -672,15 +672,15 @@ h2 {
   padding: 0.25rem 0.7rem;
 }
 
-/* —— 農虎榜 / Rank —— */
+/* —— 龍虎榜 / Rank —— */
 .wrap--wide {
   width: min(1100px, 100% - 1.5rem);
 }
 
-.nonghu-hero {
+.longhu-hero {
   margin-bottom: 1rem;
 }
-.nonghu-kicker {
+.longhu-kicker {
   margin: 0;
   font-size: 0.78rem;
   font-weight: 700;
@@ -689,11 +689,11 @@ h2 {
   color: #b45309;
 }
 
-.nonghu-tabs {
+.longhu-tabs {
   margin-bottom: 1rem;
 }
 
-.nonghu-stage {
+.longhu-stage {
   margin-bottom: 1.25rem;
 }
 

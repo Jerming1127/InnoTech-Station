@@ -27,7 +27,7 @@
 
     WEEK_COUNT: 18,
 
-    /** Six classes for progress matrix (includes 1C — unlike 農虎榜) */
+    /** Six classes for progress matrix (includes 1C — unlike 龍虎榜) */
     CLASSES: [
       { id: "1a", short: "1A", days: "四、五" },
       { id: "1b", short: "1B", days: "三、五" },

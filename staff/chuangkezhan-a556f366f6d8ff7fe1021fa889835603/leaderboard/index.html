@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>農虎榜 · 職員區</title>
+  <title>龍虎榜 · 職員區</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
@@ -29,17 +29,17 @@
         </div>
       </header>
 
-      <div class="nonghu-hero">
+      <div class="longhu-hero">
         <div>
-          <p class="nonghu-kicker">創科站 · Classroom Rank</p>
-          <h1>農虎榜</h1>
+          <p class="longhu-kicker">創科站 · Classroom Rank</p>
+          <h1>龍虎榜</h1>
           <p class="muted" style="margin:0.25rem 0 0">點同學 → 揀原因 → 一次加 1–4 分。班別只有 1A／1B／2A／2B／3B（無 1C）。名單自行輸入。</p>
         </div>
       </div>
 
-      <div class="class-tabs nonghu-tabs" id="class-tabs" role="tablist" aria-label="班別"></div>
+      <div class="class-tabs longhu-tabs" id="class-tabs" role="tablist" aria-label="班別"></div>
 
-      <section class="nonghu-stage" id="rank-stage">
+      <section class="longhu-stage" id="rank-stage">
         <div class="podium" id="podium" aria-label="Top 3 Rank"></div>
         <div class="rank-rail" id="rank-rail" aria-label="Rank list"></div>
         <p class="empty" id="rank-empty" hidden>尚未有同學。喺下面加入名字先。</p>
@@ -88,14 +88,15 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="farmer-config.js"></script>
+  <script src="longhu-config.js"></script>
   <script>
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "innotech-staff-nonghu-v1";
+  var STORAGE_KEY = "innotech-staff-longhu-v1";
+  var OLD_STORAGE_KEYS = ["innotech-staff-nonghu-v1", "innotech-staff-leaderboard-v1"];
   var LEGACY_KEY = "innotech-staff-leaderboard";
-  var cfg = window.FarmerConfig || { CLASSES: [], CATALOGS: [] };
+  var cfg = window.LonghuConfig || { CLASSES: [], CATALOGS: [] };
   var CLASSES = cfg.CLASSES || [];
   var CATALOGS = cfg.CATALOGS || [];
 
@@ -568,7 +569,7 @@
       var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "innotech-nonghu-backup.json";
+      a.download = "innotech-longhu-backup.json";
       a.click();
       URL.revokeObjectURL(a.href);
     });
@@ -582,7 +583,7 @@
         try {
           var data = JSON.parse(String(reader.result || ""));
           if (!data || !data.classes) throw new Error("格式不正確");
-          if (!confirm("匯入會覆蓋本機農虎榜資料，確定？")) return;
+          if (!confirm("匯入會覆蓋本機龍虎榜資料，確定？")) return;
           var base = blankState();
           CLASSES.forEach(function (c) {
             if (data.classes[c.id]) base.classes[c.id] = data.classes[c.id];
