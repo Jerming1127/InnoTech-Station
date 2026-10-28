@@ -26,7 +26,7 @@
 
   global.ProgressConfig = {
     /** Published CSV / export URL — leave "" until ready */
-    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFHMUA1qKnAvReYlkLGCvwYIHcDwPeUwZBgAukORsEtFOCKhmApf5m4gJzTfJ_cOO_Onmh0Jy_cAMe/pub?gid=244078639&single=true&output=csv",
+    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFHMUA1qKnAvReYlkLGCvwYIHcDwPeUwZBgAukORsEtFOCKhmApf5m4gJzTfJ_cOO_Onmh0Jy_cAMe/pub?gid=915310866&single=true&output=csv",
 
     WEEK_COUNT: 18,
 
