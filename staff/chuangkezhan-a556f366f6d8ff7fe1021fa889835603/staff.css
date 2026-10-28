@@ -678,7 +678,19 @@ h2 {
 }
 
 .longhu-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
   margin-bottom: 1rem;
+}
+.longhu-hero h1 {
+  margin: 0;
+}
+.longhu-hero .stamp {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 .longhu-kicker {
   margin: 0;

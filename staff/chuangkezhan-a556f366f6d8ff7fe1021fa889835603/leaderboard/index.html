@@ -19,12 +19,13 @@
         <a class="topbar__brand" href="../">← 職員區</a>
         <div class="topbar__spacer"></div>
         <div class="topbar__actions">
+          <button type="button" class="btn btn-sm" id="btn-reload-sheet" hidden>重新載入 Sheet</button>
           <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
-          <label class="btn btn-sm" style="cursor:pointer;margin:0" title="完整備份還原">
+          <label class="btn btn-sm" id="btn-import-json-wrap" style="cursor:pointer;margin:0" title="完整備份還原">
             匯入 JSON
             <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
           </label>
-          <label class="btn btn-sm" style="cursor:pointer;margin:0" title="只匯入同學名單">
+          <label class="btn btn-sm" id="btn-import-csv-wrap" style="cursor:pointer;margin:0" title="只匯入同學名單">
             匯入 CSV 名單
             <input type="file" id="import-csv" accept="text/csv,.csv,text/plain" class="sr-only" />
           </label>
@@ -37,9 +38,12 @@
         <div>
           <p class="longhu-kicker">創科站 · Classroom Rank</p>
           <h1>龍虎榜</h1>
-          <p class="muted" style="margin:0.25rem 0 0">點同學 → 揀原因 → 一次加 1–4 分。班別只有 1A／1B／2A／2B／3B（無 1C）。名單自行輸入。</p>
+          <p class="muted" style="margin:0.25rem 0 0">班別只有 1A／1B／2A／2B／3B（無 1C）。可接 Google Sheet CSV；未設定則本機編輯／加分。</p>
         </div>
+        <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
+
+      <p class="sheet-note" id="sheet-note" hidden></p>
 
       <div class="class-tabs longhu-tabs" id="class-tabs" role="tablist" aria-label="班別"></div>
 
@@ -49,9 +53,9 @@
         <p class="empty" id="rank-empty" hidden>尚未有同學。喺下面加入名字先。</p>
       </section>
 
-      <section class="card">
-        <p class="section-label">名單（自行輸入）</p>
-        <div class="row" style="margin-bottom:0.75rem">
+      <section class="card" id="roster-card">
+        <p class="section-label" id="roster-label">名單（自行輸入）</p>
+        <div class="row" style="margin-bottom:0.75rem" id="roster-add-row">
           <label class="field" style="margin:0;flex:1;min-width:10rem">
             <span class="sr-only">同學名</span>
             <input type="text" id="student-name" placeholder="輸入同學名後按加入" autocomplete="off" />
@@ -60,7 +64,7 @@
         </div>
         <ul class="list" id="student-list"></ul>
         <p class="empty" id="roster-empty">尚未加入同學。</p>
-        <p class="muted" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。CSV 名單：UTF-8、逗號分隔；第一行欄位名要有 <code>name</code> 或 <code>姓名</code>；可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）。完整備份請用「匯出／匯入 JSON」。</p>
+        <p class="muted" id="roster-hint" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。本機 CSV：UTF-8；欄位 <code>name</code>／<code>姓名</code>，可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）。Sheet 模式見 longhu-config.js（另可選 <code>score</code>／<code>分數</code>）。</p>
       </section>
 
       <section class="card">
@@ -69,7 +73,7 @@
         <p class="empty" id="log-empty">暫無紀錄。</p>
       </section>
 
-      <p class="footnote">資料只存本機瀏覽器（localStorage）。靜態站前端保安有限；須 Google 登入。</p>
+      <p class="footnote">Sheet 模式：改分請喺 Google Sheet 改完撳「重新載入 Sheet」。未設網址時資料存本機 localStorage。靜態站前端保安有限；須 Google 登入。</p>
     </div>
   </div>
 
@@ -103,6 +107,8 @@
   var cfg = window.LonghuConfig || { CLASSES: [], CATALOGS: [] };
   var CLASSES = cfg.CLASSES || [];
   var CATALOGS = cfg.CATALOGS || [];
+  var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
+  var sheetMode = false;
 
   var awardTarget = null;
   var activeCatalogId = CATALOGS[0] ? CATALOGS[0].id : null;
@@ -188,7 +194,52 @@
   }
 
   function save() {
+    if (sheetMode) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function showNote(msg, isErr) {
+    var note = document.getElementById("sheet-note");
+    if (!note) return;
+    if (!msg) {
+      note.hidden = true;
+      note.textContent = "";
+      note.classList.remove("is-err");
+      return;
+    }
+    note.hidden = false;
+    note.textContent = msg;
+    note.classList.toggle("is-err", !!isErr);
+  }
+
+  function setStamp() {
+    var el = document.getElementById("mode-stamp");
+    if (!el) return;
+    if (sheetMode) {
+      el.textContent = "來源：Google Sheet（唯讀）";
+      return;
+    }
+    el.textContent = "本機模式 · 可加分／編輯名單";
+  }
+
+  function setChromeForMode() {
+    var reload = document.getElementById("btn-reload-sheet");
+    var exp = document.getElementById("btn-export");
+    var jw = document.getElementById("btn-import-json-wrap");
+    var cw = document.getElementById("btn-import-csv-wrap");
+    var addRow = document.getElementById("roster-add-row");
+    var label = document.getElementById("roster-label");
+    var hint = document.getElementById("roster-hint");
+    if (reload) reload.hidden = !(sheetMode || sheetUrl);
+    if (exp) exp.hidden = !!sheetMode;
+    if (jw) jw.hidden = !!sheetMode;
+    if (cw) cw.hidden = !!sheetMode;
+    if (addRow) addRow.hidden = !!sheetMode;
+    if (label) label.textContent = sheetMode ? "名單（Sheet 唯讀）" : "名單（自行輸入）";
+    if (hint) {
+      hint.hidden = !!sheetMode;
+    }
+    setStamp();
   }
 
   var state = load();
@@ -247,6 +298,7 @@
   }
 
   function openAward(student) {
+    if (sheetMode) return;
     awardTarget = student;
     selectedReasonId = null;
     selectedPts = 1;
@@ -443,40 +495,42 @@
       name.textContent = s.name + " · " + (totals[s.id] || 0) + " 分";
       li.appendChild(name);
 
-      var addBtn = document.createElement("button");
-      addBtn.type = "button";
-      addBtn.className = "btn btn-good btn-sm";
-      addBtn.textContent = "加分";
-      addBtn.addEventListener("click", function () { openAward(s); });
-      li.appendChild(addBtn);
+      if (!sheetMode) {
+        var addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "btn btn-good btn-sm";
+        addBtn.textContent = "加分";
+        addBtn.addEventListener("click", function () { openAward(s); });
+        li.appendChild(addBtn);
 
-      var renameBtn = document.createElement("button");
-      renameBtn.type = "button";
-      renameBtn.className = "btn btn-sm";
-      renameBtn.textContent = "改名";
-      renameBtn.addEventListener("click", function () {
-        var n = prompt("新名字", s.name);
-        if (n == null) return;
-        n = String(n).trim();
-        if (!n) return;
-        s.name = n;
-        save();
-        renderAll();
-      });
-      li.appendChild(renameBtn);
+        var renameBtn = document.createElement("button");
+        renameBtn.type = "button";
+        renameBtn.className = "btn btn-sm";
+        renameBtn.textContent = "改名";
+        renameBtn.addEventListener("click", function () {
+          var n = prompt("新名字", s.name);
+          if (n == null) return;
+          n = String(n).trim();
+          if (!n) return;
+          s.name = n;
+          save();
+          renderAll();
+        });
+        li.appendChild(renameBtn);
 
-      var delBtn = document.createElement("button");
-      delBtn.type = "button";
-      delBtn.className = "btn btn-danger btn-sm";
-      delBtn.textContent = "移除";
-      delBtn.addEventListener("click", function () {
-        if (!confirm("移除「" + s.name + "」？相關加分會一併刪除。")) return;
-        b.students = b.students.filter(function (x) { return x.id !== s.id; });
-        b.awards = (b.awards || []).filter(function (a) { return a.studentId !== s.id; });
-        save();
-        renderAll();
-      });
-      li.appendChild(delBtn);
+        var delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "btn btn-danger btn-sm";
+        delBtn.textContent = "移除";
+        delBtn.addEventListener("click", function () {
+          if (!confirm("移除「" + s.name + "」？相關加分會一併刪除。")) return;
+          b.students = b.students.filter(function (x) { return x.id !== s.id; });
+          b.awards = (b.awards || []).filter(function (a) { return a.studentId !== s.id; });
+          save();
+          renderAll();
+        });
+        li.appendChild(delBtn);
+      }
       list.appendChild(li);
     });
   }
@@ -517,18 +571,20 @@
       } catch (e) {
         meta.textContent = a.at || "";
       }
-      var del = document.createElement("button");
-      del.type = "button";
-      del.className = "btn btn-danger btn-sm";
-      del.textContent = "撤銷";
-      del.addEventListener("click", function () {
-        b.awards = b.awards.filter(function (x) { return x.id !== a.id; });
-        save();
-        renderAll();
-      });
       li.appendChild(title);
       li.appendChild(meta);
-      li.appendChild(del);
+      if (!sheetMode) {
+        var del = document.createElement("button");
+        del.type = "button";
+        del.className = "btn btn-danger btn-sm";
+        del.textContent = "撤銷";
+        del.addEventListener("click", function () {
+          b.awards = b.awards.filter(function (x) { return x.id !== a.id; });
+          save();
+          renderAll();
+        });
+        li.appendChild(del);
+      }
       list.appendChild(li);
     });
   }
@@ -540,7 +596,149 @@
     renderLog();
   }
 
-  function initUi() {
+  function headerIndex(header, names) {
+    for (var i = 0; i < names.length; i++) {
+      var idx = header.indexOf(names[i]);
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  }
+
+  function parseCsvRows(text) {
+    text = String(text || "").replace(/^\uFEFF/, "");
+    var lines = text.split(/\r\n|\n|\r/).filter(function (ln) { return String(ln).trim().length; });
+    if (!lines.length) throw new Error("CSV 空白");
+    function splitRow(line) {
+      var out = [];
+      var cur = "";
+      var q = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') {
+          if (q && line[i + 1] === '"') { cur += '"'; i++; }
+          else q = !q;
+        } else if ((ch === "," || ch === "\t") && !q) {
+          out.push(cur);
+          cur = "";
+        } else cur += ch;
+      }
+      out.push(cur);
+      return out.map(function (s) { return String(s).trim(); });
+    }
+    var header = splitRow(lines[0]).map(function (h) { return h.toLowerCase(); });
+    var nameIdx = headerIndex(header, ["name", "姓名", "學生", "同學"]);
+    if (nameIdx < 0) throw new Error("找不到欄位 name／姓名（第一行要有欄位名）");
+    var classIdx = headerIndex(header, ["class", "班別", "classid"]);
+    var scoreIdx = headerIndex(header, ["score", "分數", "points", "总分", "總分"]);
+    var rows = [];
+    for (var r = 1; r < lines.length; r++) {
+      var cols = splitRow(lines[r]);
+      var nm = (cols[nameIdx] || "").trim();
+      if (!nm) continue;
+      var cls = classIdx >= 0 ? (cols[classIdx] || "").trim() : "";
+      var score = null;
+      if (scoreIdx >= 0 && cols[scoreIdx] != null && String(cols[scoreIdx]).trim() !== "") {
+        var n = Number(String(cols[scoreIdx]).replace(/,/g, ""));
+        if (!isNaN(n)) score = n;
+      }
+      rows.push({ name: nm, classRaw: cls, score: score });
+    }
+    if (!rows.length) throw new Error("沒有有效姓名列");
+    return rows;
+  }
+
+  function resolveClassId(raw, fallback) {
+    var s = String(raw || "").trim().toLowerCase().replace(/\s+/g, "");
+    if (!s) return fallback || null;
+    var hit = null;
+    CLASSES.forEach(function (c) {
+      if (c.id === s || c.short.toLowerCase() === s || c.name.toLowerCase() === s) hit = c.id;
+    });
+    return hit;
+  }
+
+  function applySheetCsv(text) {
+    var rows = parseCsvRows(text);
+    var next = blankState();
+    if (state && state.activeClassId && next.classes[state.activeClassId]) {
+      next.activeClassId = state.activeClassId;
+    }
+    var added = 0;
+    var skipped = 0;
+    rows.forEach(function (row) {
+      var cid = resolveClassId(row.classRaw, null);
+      if (!cid || !next.classes[cid]) { skipped++; return; }
+      var b = next.classes[cid];
+      var dup = b.students.some(function (s) { return s.name === row.name; });
+      if (dup) { skipped++; return; }
+      var sid = uid();
+      b.students.push({ id: sid, name: row.name });
+      if (row.score != null && row.score > 0) {
+        b.awards.push({
+          id: uid(),
+          studentId: sid,
+          points: row.score,
+          catalogId: "sheet",
+          reasonId: "sheet-total",
+          reasonLabel: "（Sheet 總分）",
+          at: new Date().toISOString(),
+        });
+      }
+      added++;
+    });
+    next.__sheetMeta = { added: added, skipped: skipped };
+    return next;
+  }
+
+  function enterLocalMode(note) {
+    sheetMode = false;
+    setChromeForMode();
+    showNote(note || (sheetUrl
+      ? "Sheet 載入失敗或未用。而家用本機可編輯／加分（見 longhu-config.js）。"
+      : "設定 Sheet CSV 網址後自動載入（見 longhu-config.js）。而家用本機可編輯／加分。"));
+    renderAll();
+  }
+
+  function enterSheetMode(next, metaNote) {
+    sheetMode = true;
+    state = next;
+    setChromeForMode();
+    showNote(metaNote || "已從 Google Sheet CSV 載入（唯讀）。要改名單／分數請改 Sheet 後撳「重新載入 Sheet」。");
+    renderAll();
+  }
+
+  function loadSheet() {
+    if (!sheetUrl) {
+      state = load();
+      enterLocalMode();
+      return;
+    }
+    var stamp = document.getElementById("mode-stamp");
+    if (stamp) stamp.textContent = "載入 Sheet…";
+    fetch(sheetUrl, { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        var next = applySheetCsv(text);
+        var m = next.__sheetMeta || {};
+        enterSheetMode(
+          next,
+          "已從 Google Sheet CSV 載入（唯讀）· " +
+            (m.added || 0) +
+            " 人" +
+            (m.skipped ? "（略過 " + m.skipped + " 行）" : "") +
+            "。要改請改 Sheet 後撳「重新載入 Sheet」。"
+        );
+      })
+      .catch(function (err) {
+        state = load();
+        enterLocalMode("Sheet 載入失敗：" + (err.message || "未知錯誤") + "。已退回本機模式。");
+      });
+  }
+
+    function initUi() {
     document.getElementById("btn-logout").addEventListener("click", function () {
       StaffAuth.logout();
       location.reload();
@@ -557,6 +755,7 @@
     });
 
     function addStudent() {
+      if (sheetMode) return;
       var input = document.getElementById("student-name");
       var name = String(input.value || "").trim();
       if (!name) return;
@@ -570,6 +769,7 @@
     }
 
     document.getElementById("btn-export").addEventListener("click", function () {
+      if (sheetMode) return;
       var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -578,71 +778,23 @@
       URL.revokeObjectURL(a.href);
     });
 
-
-    function parseCsv(text) {
-      text = String(text || "").replace(/^\uFEFF/, "");
-      var lines = text.split(/\r\n|\n|\r/).filter(function (ln) { return String(ln).trim().length; });
-      if (!lines.length) throw new Error("CSV 空白");
-      function splitRow(line) {
-        var out = [];
-        var cur = "";
-        var q = false;
-        for (var i = 0; i < line.length; i++) {
-          var ch = line[i];
-          if (ch === '"') {
-            if (q && line[i + 1] === '"') { cur += '"'; i++; }
-            else q = !q;
-          } else if ((ch === "," || ch === "\t") && !q) {
-            out.push(cur);
-            cur = "";
-          } else cur += ch;
-        }
-        out.push(cur);
-        return out.map(function (s) { return String(s).trim(); });
-      }
-      var header = splitRow(lines[0]).map(function (h) { return h.toLowerCase(); });
-      var nameIdx = header.indexOf("name");
-      if (nameIdx < 0) nameIdx = header.indexOf("姓名");
-      if (nameIdx < 0) nameIdx = header.indexOf("學生");
-      if (nameIdx < 0) nameIdx = header.indexOf("同學");
-      if (nameIdx < 0) throw new Error("找不到欄位 name／姓名（第一行要有欄位名）");
-      var classIdx = header.indexOf("class");
-      if (classIdx < 0) classIdx = header.indexOf("班別");
-      if (classIdx < 0) classIdx = header.indexOf("classid");
-      var rows = [];
-      for (var r = 1; r < lines.length; r++) {
-        var cols = splitRow(lines[r]);
-        var nm = (cols[nameIdx] || "").trim();
-        if (!nm) continue;
-        var cls = classIdx >= 0 ? (cols[classIdx] || "").trim() : "";
-        rows.push({ name: nm, classRaw: cls });
-      }
-      if (!rows.length) throw new Error("沒有有效姓名列");
-      return rows;
-    }
-
-    function resolveClassId(raw) {
-      var s = String(raw || "").trim().toLowerCase().replace(/\s+/g, "");
-      if (!s) return state.activeClassId;
-      var hit = null;
-      CLASSES.forEach(function (c) {
-        if (c.id === s || c.short.toLowerCase() === s || c.name.toLowerCase() === s) hit = c.id;
-      });
-      return hit;
-    }
+    document.getElementById("btn-reload-sheet").addEventListener("click", function () {
+      loadSheet();
+    });
 
     document.getElementById("import-csv").addEventListener("change", function (e) {
+      if (sheetMode) return;
       var file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
       var reader = new FileReader();
       reader.onload = function () {
         try {
-          var rows = parseCsv(String(reader.result || ""));
+          var rows = parseCsvRows(String(reader.result || ""));
           var added = 0;
           var skipped = 0;
           rows.forEach(function (row) {
-            var cid = resolveClassId(row.classRaw);
+            var cid = resolveClassId(row.classRaw, state.activeClassId);
             if (!cid || !state.classes[cid]) { skipped++; return; }
             var b = state.classes[cid];
             b.students = b.students || [];
@@ -662,6 +814,7 @@
     });
 
     document.getElementById("import-file").addEventListener("change", function (e) {
+      if (sheetMode) return;
       var file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
@@ -688,7 +841,7 @@
       reader.readAsText(file);
     });
 
-    renderAll();
+    loadSheet();
   }
 
   StaffAuth.requireAuth({ onUnlock: initUi });
