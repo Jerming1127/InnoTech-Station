@@ -53,7 +53,7 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="progress-config.js"></script>
+  <script src="progress-config.js?v=SHEET1"></script>
   <script>
 (function () {
   "use strict";
@@ -65,6 +65,7 @@
   var CLASSES = cfg.CLASSES || [];
   var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
   var sheetMode = false;
+  var sheetDataOk = false;
   var saveTimer = null;
 
   function blankGrid() {
@@ -146,6 +147,10 @@
     var el = document.getElementById("mode-stamp");
     if (sheetMode) {
       el.textContent = "來源：Google Sheet（唯讀）";
+      return;
+    }
+    if (sheetUrl) {
+      el.textContent = "Sheet 模式（唯讀）";
       return;
     }
     if (!state.updatedAt) {
@@ -389,14 +394,24 @@
     note.classList.toggle("is-err", !!isErr);
   }
 
+  function setChromeForMode() {
+    var locked = !!sheetUrl || sheetMode;
+    var reload = document.getElementById("btn-reload-sheet");
+    var exp = document.getElementById("btn-export");
+    var imp = document.getElementById("btn-import-wrap");
+    if (reload) reload.hidden = !locked;
+    if (exp) exp.hidden = locked;
+    if (imp) imp.hidden = locked;
+  }
+
   function enterLocalMode(note) {
     sheetMode = false;
+    sheetDataOk = false;
     if (state && state.__week9Seeded) {
       persistLocal(true);
       state.__week9Seeded = false;
     }
-    document.getElementById("btn-reload-sheet").hidden = !sheetUrl;
-    document.getElementById("btn-import-wrap").hidden = false;
+    setChromeForMode();
     showNote(note || "設定 Sheet CSV 網址後自動載入（見 progress-config.js）。而家用本機可編輯格。");
     setStamp();
     renderMatrix();
@@ -404,10 +419,25 @@
 
   function enterSheetMode(grid) {
     sheetMode = true;
+    sheetDataOk = true;
     state = grid;
-    document.getElementById("btn-reload-sheet").hidden = false;
-    document.getElementById("btn-import-wrap").hidden = true;
+    setChromeForMode();
     showNote("已從 Google Sheet CSV 載入（唯讀）。要改內容請改 Sheet 後撳「重新載入 Sheet」。");
+    setStamp();
+    renderMatrix();
+  }
+
+  /** Sheet URL configured: stay locked read-only; never fall back to editable localStorage. */
+  function enterSheetFailure(err) {
+    sheetMode = true;
+    if (!sheetDataOk) state = blankGrid();
+    setChromeForMode();
+    showNote(
+      "無法載入 Sheet（" +
+        (err && err.message ? err.message : "錯誤") +
+        "）。請檢查 CSV 網址／發佈設定／CORS，然後撳「重新載入 Sheet」。",
+      true
+    );
     setStamp();
     renderMatrix();
   }
@@ -417,6 +447,7 @@
       enterLocalMode();
       return;
     }
+    setChromeForMode();
     document.getElementById("mode-stamp").textContent = "載入 Sheet…";
     fetch(sheetUrl, { cache: "no-store" })
       .then(function (res) {
@@ -427,12 +458,7 @@
         enterSheetMode(applyCsv(text));
       })
       .catch(function (err) {
-        enterLocalMode(
-          "無法載入 Sheet（" +
-            (err.message || "錯誤") +
-            "）。已退回本機模式。請檢查 CSV 網址／發佈設定／CORS。"
-        );
-        document.getElementById("sheet-note").classList.add("is-err");
+        enterSheetFailure(err);
       });
   }
 

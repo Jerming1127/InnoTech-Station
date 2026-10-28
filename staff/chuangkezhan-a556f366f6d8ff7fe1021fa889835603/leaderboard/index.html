@@ -96,7 +96,7 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="longhu-config.js"></script>
+  <script src="longhu-config.js?v=SHEET1"></script>
   <script>
 (function () {
   "use strict";
@@ -109,6 +109,7 @@
   var CATALOGS = cfg.CATALOGS || [];
   var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
   var sheetMode = false;
+  var sheetDataOk = false;
 
   var awardTarget = null;
   var activeCatalogId = CATALOGS[0] ? CATALOGS[0].id : null;
@@ -219,10 +220,16 @@
       el.textContent = "來源：Google Sheet（唯讀）";
       return;
     }
+    if (sheetUrl) {
+      el.textContent = "Sheet 模式（唯讀）";
+      return;
+    }
     el.textContent = "本機模式 · 可加分／編輯名單";
   }
 
   function setChromeForMode() {
+    // When SHEET_CSV_URL is set, never show local editable controls
+    var locked = !!sheetUrl || sheetMode;
     var reload = document.getElementById("btn-reload-sheet");
     var exp = document.getElementById("btn-export");
     var jw = document.getElementById("btn-import-json-wrap");
@@ -230,14 +237,14 @@
     var addRow = document.getElementById("roster-add-row");
     var label = document.getElementById("roster-label");
     var hint = document.getElementById("roster-hint");
-    if (reload) reload.hidden = !(sheetMode || sheetUrl);
-    if (exp) exp.hidden = !!sheetMode;
-    if (jw) jw.hidden = !!sheetMode;
-    if (cw) cw.hidden = !!sheetMode;
-    if (addRow) addRow.hidden = !!sheetMode;
-    if (label) label.textContent = sheetMode ? "名單（Sheet 唯讀）" : "名單（自行輸入）";
+    if (reload) reload.hidden = !locked;
+    if (exp) exp.hidden = locked;
+    if (jw) jw.hidden = locked;
+    if (cw) cw.hidden = locked;
+    if (addRow) addRow.hidden = locked;
+    if (label) label.textContent = locked ? "名單（Sheet 唯讀）" : "名單（自行輸入）";
     if (hint) {
-      hint.hidden = !!sheetMode;
+      hint.hidden = locked;
     }
     setStamp();
   }
@@ -692,15 +699,28 @@
 
   function enterLocalMode(note) {
     sheetMode = false;
+    sheetDataOk = false;
     setChromeForMode();
-    showNote(note || (sheetUrl
-      ? "Sheet 載入失敗或未用。而家用本機可編輯／加分（見 longhu-config.js）。"
-      : "設定 Sheet CSV 網址後自動載入（見 longhu-config.js）。而家用本機可編輯／加分。"));
+    showNote(note || "設定 Sheet CSV 網址後自動載入（見 longhu-config.js）。而家用本機可編輯／加分。");
+    renderAll();
+  }
+
+  /** Sheet URL configured: stay locked read-only; never fall back to editable localStorage. */
+  function enterSheetFailure(err) {
+    sheetMode = true;
+    if (!sheetDataOk) state = blankState();
+    setChromeForMode();
+    showNote(
+      "Sheet 載入失敗：" + (err && err.message ? err.message : "未知錯誤") +
+        "。請檢查 CSV 網址／發佈設定／CORS，然後撳「重新載入 Sheet」。",
+      true
+    );
     renderAll();
   }
 
   function enterSheetMode(next, metaNote) {
     sheetMode = true;
+    sheetDataOk = true;
     state = next;
     setChromeForMode();
     showNote(metaNote || "已從 Google Sheet CSV 載入（唯讀）。要改名單／分數請改 Sheet 後撳「重新載入 Sheet」。");
@@ -713,6 +733,7 @@
       enterLocalMode();
       return;
     }
+    setChromeForMode();
     var stamp = document.getElementById("mode-stamp");
     if (stamp) stamp.textContent = "載入 Sheet…";
     fetch(sheetUrl, { cache: "no-store" })
@@ -733,8 +754,7 @@
         );
       })
       .catch(function (err) {
-        state = load();
-        enterLocalMode("Sheet 載入失敗：" + (err.message || "未知錯誤") + "。已退回本機模式。");
+        enterSheetFailure(err);
       });
   }
 
