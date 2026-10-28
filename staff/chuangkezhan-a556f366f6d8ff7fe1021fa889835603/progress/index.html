@@ -14,14 +14,15 @@
   <div id="staff-gate"></div>
 
   <div id="staff-app" hidden>
-    <div class="wrap">
+    <div class="wrap wrap--wide">
       <header class="topbar">
         <a class="topbar__brand" href="../">← 職員區</a>
         <div class="topbar__spacer"></div>
         <div class="topbar__actions">
-          <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
-          <label class="btn btn-sm" style="cursor:pointer;margin:0">
-            匯入 JSON
+          <button type="button" class="btn btn-sm" id="btn-reload-sheet" hidden>重新載入 Sheet</button>
+          <button type="button" class="btn btn-sm" id="btn-export">匯出本機</button>
+          <label class="btn btn-sm" style="cursor:pointer;margin:0" id="btn-import-wrap">
+            匯入本機
             <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
           </label>
           <span class="user-chip" id="staff-user-chip" hidden></span>
@@ -32,204 +33,103 @@
       <div class="prog-hero">
         <div>
           <h1>課堂進度</h1>
-          <p class="muted" style="margin:0.25rem 0 0">班別同星期已固定（Work 26-27 創科課）。揀班 → 填各週進度即可，自動儲存。唔存學生姓名。</p>
+          <p class="muted" style="margin:0.25rem 0 0">六班 × 18 週一覽（含 1C）。優先讀 Google Sheet CSV；未設定則本機可編輯。</p>
         </div>
-        <p class="stamp" id="save-stamp"><span class="autosave-dot" id="save-dot" hidden></span><span id="save-text">尚未有內容</span></p>
+        <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
 
-      <section class="card" style="padding-bottom:1rem">
-        <p class="section-label">班別（Inno Tech）</p>
-        <div class="class-tabs" id="class-tabs" role="tablist" aria-label="班別"></div>
-        <details class="muted" style="margin-top:0.65rem;font-size:0.85rem">
-          <summary style="cursor:pointer">其他班別（選用）</summary>
-          <div class="row" style="margin-top:0.55rem">
-            <button type="button" class="btn btn-sm" id="btn-add-other">＋ 新增其他班別</button>
-            <button type="button" class="btn btn-danger btn-sm" id="btn-del-other" disabled>刪除目前其他班別</button>
-          </div>
-        </details>
-      </section>
+      <p class="sheet-note" id="sheet-note" hidden></p>
 
-      <div id="weeks-panel">
-        <div class="row" style="margin-bottom:0.75rem;justify-content:space-between;align-items:center">
-          <p class="section-label" style="margin:0">各週進度（共 <span id="week-count">18</span> 週）</p>
-          <p class="muted" style="margin:0;font-size:0.82rem" id="class-hint"></p>
-        </div>
-        <div class="week-list" id="week-list"></div>
+      <div class="matrix-scroll">
+        <table class="prog-matrix" id="prog-matrix" aria-label="班別 × 週進度">
+          <thead id="matrix-head"></thead>
+          <tbody id="matrix-body"></tbody>
+        </table>
       </div>
 
-      <p class="footnote">靜態 GitHub Pages：須 Google 登入＋允許名單。日常喺瀏覽器直接改；匯出 JSON 作備份。</p>
+      <p class="footnote">Sheet 編輯請用學校帳戶喺 Google Sheet 改；本頁只讀 CSV。未設網址時改動存 localStorage。唔存學生姓名。</p>
     </div>
   </div>
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
+  <script src="progress-config.js"></script>
   <script>
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "innotech-staff-progress-v3";
-  var WEEK_COUNT = 18;
+  var STORAGE_KEY = "innotech-staff-progress-matrix-v1";
+  var LEGACY_V3 = "innotech-staff-progress-v3";
+  var cfg = window.ProgressConfig || {};
+  var WEEK_COUNT = cfg.WEEK_COUNT || 18;
+  var CLASSES = cfg.CLASSES || [];
+  var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
+  var sheetMode = false;
   var saveTimer = null;
 
-  /** Fixed from Work 26-27 weekly Inno Tech timetable */
-  var PRESETS = [
-    { id: "preset-1a", name: "1A Inno Tech", short: "1A", days: "四、五" },
-    { id: "preset-1b", name: "1B Inno Tech", short: "1B", days: "三、五" },
-    { id: "preset-2a", name: "2A Inno Tech", short: "2A", days: "二、三" },
-    { id: "preset-2b", name: "2B Inno Tech", short: "2B", days: "二、三" },
-    { id: "preset-3b", name: "3B Inno Tech", short: "3B", days: "一、四" },
-  ];
-
-  function uid() {
-    return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
-  }
-
-  function makeWeeks() {
-    var weeks = [];
-    for (var n = 1; n <= WEEK_COUNT; n++) {
-      weeks.push({ id: "w" + n, n: n, label: "", dates: "", body: "" });
-    }
-    return weeks;
-  }
-
-  function seedPresets() {
-    return PRESETS.map(function (p) {
-      return {
-        id: p.id,
-        name: p.name,
-        short: p.short,
-        days: p.days,
-        preset: true,
-        weeks: makeWeeks(),
-      };
+  function blankGrid() {
+    var cells = {};
+    CLASSES.forEach(function (c) {
+      cells[c.id] = {};
+      for (var w = 1; w <= WEEK_COUNT; w++) cells[c.id][w] = "";
     });
+    return { version: 1, cells: cells, updatedAt: null };
   }
 
-  function blankState() {
-    var classes = seedPresets();
-    return {
-      version: 3,
-      classes: classes,
-      activeClassId: classes[0].id,
-      updatedAt: null,
-    };
+  function softMigrateV3(raw) {
+    var grid = blankGrid();
+    if (!raw || !Array.isArray(raw.classes)) return grid;
+    raw.classes.forEach(function (oc) {
+      var match = null;
+      CLASSES.forEach(function (c) {
+        if (oc.id === "preset-" + c.id || oc.short === c.short || (oc.name && oc.name.indexOf(c.short) === 0)) {
+          match = c;
+        }
+      });
+      if (!match || !Array.isArray(oc.weeks)) return;
+      oc.weeks.forEach(function (ow) {
+        if (!ow || !ow.n || ow.n < 1 || ow.n > WEEK_COUNT) return;
+        var parts = [];
+        if (ow.label) parts.push(ow.label);
+        if (ow.dates) parts.push(ow.dates);
+        if (ow.body) parts.push(ow.body);
+        grid.cells[match.id][ow.n] = parts.join(" · ");
+      });
+    });
+    return grid;
   }
 
-  function ensureWeeks(cls) {
-    if (!Array.isArray(cls.weeks)) cls.weeks = makeWeeks();
-    // pad / trim to WEEK_COUNT while keeping bodies
-    var byN = {};
-    cls.weeks.forEach(function (w) {
-      if (w && w.n) byN[w.n] = w;
-    });
-    var next = [];
-    for (var n = 1; n <= WEEK_COUNT; n++) {
-      if (byN[n]) {
-        byN[n].n = n;
-        if (!byN[n].id) byN[n].id = "w" + n;
-        next.push(byN[n]);
-      } else {
-        next.push({ id: "w" + n, n: n, label: "", dates: "", body: "" });
-      }
-    }
-    cls.weeks = next;
-  }
-
-  function mergePresets(state) {
-    var map = {};
-    (state.classes || []).forEach(function (c) {
-      map[c.id] = c;
-    });
-    var merged = [];
-    PRESETS.forEach(function (p) {
-      if (map[p.id]) {
-        map[p.id].name = p.name;
-        map[p.id].short = p.short;
-        map[p.id].days = p.days;
-        map[p.id].preset = true;
-        ensureWeeks(map[p.id]);
-        merged.push(map[p.id]);
-        delete map[p.id];
-      } else {
-        merged.push({
-          id: p.id,
-          name: p.name,
-          short: p.short,
-          days: p.days,
-          preset: true,
-          weeks: makeWeeks(),
-        });
-      }
-    });
-    // keep optional custom classes
-    Object.keys(map).forEach(function (id) {
-      var c = map[id];
-      c.preset = false;
-      ensureWeeks(c);
-      merged.push(c);
-    });
-    state.classes = merged;
-    var ids = {};
-    merged.forEach(function (c) { ids[c.id] = true; });
-    if (!state.activeClassId || !ids[state.activeClassId]) {
-      state.activeClassId = merged[0].id;
-    }
-    return state;
-  }
-
-  function load() {
+  function loadLocal() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var data = JSON.parse(raw);
-        if (data && Array.isArray(data.classes)) {
-          data.version = 3;
-          return mergePresets(data);
+        if (data && data.cells) {
+          var base = blankGrid();
+          CLASSES.forEach(function (c) {
+            if (!data.cells[c.id]) return;
+            for (var w = 1; w <= WEEK_COUNT; w++) {
+              if (data.cells[c.id][w] != null) base.cells[c.id][w] = String(data.cells[c.id][w]);
+            }
+          });
+          base.updatedAt = data.updatedAt || null;
+          return base;
         }
       }
-      // soft-migrate bodies from v2 if same class names exist
-      var v2 = localStorage.getItem("innotech-staff-progress-v2");
-      if (v2) {
-        try {
-          var old = JSON.parse(v2);
-          var seeded = blankState();
-          if (old && Array.isArray(old.classes)) {
-            old.classes.forEach(function (oc) {
-              var match = null;
-              seeded.classes.forEach(function (sc) {
-                if (
-                  sc.name === oc.name ||
-                  (oc.name && sc.short && oc.name.indexOf(sc.short) === 0)
-                ) {
-                  match = sc;
-                }
-              });
-              if (match && Array.isArray(oc.weeks)) {
-                oc.weeks.forEach(function (ow) {
-                  if (!ow || !ow.n || ow.n < 1 || ow.n > WEEK_COUNT) return;
-                  var tw = match.weeks[ow.n - 1];
-                  if (!tw) return;
-                  if (ow.body) tw.body = ow.body;
-                  if (ow.label) tw.label = ow.label;
-                  if (ow.dates) tw.dates = ow.dates;
-                });
-              }
-            });
-          }
-          return seeded;
-        } catch (e) {}
+      var v3 = localStorage.getItem(LEGACY_V3);
+      if (v3) {
+        try { return softMigrateV3(JSON.parse(v3)); } catch (e) {}
       }
-      return blankState();
-    } catch (e) {
-      return blankState();
-    }
+    } catch (e) {}
+    return blankGrid();
   }
 
-  function persist(immediate) {
+  function persistLocal(immediate) {
+    if (sheetMode) return;
     function write() {
       state.updatedAt = new Date().toISOString();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      setStamp(true);
+      setStamp();
     }
     if (immediate) {
       if (saveTimer) clearTimeout(saveTimer);
@@ -237,167 +137,226 @@
       write();
       return;
     }
-    setStamp(false);
+    document.getElementById("mode-stamp").textContent = "儲存中…";
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(write, 400);
   }
 
-  function setStamp(saved) {
-    var dot = document.getElementById("save-dot");
-    var text = document.getElementById("save-text");
-    dot.hidden = false;
-    if (!saved) {
-      dot.classList.add("is-pending");
-      text.textContent = "儲存中…";
+  function setStamp() {
+    var el = document.getElementById("mode-stamp");
+    if (sheetMode) {
+      el.textContent = "來源：Google Sheet（唯讀）";
       return;
     }
-    dot.classList.remove("is-pending");
     if (!state.updatedAt) {
-      text.textContent = "內容空白 · 改完會自動儲存";
+      el.textContent = "本機模式 · 改完自動儲存";
       return;
     }
     try {
       var d = new Date(state.updatedAt);
-      text.textContent =
-        "已自動儲存 · " +
+      el.textContent =
+        "本機已存 · " +
         d.toLocaleString("zh-HK", {
           timeZone: "Asia/Hong_Kong",
           month: "2-digit",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
-        }) +
-        "（香港時間）";
+        });
     } catch (e) {
-      text.textContent = "已自動儲存";
+      el.textContent = "本機已存";
     }
   }
 
-  var state = load();
-
-  function activeClass() {
-    for (var i = 0; i < state.classes.length; i++) {
-      if (state.classes[i].id === state.activeClassId) return state.classes[i];
-    }
-    return state.classes[0] || null;
-  }
-
-  function renderClassTabs() {
-    var tabs = document.getElementById("class-tabs");
-    tabs.innerHTML = "";
-    state.classes.forEach(function (c) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "class-tab" + (c.id === state.activeClassId ? " is-active" : "");
-      btn.setAttribute("role", "tab");
-      btn.setAttribute("aria-selected", c.id === state.activeClassId ? "true" : "false");
-      var label = document.createElement("span");
-      label.className = "class-tab__name";
-      label.textContent = c.short || c.name;
-      btn.appendChild(label);
-      if (c.days) {
-        var sub = document.createElement("span");
-        sub.className = "class-tab__days";
-        sub.textContent = "星期" + c.days;
-        btn.appendChild(sub);
+  function parseCsv(text) {
+    var rows = [];
+    var i = 0;
+    var field = "";
+    var row = [];
+    var inQ = false;
+    text = String(text || "").replace(/^\uFEFF/, "");
+    while (i < text.length) {
+      var ch = text[i];
+      if (inQ) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') {
+            field += '"';
+            i += 2;
+            continue;
+          }
+          inQ = false;
+          i++;
+          continue;
+        }
+        field += ch;
+        i++;
+        continue;
       }
-      btn.title = c.name + (c.days ? " · 星期" + c.days : "");
-      btn.addEventListener("click", function () {
-        state.activeClassId = c.id;
-        persist(true);
-        renderAll();
-      });
-      tabs.appendChild(btn);
-    });
-    var cls = activeClass();
-    document.getElementById("btn-del-other").disabled = !(cls && !cls.preset);
-    var hint = document.getElementById("class-hint");
-    if (cls) {
-      hint.textContent = cls.name + (cls.days ? " · 逢星期" + cls.days : "");
-    } else {
-      hint.textContent = "";
+      if (ch === '"') {
+        inQ = true;
+        i++;
+        continue;
+      }
+      if (ch === ",") {
+        row.push(field);
+        field = "";
+        i++;
+        continue;
+      }
+      if (ch === "\n" || ch === "\r") {
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+        row.push(field);
+        field = "";
+        if (row.length > 1 || (row[0] && String(row[0]).trim())) rows.push(row);
+        row = [];
+        i++;
+        continue;
+      }
+      field += ch;
+      i++;
     }
+    if (field.length || row.length) {
+      row.push(field);
+      rows.push(row);
+    }
+    return rows;
   }
 
-  function renderWeeks() {
-    var list = document.getElementById("week-list");
-    list.innerHTML = "";
-    document.getElementById("week-count").textContent = String(WEEK_COUNT);
-    var cls = activeClass();
-    if (!cls) return;
-    ensureWeeks(cls);
-
-    cls.weeks.forEach(function (w) {
-      var card = document.createElement("article");
-      card.className = "week-card";
-      card.id = "week-" + w.n;
-
-      var head = document.createElement("div");
-      head.className = "week-card__head";
-
-      var badge = document.createElement("span");
-      badge.className = "week-card__badge";
-      badge.textContent = "第 " + w.n + " 週";
-      head.appendChild(badge);
-
-      var meta = document.createElement("div");
-      meta.className = "week-card__meta";
-
-      var labelIn = document.createElement("input");
-      labelIn.type = "text";
-      labelIn.className = "week-label";
-      labelIn.placeholder = "主題（選填）";
-      labelIn.value = w.label || "";
-      labelIn.setAttribute("aria-label", "第" + w.n + "週主題");
-      labelIn.addEventListener("input", function () {
-        w.label = labelIn.value;
-        persist();
+  function applyCsv(text) {
+    var rows = parseCsv(text);
+    if (!rows.length) throw new Error("CSV 空白");
+    var grid = blankGrid();
+    var header = rows[0].map(function (h) { return String(h || "").trim(); });
+    var weekCols = [];
+    for (var c = 1; c < header.length; c++) {
+      var h = header[c];
+      var m = h.match(/(\d+)/);
+      var n = m ? parseInt(m[1], 10) : c;
+      if (n >= 1 && n <= WEEK_COUNT) weekCols.push({ col: c, week: n });
+    }
+    if (!weekCols.length) {
+      for (var w = 1; w <= WEEK_COUNT && w < header.length; w++) {
+        weekCols.push({ col: w, week: w });
+      }
+    }
+    for (var r = 1; r < rows.length; r++) {
+      var short = String(rows[r][0] || "").trim().toUpperCase();
+      var cls = null;
+      CLASSES.forEach(function (c) {
+        if (c.short === short || short.indexOf(c.short) === 0) cls = c;
       });
-      meta.appendChild(labelIn);
-
-      var datesIn = document.createElement("input");
-      datesIn.type = "text";
-      datesIn.className = "week-dates";
-      datesIn.placeholder = "日期（選填）";
-      datesIn.value = w.dates || "";
-      datesIn.setAttribute("aria-label", "第" + w.n + "週日期");
-      datesIn.addEventListener("input", function () {
-        w.dates = datesIn.value;
-        persist();
+      if (!cls) continue;
+      weekCols.forEach(function (wc) {
+        var val = rows[r][wc.col];
+        grid.cells[cls.id][wc.week] = val == null ? "" : String(val);
       });
-      meta.appendChild(datesIn);
-      head.appendChild(meta);
-      card.appendChild(head);
+    }
+    return grid;
+  }
 
-      var body = document.createElement("div");
-      body.className = "week-card__body";
-      var ta = document.createElement("textarea");
-      ta.placeholder = "本週進度、教咗咩、功課、備註…（純文字，改完自動儲存）";
-      ta.value = w.body || "";
-      ta.setAttribute("aria-label", "第" + w.n + "週進度");
-      ta.addEventListener("input", function () {
-        w.body = ta.value;
-        persist();
-        updateFilledState(card, w);
-      });
-      body.appendChild(ta);
-      card.appendChild(body);
+  var state = loadLocal();
 
-      updateFilledState(card, w);
-      list.appendChild(card);
+  function renderMatrix() {
+    var head = document.getElementById("matrix-head");
+    var body = document.getElementById("matrix-body");
+    var hr = "<tr><th class=\"sticky-col\">班別</th>";
+    for (var w = 1; w <= WEEK_COUNT; w++) {
+      hr += "<th>W" + w + "</th>";
+    }
+    hr += "</tr>";
+    head.innerHTML = hr;
+    body.innerHTML = "";
+
+    CLASSES.forEach(function (c) {
+      var tr = document.createElement("tr");
+      var th = document.createElement("th");
+      th.className = "sticky-col";
+      var days = c.days ? '<span class="matrix-days">星期' + c.days + "</span>" : "";
+      th.innerHTML = '<span class="matrix-class">' + c.short + "</span>" + days;
+      tr.appendChild(th);
+
+      for (var week = 1; week <= WEEK_COUNT; week++) {
+        (function (cid, wn) {
+          var td = document.createElement("td");
+          var val = (state.cells[cid] && state.cells[cid][wn]) || "";
+          if (sheetMode) {
+            td.className = "matrix-cell" + (val ? " is-filled" : "");
+            td.textContent = val;
+            td.title = val;
+          } else {
+            var ta = document.createElement("textarea");
+            ta.className = "matrix-input";
+            ta.rows = 2;
+            ta.value = val;
+            ta.setAttribute("aria-label", c.short + " 第" + wn + "週");
+            ta.addEventListener("input", function () {
+              state.cells[cid][wn] = ta.value;
+              td.classList.toggle("is-filled", !!String(ta.value).trim());
+              persistLocal();
+            });
+            td.className = "matrix-cell" + (val ? " is-filled" : "");
+            td.appendChild(ta);
+          }
+          tr.appendChild(td);
+        })(c.id, week);
+      }
+      body.appendChild(tr);
     });
   }
 
-  function updateFilledState(card, w) {
-    var filled = !!(w.body && String(w.body).trim());
-    card.classList.toggle("is-filled", filled);
+  function showNote(msg, isErr) {
+    var note = document.getElementById("sheet-note");
+    if (!msg) {
+      note.hidden = true;
+      note.textContent = "";
+      return;
+    }
+    note.hidden = false;
+    note.textContent = msg;
+    note.classList.toggle("is-err", !!isErr);
   }
 
-  function renderAll() {
-    renderClassTabs();
-    renderWeeks();
-    if (state.updatedAt) setStamp(true);
-    else setStamp(true);
+  function enterLocalMode(note) {
+    sheetMode = false;
+    document.getElementById("btn-reload-sheet").hidden = !sheetUrl;
+    document.getElementById("btn-import-wrap").hidden = false;
+    showNote(note || "設定 Sheet CSV 網址後自動載入（見 progress-config.js）。而家用本機可編輯格。");
+    setStamp();
+    renderMatrix();
+  }
+
+  function enterSheetMode(grid) {
+    sheetMode = true;
+    state = grid;
+    document.getElementById("btn-reload-sheet").hidden = false;
+    document.getElementById("btn-import-wrap").hidden = true;
+    showNote("已從 Google Sheet CSV 載入（唯讀）。要改內容請改 Sheet 後撳「重新載入 Sheet」。");
+    setStamp();
+    renderMatrix();
+  }
+
+  function loadSheet() {
+    if (!sheetUrl) {
+      enterLocalMode();
+      return;
+    }
+    document.getElementById("mode-stamp").textContent = "載入 Sheet…";
+    fetch(sheetUrl, { cache: "no-store" })
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.text();
+      })
+      .then(function (text) {
+        enterSheetMode(applyCsv(text));
+      })
+      .catch(function (err) {
+        enterLocalMode(
+          "無法載入 Sheet（" +
+            (err.message || "錯誤") +
+            "）。已退回本機模式。請檢查 CSV 網址／發佈設定／CORS。"
+        );
+        document.getElementById("sheet-note").classList.add("is-err");
+      });
   }
 
   function initUi() {
@@ -405,47 +364,20 @@
       StaffAuth.logout();
       location.reload();
     });
-
-    document.getElementById("btn-add-other").addEventListener("click", function () {
-      var name = prompt("其他班別名稱");
-      if (name == null) return;
-      name = String(name).trim();
-      if (!name) return;
-      var c = {
-        id: uid(),
-        name: name,
-        short: name,
-        days: "",
-        preset: false,
-        weeks: makeWeeks(),
-      };
-      state.classes.push(c);
-      state.activeClassId = c.id;
-      persist(true);
-      renderAll();
-    });
-
-    document.getElementById("btn-del-other").addEventListener("click", function () {
-      var cls = activeClass();
-      if (!cls || cls.preset) return;
-      if (!confirm("刪除「" + cls.name + "」？")) return;
-      state.classes = state.classes.filter(function (c) { return c.id !== cls.id; });
-      state.activeClassId = state.classes[0].id;
-      persist(true);
-      renderAll();
-    });
+    document.getElementById("btn-reload-sheet").addEventListener("click", loadSheet);
 
     document.getElementById("btn-export").addEventListener("click", function () {
-      persist(true);
+      if (!sheetMode) persistLocal(true);
       var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "innotech-progress-v3-backup.json";
+      a.download = "innotech-progress-matrix-backup.json";
       a.click();
       URL.revokeObjectURL(a.href);
     });
 
     document.getElementById("import-file").addEventListener("change", function (e) {
+      if (sheetMode) return;
       var file = e.target.files && e.target.files[0];
       e.target.value = "";
       if (!file) return;
@@ -453,17 +385,18 @@
       reader.onload = function () {
         try {
           var data = JSON.parse(String(reader.result || ""));
-          if (!data || !Array.isArray(data.classes)) throw new Error("格式不正確");
-          if (!confirm("匯入會覆蓋本機進度內容（班別結構會與預設合併），確定？")) return;
-          state = mergePresets({
-            version: 3,
-            classes: data.classes,
-            activeClassId: data.activeClassId || null,
-            updatedAt: data.updatedAt || new Date().toISOString(),
+          if (!data || !data.cells) throw new Error("格式不正確");
+          if (!confirm("匯入會覆蓋本機進度矩陣，確定？")) return;
+          var base = blankGrid();
+          CLASSES.forEach(function (c) {
+            if (!data.cells[c.id]) return;
+            for (var w = 1; w <= WEEK_COUNT; w++) {
+              if (data.cells[c.id][w] != null) base.cells[c.id][w] = String(data.cells[c.id][w]);
+            }
           });
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          renderAll();
-          setStamp(true);
+          state = base;
+          persistLocal(true);
+          renderMatrix();
         } catch (err) {
           alert("匯入失敗：" + (err.message || "未知錯誤"));
         }
@@ -471,7 +404,7 @@
       reader.readAsText(file);
     });
 
-    renderAll();
+    loadSheet();
   }
 
   StaffAuth.requireAuth({ onUnlock: initUi });
