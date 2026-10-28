@@ -38,13 +38,13 @@
      * Deploy steps: ../apps-script/README.md
      * Shared with progress-config.js (同一 Web App 寫龍虎榜＋進度).
      */
-    APPS_SCRIPT_URL: "",
+    APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby8qrwfMvggGF5rZM9bem_Pvskr1JYGk17ea7eeE1wj_zQtQDqL5_JRo3tJ4C2av-jb/exec",
 
     /**
      * Shared write token — must match Apps Script property WRITE_TOKEN.
      * Leave "" / do not commit real secrets. Placeholder until you deploy: REPLACE_ME
      */
-    WRITE_TOKEN: "",
+    WRITE_TOKEN: "1b8cfcf5dc36e8df196448966c640b3d",
 
     /** Fixed class tabs — 龍虎榜 deliberately excludes 1C */
     CLASSES: [
