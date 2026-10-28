@@ -994,13 +994,13 @@ a.gantry:focus-visible {
   background: var(--split-grad);
 }
 
-/* Light Rail Phase IV side cutout (944×172) — display ~14px tall; ND: no recolor */
+/* Light Rail Phase IV side cutout (944×172) — ~14px tall; original PNG untouched (ND) */
 .train-bar {
   position: absolute;
   left: 0;
   bottom: 0.85rem;
   display: block;
-  height: 0.875rem; /* 14px */
+  height: 0.875rem; /* 14px — matches display reference */
   width: auto;
   aspect-ratio: 944 / 172;
   max-width: 7.5rem;
@@ -1008,7 +1008,8 @@ a.gantry:focus-visible {
   object-position: left center;
   background: transparent;
   border: 0;
-  box-shadow: none;
+  /* presentation edge only — does not modify/redistribute the asset */
+  filter: drop-shadow(0 0.5px 0.6px rgba(0, 0, 0, 0.45));
   transform: translateX(-110%);
   will-change: transform;
   pointer-events: none;
