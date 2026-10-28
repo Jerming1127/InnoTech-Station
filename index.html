@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=0.25" />
+  <link rel="stylesheet" href="styles.css?v=0.26" />
 </head>
 <body>
   <nav class="top-nav" aria-label="主導航" id="top-nav">
@@ -103,8 +103,17 @@
             </span>
           </a>
         </nav>
-        <!-- placeholder train: solid bar; swap for MTR graphic later -->
-        <div class="train-bar" id="train-bar" aria-hidden="true"></div>
+        <!-- MTR mini train (路牌美術師) · scroll travels right -->
+        <img
+          class="train-bar"
+          id="train-bar"
+          src="mtr-train-side-mini.svg"
+          width="220"
+          height="26"
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+        />
       </div>
     </section>
 
@@ -199,11 +208,11 @@
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.25 · deeper L/R wash
+      GitHub Pages · 靜態站 · 草稿 v0.26 · MTR train graphic
     </footer>
   </div>
-  <script src="scroll-pin.js?v=0.25" defer></script>
+  <script src="scroll-pin.js?v=0.26" defer></script>
   <script src="nav-fade.js" defer></script>
-  <script src="secret-entry.js?v=0.25" defer></script>
+  <script src="secret-entry.js?v=0.26" defer></script>
 </body>
 </html>

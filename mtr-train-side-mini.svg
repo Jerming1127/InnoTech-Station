@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 26" width="220" height="26" role="img" aria-label="MTR-style mini train, side view facing right">
+  <!-- Flat MTR Urban-line style · transparent bg · nose right · short 2-car -->
+  <!-- Colours: body #C5C9CE · band #003366 · door #C8102E · win #9BB8CC -->
+
+  <!-- rail hint (optional thin line; keep very subtle) -->
+  <line x1="2" y1="24.5" x2="216" y2="24.5" stroke="#B0B4B8" stroke-width="0.6"/>
+
+  <!-- ===== Trailing car ===== -->
+  <g id="car-trail">
+    <rect x="2" y="5" width="84" height="15.5" rx="1.1" fill="#C5C9CE"/>
+    <rect x="2" y="19.2" width="84" height="1.6" fill="#8A8E94"/>
+    <rect x="2" y="5" width="84" height="6.2" fill="#003366"/>
+    <!-- windows -->
+    <rect x="6" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <rect x="24" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <rect x="56" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <rect x="72" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <!-- red doors -->
+    <rect x="17" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <rect x="39" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <rect x="49" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <rect x="67" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <!-- bogies -->
+    <circle cx="16" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="25" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="64" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="73" cy="22.8" r="1.9" fill="#2A2A2A"/>
+  </g>
+
+  <!-- coupler -->
+  <rect x="86" y="11" width="5.5" height="2.6" rx="0.4" fill="#2A2A2A"/>
+
+  <!-- ===== Lead car (nose right) ===== -->
+  <g id="car-lead">
+    <!-- body with aero nose -->
+    <path fill="#C5C9CE" d="M91.5 5 H168 Q178 5 183 9.5 L188 14 Q189.5 16 188 18 L183 20.8 H91.5 Z"/>
+    <rect x="91.5" y="19.2" width="91" height="1.6" fill="#8A8E94"/>
+    <!-- navy band + taper into cab -->
+    <path fill="#003366" d="M91.5 5 H168 Q175 5 178 8.2 L180 10.5 H91.5 Z"/>
+    <!-- cab glass -->
+    <path fill="#2C3A4A" d="M168 6 Q174 6 177 8.8 L179 10.8 H165 Z"/>
+    <!-- windows -->
+    <rect x="95" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <rect x="113" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <rect x="145" y="6.1" width="9" height="4" rx="0.35" fill="#9BB8CC"/>
+    <!-- red doors -->
+    <rect x="106" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <rect x="128" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <rect x="138" y="5" width="5.2" height="15.5" fill="#C8102E"/>
+    <!-- bogies -->
+    <circle cx="105" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="114" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="158" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <circle cx="167" cy="22.8" r="1.9" fill="#2A2A2A"/>
+    <!-- simplified MTR mark on nose: pale disc + red emblem (readable when scaled up) -->
+    <circle cx="182.2" cy="14.6" r="3.4" fill="#EEEEEE"/>
+    <!-- stylized red “tree” / interlocking mark (geometric, not official glyph) -->
+    <path fill="#C8102E" d="M182.2 12.2
+      c-0.55 0-1 0.2-1.35 0.55
+      l-1.15 1.15 0.85 0.85 0.75-0.75
+      v3.35 h1.5 v-3.35
+      l0.75 0.75 0.85-0.85
+      -1.15-1.15
+      c-0.35-0.35-0.8-0.55-1.35-0.55z"/>
+  </g>
+</svg>
