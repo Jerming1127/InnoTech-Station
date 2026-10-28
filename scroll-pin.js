@@ -16,8 +16,7 @@
     var scrolled = Math.min(Math.max(-rect.top, 0), total);
     var p = scrolled / total;
     var scale = 1 - p * 0.08;
-    /* keep optical lift while scaling */
-    board.style.transform = 'translateY(-6vh) scale(' + scale.toFixed(4) + ')';
+    board.style.transform = 'scale(' + scale.toFixed(4) + ')';
     board.style.opacity = String((1 - p * 0.12).toFixed(3));
   }
 

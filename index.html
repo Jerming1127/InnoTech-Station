@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=0.21" />
+  <link rel="stylesheet" href="styles.css?v=0.22" />
 </head>
 <body>
   <nav class="top-nav" aria-label="主導航" id="top-nav">
@@ -40,19 +40,13 @@
     </div>
   </nav>
   <div class="page">
-    <section class="pin-scene" id="pin-scene" aria-label="站名牌">
+    <section class="pin-scene" id="pin-scene" aria-label="站名同主目錄">
       <div class="pin-sticky">
         <header class="station-board" id="pin-board">
           <h1 class="station-board__zh" id="station-zh-secret" data-secret-entry="1">創科站</h1>
           <p class="station-board__en">InnoTech</p>
         </header>
-      </div>
-    </section>
-
-    <main>
-      <section class="junction" aria-label="主目錄">
-        <!-- v0.7 Flag Left PNG + CSS overlay（TPDM 金樣 v7） -->
-        <nav class="nav-grid" aria-label="暫定分頁">
+        <nav class="nav-grid nav-grid--stack" aria-label="暫定分頁">
           <a class="flag" href="#classroom" title="Classroom · 課堂示範 · 幹綫 1">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
@@ -109,8 +103,12 @@
             </span>
           </a>
         </nav>
+      </div>
+    </section>
 
-        <!-- v0.15 Gantry：Useful Links／有用連結（cache-bust + SVG 尺寸）；橫線+箭嘴鎖下帶（張老師）；唔改 Flag Left -->
+    <main>
+      <section class="junction" aria-label="主目錄">
+        <!-- v0.15 Gantry：Useful Links／有用連結；Flag Left 已移入 sticky header -->
         <nav class="gantry-wrap" aria-label="有用連結">
           <a class="gantry" href="#links" title="Useful Links · 有用連結" aria-label="Useful Links · 有用連結">
             <div class="gantry__top">
@@ -157,7 +155,7 @@
           </a>
         </nav>
 
-        <p class="junction__note">分頁名稱暫定，之後可改 · Tabs are placeholders · Flag 導向牌跟 TPDM 金樣 v7 · 下排一個頁面寬 Gantry 高速掣跟 TPDM 金樣 v8</p>
+        <p class="junction__note">分頁名稱暫定 · Flag 導向牌喺 sticky header（左站名／右四行）· Gantry 高速掣跟 TPDM 金樣 v8</p>
       </section>
 
 
@@ -192,18 +190,18 @@
       <section class="board" id="about">
         <div class="board__plate">
           <h2 class="board__h">本站說明</h2>
-          <p>呢度係創科／DT／電腦科網頁主頁草稿。站名牌跟西九龍式牆牌（置中大字、無框）；目錄用 TPDM Flag 導向牌（透明 Flag Left 底圖 + CSS 叠中英字），右邊係幹綫盾（黃底盾形 + Transport Heavy 數字 1–4）；下排另有一個頁面寬獨立 Gantry 高速掣（綠底 #006928、三線箭嘴、ExpresswayRed、無機場；金樣 v8 · Useful Links／有用連結）。</p>
+          <p>呢度係創科／DT／電腦科網頁主頁草稿。站名同四個 Flag 導向牌喺全闊 sticky header（左大半創科站、右直排四牌、左→右漸變）；Flag 用透明 Flag Left 底圖 + CSS 叠中英字同幹綫盾；下排另有頁面寬 Gantry 高速掣（綠底 #006928、三線箭嘴、ExpresswayRed；金樣 v8 · Useful Links／有用連結）。</p>
         </div>
       </section>
     </main>
 
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
-      GitHub Pages · 靜態站 · 草稿 v0.21 · build c1d1d2a+
+      GitHub Pages · 靜態站 · 草稿 v0.22 · header L/R sticky
     </footer>
   </div>
   <script src="scroll-pin.js" defer></script>
   <script src="nav-fade.js" defer></script>
-  <script src="secret-entry.js?v=0.21" defer></script>
+  <script src="secret-entry.js?v=0.22" defer></script>
 </body>
 </html>

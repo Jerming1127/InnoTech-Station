@@ -1,0 +1,183 @@
+/* Reference: approved L/R sticky header (merged into live styles.css v0.22) */
+
+.demo-banner {
+  margin: 0;
+  padding: 0.45rem 1rem;
+  text-align: center;
+  font-family: var(--zh), var(--en);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #5a3a00;
+  background: #ffe08a;
+  border-bottom: 1px solid #e0b84a;
+}
+
+/* —— Full-bleed sticky band (佔全版) —— */
+.pin-scene {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  height: 145vh;
+}
+
+.pin-sticky {
+  --split-left: #f4f5f7;
+  --split-right: #d8e4ef;
+  width: 100%;
+  box-sizing: border-box;
+  /* keep sticky from live styles; row: 左站名 · 右牌 */
+  flex-direction: row;
+  align-items: center;
+  justify-content: stretch;
+  min-height: clamp(18rem, 42vh, 28rem);
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  padding: 0.85rem clamp(1rem, 2.5vw, 2rem) 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: linear-gradient(
+    90deg,
+    var(--split-left) 0%,
+    var(--split-left) 52%,
+    color-mix(in srgb, var(--split-left) 40%, var(--split-right)) 68%,
+    var(--split-right) 82%,
+    var(--split-right) 100%
+  );
+}
+
+/* Left 大半：創科站（維持大字 · 垂直置中） */
+.pin-sticky .station-board {
+  flex: 2.6 1 0;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0.65rem clamp(0.75rem, 2.5vw, 1.75rem);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+  will-change: transform, opacity;
+}
+
+.pin-sticky .station-board__zh {
+  font-size: clamp(4.6rem, 13vw, 8.6rem);
+  letter-spacing: 0.14em;
+  line-height: 1.02;
+}
+
+.pin-sticky .station-board__en {
+  margin-top: 0.65rem;
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+}
+
+/* Right：四個 Flag 直排 — 保持 461×138 比例，高度平均間距（唔拉長） */
+.pin-sticky .nav-grid--stack {
+  flex: 0 0 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: stretch;
+  gap: 0;
+  width: min(26rem, 36vw);
+  max-width: 26rem;
+  height: 100%;
+  min-height: clamp(18rem, 42vh, 28rem);
+  margin: 0 0 0 auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  padding: 0.15rem 0;
+}
+
+.pin-sticky .nav-grid--stack .flag {
+  width: 100%;
+  max-width: none;
+  height: auto;
+  flex: 0 0 auto;
+  --flag-w: 100%;
+  container-type: inline-size;
+  aspect-ratio: 461 / 138;
+}
+
+.pin-sticky .nav-grid--stack .flag__plate {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 461 / 138;
+  object-fit: contain;
+  display: block;
+}
+
+.pin-sticky .nav-grid--stack .flag:hover,
+.pin-sticky .nav-grid--stack .flag:focus-visible {
+  transform: translateY(-2px);
+}
+
+/* Hide duplicate Flag grid in junction; keep Gantry */
+.junction .nav-grid:not(.nav-grid--stack) {
+  display: none;
+}
+
+.junction {
+  margin-top: 0.5rem;
+}
+
+.page {
+  padding-top: 0;
+  overflow-x: clip;
+}
+
+@supports not (background: color-mix(in srgb, white 50%, black)) {
+  .pin-sticky {
+    background: linear-gradient(90deg, #f4f5f7 0%, #f4f5f7 55%, #e4eaf0 72%, #d8e4ef 100%);
+  }
+}
+
+@media (max-width: 720px) {
+  .pin-scene {
+    height: auto;
+    width: 100%;
+    max-width: none;
+    margin-left: calc(-1 * clamp(1rem, 3vw, 1.5rem));
+    margin-right: calc(-1 * clamp(1rem, 3vw, 1.5rem));
+  }
+
+  .pin-sticky {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.25rem clamp(0.85rem, 3vw, 1.25rem) 1.35rem;
+    background: linear-gradient(
+      180deg,
+      var(--split-left) 0%,
+      var(--split-left) 38%,
+      color-mix(in srgb, var(--split-left) 45%, var(--split-right)) 55%,
+      var(--split-right) 100%
+    );
+  }
+
+  .pin-sticky .station-board {
+    flex: none;
+    width: 100%;
+  }
+
+  .pin-sticky .station-board__zh {
+    font-size: clamp(3.4rem, 14vw, 4.4rem);
+  }
+
+  .pin-sticky .nav-grid--stack {
+    flex: none;
+    width: min(100%, 16rem);
+    max-width: 16rem;
+    margin-inline: auto;
+    gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-scene {
+    height: auto;
+  }
+}

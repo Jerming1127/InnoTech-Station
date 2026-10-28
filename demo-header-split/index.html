@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>創科站 · DT（本機 header 預覽）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles.css?v=0.21" />
+  <link rel="stylesheet" href="demo.css?v=lr72" />
+</head>
+<body>
+  <p class="demo-banner" role="status">本機預覽 · 未上線</p>
+  <nav class="top-nav" aria-label="主導航" id="top-nav">
+    <div class="top-nav__inner">
+      <button
+        type="button"
+        class="top-nav__menu-btn"
+        id="top-nav-menu-btn"
+        aria-expanded="false"
+        aria-controls="top-nav-menu"
+        aria-label="Menu"
+      >
+        <span class="top-nav__burger" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </button>
+      <a class="top-nav__mark" href="#">創科站 · DT</a>
+      <ul class="top-nav__links" id="top-nav-menu">
+        <li><a href="#classroom" data-zh="課堂示範" data-en="Classroom">課堂示範</a></li>
+        <li><a href="#practice" data-zh="互動練習" data-en="Practice">互動練習</a></li>
+        <li><a href="#resources" data-zh="教學資源" data-en="Resources">教學資源</a></li>
+        <li><a href="#gallery" data-zh="學生作品" data-en="Gallery">學生作品</a></li>
+      </ul>
+      <div class="top-nav__spacer" aria-hidden="true"></div>
+      <div class="top-nav__lang" role="group" aria-label="Language">
+        <button type="button" class="top-nav__lang-btn is-active" data-lang="zh" aria-pressed="true">中</button>
+        <button type="button" class="top-nav__lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="top-nav__backdrop" id="top-nav-backdrop" hidden></div>
+    </div>
+  </nav>
+  <div class="page">
+    <!-- DEMO: full-width sticky · 左大半創科站 · 右四 Flag 直排 -->
+    <section class="pin-scene" id="pin-scene" aria-label="站名同主目錄">
+      <div class="pin-sticky">
+        <header class="station-board" id="pin-board">
+          <h1 class="station-board__zh" id="station-zh-secret" data-secret-entry="1">創科站</h1>
+          <p class="station-board__en">InnoTech</p>
+        </header>
+        <nav class="nav-grid nav-grid--stack" aria-label="暫定分頁">
+          <a class="flag" href="#classroom" title="Classroom · 課堂示範 · 幹綫 1">
+            <img class="flag__plate" src="../flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Classroom</span>
+                <span class="zh">課堂示範</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 1" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="flag" href="#practice" title="Practice · 互動練習 · 幹綫 2">
+            <img class="flag__plate" src="../flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Practice</span>
+                <span class="zh">互動練習</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 2" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">2</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="flag" href="#resources" title="Resources · 教學資源 · 幹綫 3">
+            <img class="flag__plate" src="../flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Resources</span>
+                <span class="zh">教學資源</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 3" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">3</span>
+              </span>
+            </span>
+          </a>
+
+          <a class="flag" href="#gallery" title="Gallery · 學生作品 · 幹綫 4">
+            <img class="flag__plate" src="../flag-left-blank-transparent.png" alt="" width="461" height="138" />
+            <span class="flag__overlay">
+              <span class="flag__text">
+                <span class="en">Gallery</span>
+                <span class="zh">學生作品</span>
+              </span>
+              <span class="flag__shield" aria-label="幹綫 4" role="img">
+                <svg class="flag__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="63" height="63" aria-hidden="true" focusable="false"><path fill="#E9B500" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">4</span>
+              </span>
+            </span>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <main>
+      <section class="junction" aria-label="主目錄">
+        <!-- Gantry kept below split header (unchanged) -->
+        <nav class="gantry-wrap" aria-label="有用連結">
+          <a class="gantry" href="#links" title="Useful Links · 有用連結" aria-label="Useful Links · 有用連結">
+            <div class="gantry__top">
+              <div class="gantry__side gantry__side--left"></div>
+              <span class="gantry__text"><span class="en">Useful Links</span><span class="zh">有用連結</span></span>
+              <div class="gantry__side gantry__side--right">
+        <svg class="gantry__express" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="44" height="44" aria-hidden="true" focusable="false">
+          <path fill="#ff0000" d="M 0 0 L 3.75 0 A 0.75 0.75 0 0 1 4.5 0.75 L 4.5 8.25 A 0.75 0.75 0 0 1 3.75 9 L -3.75 9 A 0.75 0.75 0 0 1 -4.5 8.25 L -4.5 0.75 A 0.75 0.75 0 0 1 -3.75 0 Z"/>
+          <path fill="#ffffff" d="M 0 0.25 L -3.75 0.25 A 0.5 0.5 0 0 0 -4.25 0.75 L -4.25 8.25 A 0.5 0.5 0 0 0 -3.75 8.75 L 3.75 8.75 A 0.5 0.5 0 0 0 4.25 8.25 L 4.25 0.75 A 0.5 0.5 0 0 0 3.75 0.25 Z"/>
+          <path fill="#ff0000" d="M 0.25 1.25 L 0.75 1.25 L 0.972 2.75 L 0.25 2.75 Z"/>
+          <path fill="#ff0000" d="M -0.25 1.25 L -0.25 2.75 L -0.972 2.75 L -0.75 1.25 Z"/>
+          <path fill="#ff0000" d="M 0 3.25 L 3.5 3.25 L 3.5 3.75 L 3 3.75 A 0.25 0.25 0 0 0 2.75 4 L 2.75 4.75 L 2.25 4.75 L 2.05 3.94 A 0.25 0.25 0 0 0 1.8 3.75 L -1.8 3.75 A 0.25 0.25 0 0 0 -2.05 3.94 L -2.25 4.75 L -2.75 4.75 L -2.75 4 A 0.25 0.25 0 0 0 -3 3.75 L -3.5 3.75 L -3.5 3.25 Z"/>
+          <path fill="#ff0000" d="M 0.25 4.25 L 1.194 4.25 L 1.5 8 L 0.25 8 Z"/>
+          <path fill="#ff0000" d="M -0.25 4.25 L -0.25 8 L -1.5 8 L -1.194 4.25 Z"/>
+        </svg>
+              </div>
+            </div>
+            <div class="gantry__bottom">
+              <hr class="gantry__divider" />
+              <div class="gantry__lanes">
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+            <span class="gantry__lane">
+              <svg class="gantry__arrow" xmlns="http://www.w3.org/2000/svg" viewBox="-9 0 18 8" width="88" height="39" aria-hidden="true" focusable="false"><path fill="#ffffff" d="M0 0 L3 0 L3 4 L9 4 L0 8 L-9 4 L-3 4 L-3 0 Z"/></svg>
+              <span class="gantry__shield" aria-label="幹綫 1" role="img">
+                <svg class="gantry__shield-shape" xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 9 9" width="32" height="32" aria-hidden="true" focusable="false"><path fill="#E9B500" stroke="none" d="M-4.5 0 H4.5 V3 A6 6 0 0 1 0 9 A6 6 0 0 1 -4.5 3 Z"/></svg>
+                <span class="num">1</span>
+              </span>
+            </span>
+              </div>
+            </div>
+          </a>
+        </nav>
+
+        <p class="junction__note">本機 demo：全闊 sticky · 左大半創科站 · 右四 Flag 直排 · 未上線</p>
+      </section>
+
+
+      <section class="board" id="resources" aria-label="教學資源">
+        <div class="board__plate">
+          <h2 class="board__h">教學資源</h2>
+          <p>Resources · 韌體／專案下載。</p>
+          <ul class="resource-list">
+            <li class="resource-card">
+              <a class="resource-card__link" href="../projects/hk-bus-eta-cyd/">
+                <span class="resource-card__title">巴士報站 · HK Bus ETA CYD</span>
+                <span class="ver-badge">v1.4.7</span>
+              </a>
+              <p class="resource-card__desc">座枱 CYD 顯示九巴／城巴實時到站；手機 Wi‑Fi 設定；天文台溫度；LVF4 繁中 UI。</p>
+              <p class="resource-card__acts">
+                <a href="../projects/hk-bus-eta-cyd/">專案頁</a>
+                · <a href="../projects/hk-bus-eta-cyd/flash/">一鍵燒錄</a>
+                · <a href="../projects/hk-bus-eta-cyd/downloads/hk-bus-eta-cyd-v1.4.7-firmware.zip">下載 zip</a>
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="board" id="links" aria-label="有用連結">
+        <div class="board__plate">
+          <h2 class="board__h">有用連結</h2>
+          <p>Useful Links · 有用連結（內容稍後補上）。</p>
+        </div>
+      </section>
+
+      <section class="board" id="about">
+        <div class="board__plate">
+          <h2 class="board__h">本站說明</h2>
+          <p>呢度係創科／DT／電腦科網頁主頁草稿。站名牌跟西九龍式牆牌（置中大字、無框）；目錄用 TPDM Flag 導向牌（透明 Flag Left 底圖 + CSS 叠中英字），右邊係幹綫盾（黃底盾形 + Transport Heavy 數字 1–4）；下排另有一個頁面寬獨立 Gantry 高速掣（綠底 #006928、三線箭嘴、ExpresswayRed、無機場；金樣 v8 · Useful Links／有用連結）。</p>
+        </div>
+      </section>
+
+      <section class="board" id="classroom" hidden aria-hidden="true"></section>
+      <section class="board" id="practice" hidden aria-hidden="true"></section>
+      <section class="board" id="gallery" hidden aria-hidden="true"></section>
+    </main>
+
+    <footer class="foot">
+      <span class="foot__dot" aria-hidden="true"></span>
+      本機 demo-header-split · 未上線 · 基於草稿 v0.21
+    </footer>
+  </div>
+  <script src="demo-scroll-pin.js" defer></script>
+  <script src="../nav-fade.js" defer></script>
+  <script src="../secret-entry.js?v=0.21" defer></script>
+</body>
+</html>
