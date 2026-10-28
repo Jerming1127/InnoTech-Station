@@ -616,7 +616,7 @@ body {
   max-width: 60rem;
   margin: 2.75rem auto 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.55rem;
   font-family: var(--en);
   font-size: 0.9rem;
@@ -627,9 +627,39 @@ body {
 .foot__dot {
   width: 0.45rem;
   height: 0.45rem;
+  margin-top: 0.45rem;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: #3a3a3a;
   box-shadow: none;
+}
+
+.foot__meta {
+  min-width: 0;
+}
+
+.foot__line {
+  margin: 0;
+}
+
+.foot__credit {
+  margin: 0.35rem 0 0;
+  font-family: var(--zh), var(--en);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+  color: var(--mute);
+}
+
+.foot__credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.foot__credit a:hover,
+.foot__credit a:focus-visible {
+  color: var(--ink);
 }
 
 @media (max-width: 720px) {
@@ -934,7 +964,7 @@ a.gantry:focus-visible {
   }
 }
 
-/* —— v0.26 header: shared page wash · flush under nav · MTR train graphic —— */
+/* —— v0.27 header: shared page wash · flush under nav · LRT Phase IV graphic —— */
 .pin-scene {
   position: relative;
   width: 100vw;
@@ -964,16 +994,16 @@ a.gantry:focus-visible {
   background: var(--split-grad);
 }
 
-/* MTR mini train graphic (viewBox 220×26) — scroll travels right */
+/* Light Rail Phase IV side cutout (944×172) — display ~14px tall; ND: no recolor */
 .train-bar {
   position: absolute;
   left: 0;
   bottom: 0.85rem;
   display: block;
-  width: 7.25rem; /* ~116px — readable, not dominant */
-  height: auto;
-  aspect-ratio: 220 / 26;
-  max-height: 0.9rem; /* ~14px */
+  height: 0.875rem; /* 14px */
+  width: auto;
+  aspect-ratio: 944 / 172;
+  max-width: 7.5rem;
   object-fit: contain;
   object-position: left center;
   background: transparent;

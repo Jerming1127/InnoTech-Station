@@ -20,7 +20,7 @@
     board.style.transform = 'scale(' + scale.toFixed(4) + ')';
     board.style.opacity = String((1 - p * 0.12).toFixed(3));
 
-    /* MTR train graphic: emerge from under header, travel right */
+    /* LRT side cutout: emerge from under header, travel right */
     if (train) {
       var sticky = scene.querySelector('.pin-sticky');
       var track = sticky ? sticky.clientWidth : window.innerWidth;
