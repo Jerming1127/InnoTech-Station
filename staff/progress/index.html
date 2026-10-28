@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>課堂進度 · 職員區</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../staff.css" />
+</head>
+<body>
+  <div id="staff-gate"></div>
+
+  <div id="staff-app" hidden>
+    <div class="wrap">
+      <header class="topbar">
+        <a class="topbar__brand" href="../">← 職員區</a>
+        <div class="topbar__spacer"></div>
+        <div class="topbar__actions">
+          <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
+          <label class="btn btn-sm" style="cursor:pointer;margin:0">
+            匯入 JSON
+            <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
+          </label>
+          <button type="button" class="btn btn-sm" id="btn-logout">登出</button>
+        </div>
+      </header>
+
+      <h1>課堂進度</h1>
+      <p class="muted">可編輯內容區，方便之後更新。唔存放學生個人資料。資料只存本機。</p>
+
+      <section class="card">
+        <label class="field">
+          <span>標題</span>
+          <input type="text" id="prog-title" placeholder="例如：本週課堂進度" autocomplete="off" />
+        </label>
+        <p class="muted" id="prog-updated" style="margin-top:-0.35rem">尚未儲存</p>
+        <label class="field">
+          <span>內容（每行一項；空行分段）</span>
+          <textarea id="prog-body" placeholder="例如：&#10;單元 1：變數同輸入&#10;單元 2：條件判斷&#10;&#10;下週：專題計劃書"></textarea>
+        </label>
+        <div class="row">
+          <button type="button" class="btn btn-primary" id="btn-save">儲存</button>
+          <button type="button" class="btn" id="btn-clear">清空內容</button>
+        </div>
+        <p class="ok" id="save-msg" hidden>已儲存。</p>
+      </section>
+
+      <section class="card">
+        <h2>預覽</h2>
+        <p class="section-label" id="preview-title-label"></p>
+        <div class="preview" id="prog-preview"></div>
+      </section>
+
+      <p class="footnote">靜態 GitHub Pages 嘅前端密碼唔係銀行級保安；靠私人連結＋密碼＋資料留喺本機瀏覽器。匯出檔請自行妥善保管。</p>
+    </div>
+  </div>
+
+  <script src="../auth.js"></script>
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "innotech-staff-progress";
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { title: "", body: "", updatedAt: null };
+      var data = JSON.parse(raw);
+      return {
+        title: data.title || "",
+        body: data.body || "",
+        updatedAt: data.updatedAt || null,
+      };
+    } catch (e) {
+      return { title: "", body: "", updatedAt: null };
+    }
+  }
+
+  function save(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function formatStamp(iso) {
+    if (!iso) return "尚未儲存";
+    try {
+      var d = new Date(iso);
+      return (
+        "上次更新：" +
+        d.toLocaleString("zh-HK", {
+          timeZone: "Asia/Hong_Kong",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) +
+        "（香港時間）"
+      );
+    } catch (e) {
+      return "上次更新：" + iso;
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderPreview() {
+    var title = document.getElementById("prog-title").value.trim();
+    var body = document.getElementById("prog-body").value;
+    var label = document.getElementById("preview-title-label");
+    var preview = document.getElementById("prog-preview");
+    label.textContent = title || "（無標題）";
+    if (!body.trim()) {
+      preview.textContent = "（空白）";
+      return;
+    }
+    // Simple line preview: keep newlines; light markdown-ish bullets
+    var lines = body.split(/\r?\n/);
+    var html = lines
+      .map(function (line) {
+        var t = line.trim();
+        if (!t) return "<br />";
+        if (/^[-*•]\s+/.test(t)) {
+          return "• " + escapeHtml(t.replace(/^[-*•]\s+/, ""));
+        }
+        if (/^\d+[\.\)]\s+/.test(t)) {
+          return escapeHtml(t);
+        }
+        return escapeHtml(line);
+      })
+      .join("<br />");
+    preview.innerHTML = html;
+  }
+
+  function applyToForm(data) {
+    document.getElementById("prog-title").value = data.title || "";
+    document.getElementById("prog-body").value = data.body || "";
+    document.getElementById("prog-updated").textContent = formatStamp(data.updatedAt);
+    renderPreview();
+  }
+
+  function initUi() {
+    var data = load();
+    applyToForm(data);
+
+    document.getElementById("btn-logout").addEventListener("click", function () {
+      StaffAuth.logout();
+      location.reload();
+    });
+
+    document.getElementById("prog-title").addEventListener("input", renderPreview);
+    document.getElementById("prog-body").addEventListener("input", renderPreview);
+
+    document.getElementById("btn-save").addEventListener("click", function () {
+      var next = {
+        title: document.getElementById("prog-title").value.trim(),
+        body: document.getElementById("prog-body").value,
+        updatedAt: new Date().toISOString(),
+      };
+      save(next);
+      document.getElementById("prog-updated").textContent = formatStamp(next.updatedAt);
+      var msg = document.getElementById("save-msg");
+      msg.hidden = false;
+      setTimeout(function () { msg.hidden = true; }, 2000);
+    });
+
+    document.getElementById("btn-clear").addEventListener("click", function () {
+      if (!confirm("清空標題同內容？（需再按儲存先寫入本機）")) return;
+      document.getElementById("prog-title").value = "";
+      document.getElementById("prog-body").value = "";
+      renderPreview();
+    });
+
+    document.getElementById("btn-export").addEventListener("click", function () {
+      var payload = {
+        title: document.getElementById("prog-title").value.trim(),
+        body: document.getElementById("prog-body").value,
+        updatedAt: (load().updatedAt) || null,
+      };
+      // Prefer last saved if form matches; else export current form + note unsaved
+      var saved = load();
+      if (
+        saved.title === payload.title &&
+        saved.body === payload.body
+      ) {
+        payload.updatedAt = saved.updatedAt;
+      } else {
+        payload.updatedAt = new Date().toISOString();
+        payload._note = "exported-from-editor";
+      }
+      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "innotech-progress-backup.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById("import-file").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(String(reader.result || ""));
+          if (!data || typeof data !== "object") throw new Error("格式不正確");
+          if (!confirm("匯入會覆蓋本機現有進度內容，確定？")) return;
+          var next = {
+            title: data.title || "",
+            body: data.body || "",
+            updatedAt: data.updatedAt || new Date().toISOString(),
+          };
+          save(next);
+          applyToForm(next);
+        } catch (err) {
+          alert("匯入失敗：" + (err.message || "未知錯誤"));
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  StaffAuth.requireAuth({ onUnlock: initUi });
+})();
+  </script>
+</body>
+</html>
