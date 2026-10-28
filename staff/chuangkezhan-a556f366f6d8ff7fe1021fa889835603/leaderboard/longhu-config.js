@@ -20,6 +20,8 @@
  *    （Sheet ID 喺瀏覽器網址 /d/<SHEET_ID>/；gid 喺分頁 #gid=）
  * 5. Reload 龍虎榜. Page tries: fetch export → fetch gviz CSV → gviz JSONP.
  *    Empty SHEET_CSV_URL → localStorage editable Rank + file CSV／JSON import.
+ * 6. WRITE (optional): deploy ../apps-script/Code.gs → set APPS_SCRIPT_URL + WRITE_TOKEN.
+ *    Empty APPS_SCRIPT_URL → Sheet 仍可讀，畫面顯示「未接寫入」。
  */
 (function (global) {
   "use strict";
@@ -30,6 +32,19 @@
 
     /** Optional last-resort publish CSV if share-link not set yet (can clear once Share works) */
     SHEET_CSV_FALLBACK: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTTb9Ftd7xz_veWy0RIhIvURKeeoEQQ7HwNpHZmrk6hsJfUry5bWW5TjkVJEW4CPVl34oS9VcdcAIRQ/pub?gid=255525742&single=true&output=csv",
+
+    /**
+     * Apps Script Web App URL (…/exec) — leave "" until deployed.
+     * Deploy steps: ../apps-script/README.md
+     * Shared with progress-config.js (同一 Web App 寫龍虎榜＋進度).
+     */
+    APPS_SCRIPT_URL: "",
+
+    /**
+     * Shared write token — must match Apps Script property WRITE_TOKEN.
+     * Leave "" / do not commit real secrets. Placeholder until you deploy: REPLACE_ME
+     */
+    WRITE_TOKEN: "",
 
     /** Fixed class tabs — 龍虎榜 deliberately excludes 1C */
     CLASSES: [

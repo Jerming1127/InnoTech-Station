@@ -38,7 +38,7 @@
         <div>
           <p class="longhu-kicker">創科站 · Classroom Rank</p>
           <h1>龍虎榜</h1>
-          <p class="muted" style="margin:0.25rem 0 0">班別只有 1A／1B／2A／2B／3B（無 1C）。優先學校 Google Sheet CSV（唯讀）；未設網址則本機編輯／加分。</p>
+          <p class="muted" style="margin:0.25rem 0 0">班別只有 1A／1B／2A／2B／3B（無 1C）。讀取用 Sheet share-link CSV；寫入經 Apps Script（見 longhu-config.js）。未設 Sheet 則本機編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
@@ -89,7 +89,7 @@
         <p class="empty" id="log-empty">暫無紀錄。</p>
       </section>
 
-      <p class="footnote">Sheet 模式：改分請喺學校 Google Sheet 改完撳「重新載入 Sheet」。未設網址時資料存本機 localStorage。靜態站前端保安有限；須 Google 登入。</p>
+      <p class="footnote">Sheet 讀取：share-link CSV。寫入：部署 Apps Script 後填 APPS_SCRIPT_URL（見 ../apps-script/README.md）。未接寫入時請直接改 Sheet。須 Google 登入。</p>
     </div>
   </div>
 
@@ -112,7 +112,7 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="longhu-config.js?v=SHARE1"></script>
+  <script src="longhu-config.js?v=WRITE1"></script>
   <script>
 (function () {
   "use strict";
@@ -125,8 +125,49 @@
   var CATALOGS = cfg.CATALOGS || [];
   var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
   var sheetFallback = String(cfg.SHEET_CSV_FALLBACK || "").trim();
+  var appsScriptUrl = String(cfg.APPS_SCRIPT_URL || "").trim();
+  var writeToken = String(cfg.WRITE_TOKEN || "").trim();
   var sheetMode = false;
   var sheetDataOk = false;
+  var awardBusy = false;
+
+  function canWriteSheet() {
+    return !!(appsScriptUrl && writeToken && writeToken !== "REPLACE_ME");
+  }
+
+  function activeClassShort() {
+    for (var i = 0; i < CLASSES.length; i++) {
+      if (CLASSES[i].id === state.activeClassId) return CLASSES[i].short;
+    }
+    return "";
+  }
+
+  function postAppsScript(payload) {
+    if (!canWriteSheet()) {
+      return Promise.reject(new Error("未接寫入（未設 APPS_SCRIPT_URL／WRITE_TOKEN）"));
+    }
+    var body = Object.assign({ token: writeToken, board: "longhu" }, payload || {});
+    return fetch(appsScriptUrl, {
+      method: "POST",
+      mode: "cors",
+      redirect: "follow",
+      credentials: "omit",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var data = null;
+        try { data = JSON.parse(t); } catch (e) {}
+        if (!res.ok) {
+          throw new Error((data && data.error) || ("HTTP " + res.status));
+        }
+        if (!data || !data.ok) {
+          throw new Error((data && data.error) || "寫入失敗");
+        }
+        return data;
+      });
+    });
+  }
 
   var awardTarget = null;
   var activeCatalogId = CATALOGS[0] ? CATALOGS[0].id : null;
@@ -234,11 +275,13 @@
     var el = document.getElementById("mode-stamp");
     if (!el) return;
     if (sheetMode) {
-      el.textContent = "來源：Google Sheet（唯讀）";
+      el.textContent = canWriteSheet()
+        ? "來源：Google Sheet（可加分寫入）"
+        : "來源：Google Sheet（唯讀）";
       return;
     }
     if (sheetUrl) {
-      el.textContent = "Sheet 模式（唯讀）";
+      el.textContent = canWriteSheet() ? "Sheet 模式（可寫入）" : "Sheet 模式（唯讀）";
       return;
     }
     el.textContent = "本機模式 · 可加分／編輯名單";
@@ -259,7 +302,11 @@
     if (jw) jw.hidden = locked;
     if (cw) cw.hidden = locked;
     if (addRow) addRow.hidden = locked;
-    if (label) label.textContent = locked ? "名單（Sheet 唯讀）" : "名單（自行輸入）";
+    if (label) {
+      if (!locked) label.textContent = "名單（自行輸入）";
+      else if (canWriteSheet()) label.textContent = "名單（Sheet · 可加分）";
+      else label.textContent = "名單（Sheet 唯讀）";
+    }
     if (hint) {
       hint.hidden = locked;
     }
@@ -322,7 +369,7 @@
   }
 
   function openAward(student) {
-    if (sheetMode) return;
+    if (sheetMode && !canWriteSheet()) return;
     awardTarget = student;
     selectedReasonId = null;
     selectedPts = 1;
@@ -401,7 +448,7 @@
 
   function confirmAward() {
     var err = document.getElementById("award-err");
-    if (!awardTarget) return;
+    if (!awardTarget || awardBusy) return;
     var cat = currentCatalog();
     var reason = null;
     if (cat) {
@@ -414,6 +461,42 @@
       err.textContent = "請先揀一個原因";
       return;
     }
+
+    if (sheetMode) {
+      if (!canWriteSheet()) {
+        err.hidden = false;
+        err.textContent = "未接寫入：請部署 Apps Script 並填 APPS_SCRIPT_URL";
+        return;
+      }
+      awardBusy = true;
+      err.hidden = true;
+      var btn = document.getElementById("award-confirm");
+      if (btn) btn.disabled = true;
+      var target = awardTarget;
+      postAppsScript({
+        action: "award",
+        studentNo: target.studentNo || "",
+        name: target.name || "",
+        class: activeClassShort(),
+        points: selectedPts,
+        reason: reason.label || "",
+      })
+        .then(function () {
+          closeAward();
+          showNote("已寫入 Sheet（+" + selectedPts + "）。重新載入中…");
+          loadSheet();
+        })
+        .catch(function (e) {
+          err.hidden = false;
+          err.textContent = "寫入失敗：" + (e && e.message ? e.message : "未知錯誤");
+        })
+        .then(function () {
+          awardBusy = false;
+          if (btn) btn.disabled = false;
+        });
+      return;
+    }
+
     var b = bucket();
     b.awards = b.awards || [];
     b.awards.push({
@@ -518,7 +601,7 @@
     var table = document.getElementById("student-table");
     var actionsTh = document.getElementById("roster-actions-th");
     list.innerHTML = "";
-    if (actionsTh) actionsTh.hidden = !!sheetMode;
+    if (actionsTh) actionsTh.hidden = sheetMode && !canWriteSheet();
     if (!(b.students || []).length) {
       empty.hidden = false;
       if (table) table.hidden = true;
@@ -540,7 +623,7 @@
       tr.appendChild(tdName);
       tr.appendChild(tdPts);
 
-      if (!sheetMode) {
+      if (!sheetMode || canWriteSheet()) {
         var tdAct = document.createElement("td");
         tdAct.style.whiteSpace = "nowrap";
         var addBtn = document.createElement("button");
@@ -550,46 +633,48 @@
         addBtn.addEventListener("click", function () { openAward(s); });
         tdAct.appendChild(addBtn);
 
-        var renameBtn = document.createElement("button");
-        renameBtn.type = "button";
-        renameBtn.className = "btn btn-sm";
-        renameBtn.textContent = "改名";
-        renameBtn.addEventListener("click", function () {
-          var n = prompt("新名字", s.name);
-          if (n == null) return;
-          n = String(n).trim();
-          if (!n) return;
-          s.name = n;
-          save();
-          renderAll();
-        });
-        tdAct.appendChild(renameBtn);
+        if (!sheetMode) {
+          var renameBtn = document.createElement("button");
+          renameBtn.type = "button";
+          renameBtn.className = "btn btn-sm";
+          renameBtn.textContent = "改名";
+          renameBtn.addEventListener("click", function () {
+            var n = prompt("新名字", s.name);
+            if (n == null) return;
+            n = String(n).trim();
+            if (!n) return;
+            s.name = n;
+            save();
+            renderAll();
+          });
+          tdAct.appendChild(renameBtn);
 
-        var noBtn = document.createElement("button");
-        noBtn.type = "button";
-        noBtn.className = "btn btn-sm";
-        noBtn.textContent = "學號";
-        noBtn.addEventListener("click", function () {
-          var n = prompt("學號", s.studentNo || "");
-          if (n == null) return;
-          s.studentNo = String(n).trim();
-          save();
-          renderAll();
-        });
-        tdAct.appendChild(noBtn);
+          var noBtn = document.createElement("button");
+          noBtn.type = "button";
+          noBtn.className = "btn btn-sm";
+          noBtn.textContent = "學號";
+          noBtn.addEventListener("click", function () {
+            var n = prompt("學號", s.studentNo || "");
+            if (n == null) return;
+            s.studentNo = String(n).trim();
+            save();
+            renderAll();
+          });
+          tdAct.appendChild(noBtn);
 
-        var delBtn = document.createElement("button");
-        delBtn.type = "button";
-        delBtn.className = "btn btn-danger btn-sm";
-        delBtn.textContent = "移除";
-        delBtn.addEventListener("click", function () {
-          if (!confirm("移除「" + s.name + "」？相關加分會一併刪除。")) return;
-          b.students = b.students.filter(function (x) { return x.id !== s.id; });
-          b.awards = (b.awards || []).filter(function (a) { return a.studentId !== s.id; });
-          save();
-          renderAll();
-        });
-        tdAct.appendChild(delBtn);
+          var delBtn = document.createElement("button");
+          delBtn.type = "button";
+          delBtn.className = "btn btn-danger btn-sm";
+          delBtn.textContent = "移除";
+          delBtn.addEventListener("click", function () {
+            if (!confirm("移除「" + s.name + "」？相關加分會一併刪除。")) return;
+            b.students = b.students.filter(function (x) { return x.id !== s.id; });
+            b.awards = (b.awards || []).filter(function (a) { return a.studentId !== s.id; });
+            save();
+            renderAll();
+          });
+          tdAct.appendChild(delBtn);
+        }
         tr.appendChild(tdAct);
       }
       list.appendChild(tr);
@@ -784,7 +869,13 @@
     sheetDataOk = true;
     state = next;
     setChromeForMode();
-    showNote(metaNote || "已從 Google Sheet CSV 載入（唯讀）。要改名單／分數請改 Sheet 後撳「重新載入 Sheet」。");
+    var base = metaNote || ("已從 Google Sheet（share-link）載入 · 可重新載入。");
+    if (!canWriteSheet()) {
+      base += " 未接寫入：部署 Apps Script 後填 APPS_SCRIPT_URL／WRITE_TOKEN（見 apps-script/README.md）。";
+    } else {
+      base += " 可喺榜上加分，即時寫入 Sheet。";
+    }
+    showNote(base);
     renderAll();
   }
 
@@ -947,11 +1038,11 @@
         var m = next.__sheetMeta || {};
         enterSheetMode(
           next,
-          "已從 Google Sheet（share-link）載入（唯讀）· " +
+          "已從 Google Sheet（share-link）載入 · " +
             (m.added || 0) +
             " 人" +
             (m.skipped ? "（略過 " + m.skipped + " 行）" : "") +
-            "。要改請改 Sheet 後撳「重新載入 Sheet」。"
+            "。"
         );
       })
       .catch(function (err) {

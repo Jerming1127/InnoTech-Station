@@ -13,6 +13,8 @@
  * 5. Reload progress page. Tries: fetch export → fetch gviz CSV → gviz JSONP.
  *
  * Empty SHEET_CSV_URL → local editable grid (localStorage), with on-screen note.
+ * WRITE (optional): deploy ../apps-script/Code.gs → set APPS_SCRIPT_URL + WRITE_TOKEN.
+ * Empty APPS_SCRIPT_URL → Sheet 仍可讀，畫面顯示「未接寫入」。
  *
  * WEEK9_DEFAULTS: only fill empty week-9 cells (never overwrite user text).
  */
@@ -25,6 +27,19 @@
 
     /** Optional last-resort publish CSV if share-link not set yet (can clear once Share works) */
     SHEET_CSV_FALLBACK: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFHMUA1qKnAvReYlkLGCvwYIHcDwPeUwZBgAukORsEtFOCKhmApf5m4gJzTfJ_cOO_Onmh0Jy_cAMe/pub?gid=915310866&single=true&output=csv",
+
+    /**
+     * Apps Script Web App URL (…/exec) — leave "" until deployed.
+     * Deploy steps: ../apps-script/README.md
+     * Shared with longhu-config.js.
+     */
+    APPS_SCRIPT_URL: "",
+
+    /**
+     * Shared write token — must match Apps Script property WRITE_TOKEN.
+     * Leave "" / do not commit real secrets.
+     */
+    WRITE_TOKEN: "",
 
     WEEK_COUNT: 18,
 

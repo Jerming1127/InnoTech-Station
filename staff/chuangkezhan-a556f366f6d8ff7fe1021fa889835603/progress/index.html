@@ -33,7 +33,7 @@
       <div class="prog-hero">
         <div>
           <h1>上課日子教學進度表</h1>
-          <p class="muted" style="margin:0.25rem 0 0">18 週 × 六班一覽（含 1C；列＝週次、欄＝班別）。優先讀學校 Google Sheet CSV（唯讀）；未設網址則本機可編輯。</p>
+          <p class="muted" style="margin:0.25rem 0 0">18 週 × 六班一覽（含 1C；列＝週次、欄＝班別）。讀取用 Sheet share-link CSV；寫入經 Apps Script。未設 Sheet 則本機可編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
@@ -47,13 +47,13 @@
         </table>
       </div>
 
-      <p class="footnote">請用學校帳戶喺學校 Google Sheet 改；本頁只讀 CSV。未設網址時改動存 localStorage。唔存學生姓名。</p>
+      <p class="footnote">讀取：share-link CSV。寫入：部署 Apps Script 後填 APPS_SCRIPT_URL（見 ../apps-script/README.md）。唔存學生姓名；須 Google 登入。</p>
     </div>
   </div>
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="progress-config.js?v=SHARE1"></script>
+  <script src="progress-config.js?v=WRITE1"></script>
   <script>
 (function () {
   "use strict";
@@ -65,9 +65,61 @@
   var CLASSES = cfg.CLASSES || [];
   var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
   var sheetFallback = String(cfg.SHEET_CSV_FALLBACK || "").trim();
+  var appsScriptUrl = String(cfg.APPS_SCRIPT_URL || "").trim();
+  var writeToken = String(cfg.WRITE_TOKEN || "").trim();
   var sheetMode = false;
   var sheetDataOk = false;
   var saveTimer = null;
+  var cellWriteTimers = {};
+
+  function canWriteSheet() {
+    return !!(appsScriptUrl && writeToken && writeToken !== "REPLACE_ME");
+  }
+
+  function postAppsScript(payload) {
+    if (!canWriteSheet()) {
+      return Promise.reject(new Error("未接寫入（未設 APPS_SCRIPT_URL／WRITE_TOKEN）"));
+    }
+    var body = Object.assign({ token: writeToken, board: "progress" }, payload || {});
+    return fetch(appsScriptUrl, {
+      method: "POST",
+      mode: "cors",
+      redirect: "follow",
+      credentials: "omit",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+    }).then(function (res) {
+      return res.text().then(function (t) {
+        var data = null;
+        try { data = JSON.parse(t); } catch (e) {}
+        if (!res.ok) throw new Error((data && data.error) || ("HTTP " + res.status));
+        if (!data || !data.ok) throw new Error((data && data.error) || "寫入失敗");
+        return data;
+      });
+    });
+  }
+
+  function queueProgressCell(week, classShort, text) {
+    var key = classShort + ":" + week;
+    if (cellWriteTimers[key]) clearTimeout(cellWriteTimers[key]);
+    document.getElementById("mode-stamp").textContent = "寫入 Sheet…";
+    cellWriteTimers[key] = setTimeout(function () {
+      postAppsScript({
+        action: "setCell",
+        week: week,
+        class: classShort,
+        text: text,
+      })
+        .then(function () {
+          setStamp();
+          showNote("已寫入 Sheet：第" + week + "週 · " + classShort, false);
+        })
+        .catch(function (err) {
+          setStamp();
+          showNote("寫入失敗：" + (err && err.message ? err.message : "未知錯誤"), true);
+        });
+    }, 600);
+  }
 
   function blankGrid() {
     var cells = {};
@@ -147,11 +199,13 @@
   function setStamp() {
     var el = document.getElementById("mode-stamp");
     if (sheetMode) {
-      el.textContent = "來源：Google Sheet（唯讀）";
+      el.textContent = canWriteSheet()
+        ? "來源：Google Sheet（可編輯寫入）"
+        : "來源：Google Sheet（唯讀）";
       return;
     }
     if (sheetUrl) {
-      el.textContent = "Sheet 模式（唯讀）";
+      el.textContent = canWriteSheet() ? "Sheet 模式（可寫入）" : "Sheet 模式（唯讀）";
       return;
     }
     if (!state.updatedAt) {
@@ -357,7 +411,7 @@
           (function (cid, short) {
             var td = document.createElement("td");
             var val = (state.cells[cid] && state.cells[cid][wn]) || "";
-            if (sheetMode) {
+            if (sheetMode && !canWriteSheet()) {
               td.className = "matrix-cell" + (val ? " is-filled" : "");
               td.textContent = val;
               td.title = val;
@@ -370,7 +424,11 @@
               ta.addEventListener("input", function () {
                 state.cells[cid][wn] = ta.value;
                 td.classList.toggle("is-filled", !!String(ta.value).trim());
-                persistLocal();
+                if (sheetMode) {
+                  queueProgressCell(wn, short, ta.value);
+                } else {
+                  persistLocal();
+                }
               });
               td.className = "matrix-cell" + (val ? " is-filled" : "");
               td.appendChild(ta);
@@ -423,7 +481,11 @@
     sheetDataOk = true;
     state = grid;
     setChromeForMode();
-    showNote("已從 Google Sheet CSV 載入（唯讀）。要改內容請改 Sheet 後撳「重新載入 Sheet」。");
+    if (canWriteSheet()) {
+      showNote("已從 Google Sheet CSV 載入。改格會自動寫回 Sheet（debounce）。");
+    } else {
+      showNote("已從 Google Sheet CSV 載入（唯讀）。未接寫入：部署 Apps Script 後填 APPS_SCRIPT_URL／WRITE_TOKEN（見 apps-script/README.md）。");
+    }
     setStamp();
     renderMatrix();
   }
