@@ -56,15 +56,31 @@
       <section class="card" id="roster-card">
         <p class="section-label" id="roster-label">名單（自行輸入）</p>
         <div class="row" style="margin-bottom:0.75rem" id="roster-add-row">
+          <label class="field" style="margin:0;min-width:6rem;max-width:8rem">
+            <span class="sr-only">學號</span>
+            <input type="text" id="student-no" placeholder="學號" autocomplete="off" />
+          </label>
           <label class="field" style="margin:0;flex:1;min-width:10rem">
             <span class="sr-only">同學名</span>
             <input type="text" id="student-name" placeholder="輸入同學名後按加入" autocomplete="off" />
           </label>
           <button type="button" class="btn btn-primary" id="btn-add-student">加入</button>
         </div>
-        <ul class="list" id="student-list"></ul>
+        <div style="overflow:auto">
+          <table class="rank-table" id="student-table" aria-label="名單">
+            <thead>
+              <tr>
+                <th scope="col">學號</th>
+                <th scope="col">姓名</th>
+                <th scope="col" class="pts">分數</th>
+                <th scope="col" id="roster-actions-th"></th>
+              </tr>
+            </thead>
+            <tbody id="student-list"></tbody>
+          </table>
+        </div>
         <p class="empty" id="roster-empty">尚未加入同學。</p>
-        <p class="muted" id="roster-hint" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。本機 CSV：UTF-8；欄位 <code>name</code>／<code>姓名</code>，可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）。Sheet 模式見 longhu-config.js（另可選 <code>score</code>／<code>分數</code>）。</p>
+        <p class="muted" id="roster-hint" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。本機 CSV：UTF-8；最左可選 <code>學號</code>／<code>id</code>／<code>studentId</code>，必填 <code>name</code>／<code>姓名</code>，可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）、<code>score</code>／<code>分數</code>。Sheet 模式見 longhu-config.js。</p>
       </section>
 
       <section class="card">
@@ -96,7 +112,7 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="longhu-config.js?v=SHEET1"></script>
+  <script src="longhu-config.js?v=SID1"></script>
   <script>
 (function () {
   "use strict";
@@ -147,7 +163,7 @@
       (oc.students || []).forEach(function (s) {
         var nid = uid();
         idMap[s.id] = nid;
-        bucket.students.push({ id: nid, name: s.name });
+        bucket.students.push({ id: nid, name: s.name, studentNo: s.studentNo || "" });
       });
       (oc.lessons || []).forEach(function (les) {
         (les.awards || []).forEach(function (a) {
@@ -269,7 +285,7 @@
     var b = bucket();
     var totals = totalsMap();
     var rows = (b.students || []).map(function (s) {
-      return { id: s.id, name: s.name, pts: totals[s.id] || 0 };
+      return { id: s.id, name: s.name, studentNo: s.studentNo || "", pts: totals[s.id] || 0 };
     });
     rows.sort(function (a, b) {
       if (b.pts !== a.pts) return b.pts - a.pts;
@@ -310,7 +326,7 @@
     selectedReasonId = null;
     selectedPts = 1;
     activeCatalogId = CATALOGS[0] ? CATALOGS[0].id : null;
-    document.getElementById("award-who").textContent = "同學：" + student.name;
+    document.getElementById("award-who").textContent = "同學：" + (student.studentNo ? student.studentNo + " · " : "") + student.name;
     document.getElementById("award-err").hidden = true;
     document.getElementById("award-dialog").hidden = false;
     renderAwardUi();
@@ -442,6 +458,11 @@
         '<span class="podium-card__rank">Rank ' +
         slot.rank +
         '</span><span class="podium-card__name">' +
+        (slot.row.studentNo
+          ? '<small style="display:block;opacity:.75;font-weight:500">' +
+            escapeHtml(slot.row.studentNo) +
+            "</small>"
+          : "") +
         escapeHtml(slot.row.name) +
         '</span><span class="podium-card__pts">' +
         slot.row.pts +
@@ -468,6 +489,11 @@
         '<span class="rank-item__n">#' +
         rank +
         '</span><span class="rank-item__name">' +
+        (row.studentNo
+          ? '<span style="opacity:.75;font-weight:500;margin-right:.35rem">' +
+            escapeHtml(row.studentNo) +
+            "</span>"
+          : "") +
         escapeHtml(row.name) +
         '</span><span class="rank-item__pts">' +
         row.pts +
@@ -488,27 +514,40 @@
     var b = bucket();
     var list = document.getElementById("student-list");
     var empty = document.getElementById("roster-empty");
+    var table = document.getElementById("student-table");
+    var actionsTh = document.getElementById("roster-actions-th");
     list.innerHTML = "";
+    if (actionsTh) actionsTh.hidden = !!sheetMode;
     if (!(b.students || []).length) {
       empty.hidden = false;
+      if (table) table.hidden = true;
       return;
     }
     empty.hidden = true;
+    if (table) table.hidden = false;
     var totals = totalsMap();
     b.students.forEach(function (s) {
-      var li = document.createElement("li");
-      var name = document.createElement("span");
-      name.className = "list__name";
-      name.textContent = s.name + " · " + (totals[s.id] || 0) + " 分";
-      li.appendChild(name);
+      var tr = document.createElement("tr");
+      var tdNo = document.createElement("td");
+      tdNo.textContent = s.studentNo || "—";
+      var tdName = document.createElement("td");
+      tdName.textContent = s.name;
+      var tdPts = document.createElement("td");
+      tdPts.className = "pts";
+      tdPts.textContent = String(totals[s.id] || 0);
+      tr.appendChild(tdNo);
+      tr.appendChild(tdName);
+      tr.appendChild(tdPts);
 
       if (!sheetMode) {
+        var tdAct = document.createElement("td");
+        tdAct.style.whiteSpace = "nowrap";
         var addBtn = document.createElement("button");
         addBtn.type = "button";
         addBtn.className = "btn btn-good btn-sm";
         addBtn.textContent = "加分";
         addBtn.addEventListener("click", function () { openAward(s); });
-        li.appendChild(addBtn);
+        tdAct.appendChild(addBtn);
 
         var renameBtn = document.createElement("button");
         renameBtn.type = "button";
@@ -523,7 +562,20 @@
           save();
           renderAll();
         });
-        li.appendChild(renameBtn);
+        tdAct.appendChild(renameBtn);
+
+        var noBtn = document.createElement("button");
+        noBtn.type = "button";
+        noBtn.className = "btn btn-sm";
+        noBtn.textContent = "學號";
+        noBtn.addEventListener("click", function () {
+          var n = prompt("學號", s.studentNo || "");
+          if (n == null) return;
+          s.studentNo = String(n).trim();
+          save();
+          renderAll();
+        });
+        tdAct.appendChild(noBtn);
 
         var delBtn = document.createElement("button");
         delBtn.type = "button";
@@ -536,9 +588,10 @@
           save();
           renderAll();
         });
-        li.appendChild(delBtn);
+        tdAct.appendChild(delBtn);
+        tr.appendChild(tdAct);
       }
-      list.appendChild(li);
+      list.appendChild(tr);
     });
   }
 
@@ -554,12 +607,17 @@
     }
     empty.hidden = true;
     var nameMap = {};
-    (b.students || []).forEach(function (s) { nameMap[s.id] = s.name; });
+    var noMap = {};
+    (b.students || []).forEach(function (s) {
+      nameMap[s.id] = s.name;
+      noMap[s.id] = s.studentNo || "";
+    });
     awards.forEach(function (a) {
       var li = document.createElement("li");
       var title = document.createElement("span");
       title.className = "list__name";
       title.textContent =
+        (noMap[a.studentId] ? noMap[a.studentId] + " · " : "") +
         (nameMap[a.studentId] || "？") +
         " +" +
         a.points +
@@ -635,6 +693,7 @@
     var header = splitRow(lines[0]).map(function (h) { return h.toLowerCase(); });
     var nameIdx = headerIndex(header, ["name", "姓名", "學生", "同學"]);
     if (nameIdx < 0) throw new Error("找不到欄位 name／姓名（第一行要有欄位名）");
+    var noIdx = headerIndex(header, ["學號", "学号", "studentid", "student_id", "studentno", "id"]);
     var classIdx = headerIndex(header, ["class", "班別", "classid"]);
     var scoreIdx = headerIndex(header, ["score", "分數", "points", "总分", "總分"]);
     var rows = [];
@@ -642,13 +701,14 @@
       var cols = splitRow(lines[r]);
       var nm = (cols[nameIdx] || "").trim();
       if (!nm) continue;
+      var sno = noIdx >= 0 ? (cols[noIdx] || "").trim() : "";
       var cls = classIdx >= 0 ? (cols[classIdx] || "").trim() : "";
       var score = null;
       if (scoreIdx >= 0 && cols[scoreIdx] != null && String(cols[scoreIdx]).trim() !== "") {
         var n = Number(String(cols[scoreIdx]).replace(/,/g, ""));
         if (!isNaN(n)) score = n;
       }
-      rows.push({ name: nm, classRaw: cls, score: score });
+      rows.push({ name: nm, studentNo: sno, classRaw: cls, score: score });
     }
     if (!rows.length) throw new Error("沒有有效姓名列");
     return rows;
@@ -679,7 +739,7 @@
       var dup = b.students.some(function (s) { return s.name === row.name; });
       if (dup) { skipped++; return; }
       var sid = uid();
-      b.students.push({ id: sid, name: row.name });
+      b.students.push({ id: sid, name: row.name, studentNo: row.studentNo || "" });
       if (row.score != null && row.score > 0) {
         b.awards.push({
           id: uid(),
@@ -777,15 +837,19 @@
     function addStudent() {
       if (sheetMode) return;
       var input = document.getElementById("student-name");
+      var noInput = document.getElementById("student-no");
       var name = String(input.value || "").trim();
+      var sno = noInput ? String(noInput.value || "").trim() : "";
       if (!name) return;
       var b = bucket();
       b.students = b.students || [];
-      b.students.push({ id: uid(), name: name });
+      b.students.push({ id: uid(), name: name, studentNo: sno });
       input.value = "";
+      if (noInput) noInput.value = "";
       save();
       renderAll();
-      input.focus();
+      if (noInput) noInput.focus();
+      else input.focus();
     }
 
     document.getElementById("btn-export").addEventListener("click", function () {
@@ -820,7 +884,7 @@
             b.students = b.students || [];
             var dup = b.students.some(function (s) { return s.name === row.name; });
             if (dup) { skipped++; return; }
-            b.students.push({ id: uid(), name: row.name });
+            b.students.push({ id: uid(), name: row.name, studentNo: row.studentNo || "" });
             added++;
           });
           save();

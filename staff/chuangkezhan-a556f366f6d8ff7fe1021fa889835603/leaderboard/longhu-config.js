@@ -6,12 +6,13 @@
  * 1. Open your school Google Sheet for 龍虎榜 (學校帳戶).
  * 2. Expected layout (UTF-8 CSV, comma-separated):
  *      Row 1 headers (any order; extras ignored):
- *        name 或 姓名   （必填）
- *        class 或 班別  （建議；值只接受 1A／1B／2A／2B／3B — 無 1C）
- *        score 或 分數  （可選；數字＝該同學總分）
+ *        學號 或 id／studentId  （建議最左；可選）
+ *        name 或 姓名           （必填）
+ *        class 或 班別          （建議；值只接受 1A／1B／2A／2B／3B — 無 1C）
+ *        score 或 分數          （可選；數字＝該同學總分）
  *      Example row:
- *        name,class,score
- *        同學甲,1A,12
+ *        學號,name,class,score
+ *        S001,同學甲,1A,12
  * 3. Publish CSV (pick one):
  *    A) File → Share → Publish to web → choose the sheet tab → CSV → Publish
  *       Copy the published CSV link.
