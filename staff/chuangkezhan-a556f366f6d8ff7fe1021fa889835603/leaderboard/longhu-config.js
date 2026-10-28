@@ -26,7 +26,7 @@
 
   global.LonghuConfig = {
     /** Published CSV / export URL — leave "" until ready */
-    SHEET_CSV_URL: "",
+    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTTb9Ftd7xz_veWy0RIhIvURKeeoEQQ7HwNpHZmrk6hsJfUry5bWW5TjkVJEW4CPVl34oS9VcdcAIRQ/pub?gid=498152876&single=true&output=csv",
 
     /** Fixed class tabs — 龍虎榜 deliberately excludes 1C */
     CLASSES: [
