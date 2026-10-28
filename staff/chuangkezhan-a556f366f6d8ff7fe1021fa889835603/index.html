@@ -24,56 +24,18 @@
         </div>
       </header>
 
-      <h1>私人工具</h1>
-      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。須 Google 登入。含今日課堂、一週時間表、上課日子教學進度表。資料只存本機瀏覽器（進度亦可讀 Sheet）。</p>
-
-      <section class="tl-section card" id="today-lessons" aria-labelledby="tl-heading">
-        <div class="tl-section__head">
-          <div>
-            <h2 id="tl-heading">上課日子教學進度表</h2>
-            <p class="muted tl-subtitle">今日／未完成 · <span data-tl-date></span>（Asia/Hong_Kong）</p>
-          </div>
-        </div>
-
-        <div class="tl-list" data-tl-list></div>
-        <p class="muted tl-empty" data-tl-empty hidden>今日未有課堂項目。可用下面表單新增。</p>
-
-        <form class="tl-form" data-tl-form>
-          <p class="section-label">新增一堂</p>
-          <div class="row-fields cols-3">
-            <label class="field">
-              <span>班別</span>
-              <select name="class" required>
-                <option value="1A">1A</option>
-                <option value="1B" selected>1B</option>
-                <option value="1C">1C</option>
-                <option value="2A">2A</option>
-                <option value="2B">2B</option>
-                <option value="3B">3B</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>內容</span>
-              <input name="content" type="text" placeholder="例如：第二堂 DRAR" required autocomplete="off" />
-            </label>
-            <label class="field">
-              <span>課室</span>
-              <input name="room" type="text" placeholder="例如：W102／1B 班房 M104" autocomplete="off" />
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary btn-sm">新增</button>
-        </form>
-      </section>
+      <h1>職員區</h1>
+      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。須 Google 登入。龍虎榜同教學進度表優先讀學校 Google Sheet CSV（唯讀）；未設網址則本機。另有一週時間表。</p>
 
       <div class="card-grid">
         <a class="app-card" href="leaderboard/">
           <p class="app-card__title">龍虎榜</p>
-          <p class="app-card__desc">1A／1B／2A／2B／3B Classroom Rank。可接 Google Sheet CSV（唯讀）；未設定則本機加分／名單。無 1C。</p>
+          <p class="app-card__desc">1A／1B／2A／2B／3B Classroom Rank。優先學校 Google Sheet CSV（唯讀）；未設網址則本機加分／名單。無 1C。</p>
           <p class="app-card__arrow">開啟 →</p>
         </a>
         <a class="app-card" href="progress/">
           <p class="app-card__title">上課日子教學進度表</p>
-          <p class="app-card__desc">六班（含 1C）× 18 週矩陣。可接 Google Sheet CSV；未設定則本機編輯。</p>
+          <p class="app-card__desc">六班（含 1C）× 18 週矩陣。優先學校 Google Sheet CSV（唯讀）；未設網址則本機編輯。</p>
           <p class="app-card__arrow">開啟 →</p>
         </a>
         <a class="app-card" href="timetable/">
@@ -89,13 +51,8 @@
 
   <script src="auth-config.js"></script>
   <script src="auth.js"></script>
-  <script src="today-lessons.js"></script>
   <script>
-    StaffAuth.requireAuth({
-      onUnlock: function () {
-        if (window.TodayLessons) TodayLessons.mount("#today-lessons");
-      },
-    });
+    StaffAuth.requireAuth();
     document.getElementById("btn-logout").addEventListener("click", function () {
       StaffAuth.logout();
       location.reload();

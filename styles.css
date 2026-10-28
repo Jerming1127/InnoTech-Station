@@ -994,16 +994,16 @@ a.gantry:focus-visible {
   background: var(--split-grad);
 }
 
-/* Light Rail Phase IV side cutout (944×172) — ~14px tall; original PNG untouched (ND) */
+/* Light Rail Phase IV side cutout (944×172) — ~24px tall (v0.29); original PNG untouched (ND) */
 .train-bar {
   position: absolute;
   left: 0;
   bottom: 0.85rem;
   display: block;
-  height: 0.875rem; /* 14px — matches display reference */
+  height: 1.5rem; /* 24px — enlarged train bar */
   width: auto;
   aspect-ratio: 944 / 172;
-  max-width: 7.5rem;
+  max-width: 10rem;
   object-fit: contain;
   object-position: left center;
   background: transparent;

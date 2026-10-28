@@ -3,7 +3,7 @@
  * No real student names in this file.
  *
  * HOW TO PLUG A SHEET CSV URL:
- * 1. Open your 龍虎榜 Google Sheet (school account).
+ * 1. Open your school Google Sheet for 龍虎榜 (學校帳戶).
  * 2. Expected layout (UTF-8 CSV, comma-separated):
  *      Row 1 headers (any order; extras ignored):
  *        name 或 姓名   （必填）
