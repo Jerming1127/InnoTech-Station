@@ -81,7 +81,8 @@ body {
 
 .page {
   min-height: calc(100vh - 72px);
-  padding: clamp(1.5rem, 4vw, 3rem);
+  /* no top pad — sticky header sits flush under top-nav */
+  padding: 0 clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
   background: var(--ground-2);
   overflow-x: clip;
 }
@@ -424,6 +425,10 @@ body {
   letter-spacing: 0.02em;
   line-height: 1.25;
   color: #0a1a3a;
+}
+
+.page > main {
+  padding-top: 0.25rem;
 }
 
 .junction {
@@ -918,8 +923,18 @@ a.gantry:focus-visible {
   }
 }
 
-/* —— v0.22 header: full-bleed sticky · 左大半創科站 · 右四 Flag 直排 —— */
+/* —— v0.23 header: full-bleed sticky · flush under nav · soft L→R ground blend —— */
 .pin-scene {
+  --split-left: var(--ground-2); /* #e8e9eb — matches body/page */
+  --split-right: #dce4ec; /* soft cool tint, close to ground-2 */
+  --split-grad: linear-gradient(
+    90deg,
+    var(--split-left) 0%,
+    var(--split-left) 42%,
+    color-mix(in srgb, var(--split-left) 70%, var(--split-right)) 62%,
+    color-mix(in srgb, var(--split-left) 25%, var(--split-right)) 82%,
+    var(--split-right) 100%
+  );
   position: relative;
   width: 100vw;
   max-width: 100vw;
@@ -927,11 +942,11 @@ a.gantry:focus-visible {
   margin-right: calc(50% - 50vw);
   box-sizing: border-box;
   height: 145vh;
+  /* same wash as sticky so pin scroll area / edges stay continuous */
+  background: var(--split-grad);
 }
 
 .pin-sticky {
-  --split-left: #f4f5f7;
-  --split-right: #d8e4ef;
   position: sticky;
   top: 72px;
   height: calc(100vh - 72px);
@@ -946,14 +961,7 @@ a.gantry:focus-visible {
   padding: 0.85rem clamp(1rem, 2.5vw, 2rem) 1rem;
   overflow-x: hidden;
   overflow-y: auto;
-  background: linear-gradient(
-    90deg,
-    var(--split-left) 0%,
-    var(--split-left) 52%,
-    color-mix(in srgb, var(--split-left) 40%, var(--split-right)) 68%,
-    var(--split-right) 82%,
-    var(--split-right) 100%
-  );
+  background: var(--split-grad);
 }
 
 /* Left 大半：創科站 */
@@ -1027,8 +1035,9 @@ a.gantry:focus-visible {
 }
 
 @supports not (background: color-mix(in srgb, white 50%, black)) {
+  .pin-scene,
   .pin-sticky {
-    background: linear-gradient(90deg, #f4f5f7 0%, #f4f5f7 55%, #e4eaf0 72%, #d8e4ef 100%);
+    background: linear-gradient(90deg, #e8e9eb 0%, #e8e9eb 42%, #e4e7eb 62%, #dfe5eb 82%, #dce4ec 100%);
   }
 }
 
@@ -1053,8 +1062,7 @@ a.gantry:focus-visible {
     background: linear-gradient(
       180deg,
       var(--split-left) 0%,
-      var(--split-left) 38%,
-      color-mix(in srgb, var(--split-left) 45%, var(--split-right)) 55%,
+      color-mix(in srgb, var(--split-left) 55%, var(--split-right)) 55%,
       var(--split-right) 100%
     );
   }
