@@ -5,6 +5,7 @@
 
   var scene = document.getElementById('pin-scene');
   var board = document.getElementById('pin-board');
+  var train = document.getElementById('train-bar');
   if (!scene || !board) return;
 
   var ticking = false;
@@ -18,6 +19,18 @@
     var scale = 1 - p * 0.08;
     board.style.transform = 'scale(' + scale.toFixed(4) + ')';
     board.style.opacity = String((1 - p * 0.12).toFixed(3));
+
+    /* solid train bar: emerge from under header, travel right */
+    if (train) {
+      var sticky = scene.querySelector('.pin-sticky');
+      var track = sticky ? sticky.clientWidth : window.innerWidth;
+      var barW = train.offsetWidth || 104;
+      /* p=0 tucked left under header; p=1 exits past right edge */
+      var start = -barW - 8;
+      var end = track + 8;
+      var x = start + p * (end - start);
+      train.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
+    }
   }
 
   function onScroll() {

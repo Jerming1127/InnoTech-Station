@@ -35,6 +35,16 @@
   /* v0.8 light station-board tokens */
   --ground: #ffffff;
   --ground-2: #e8e9eb;
+  /* soft L→R wash — shared by header + page so no below-header seam */
+  --split-left: var(--ground-2);
+  --split-right: #e5e8ec;
+  --split-grad: linear-gradient(
+    90deg,
+    var(--split-left) 0%,
+    var(--split-left) 48%,
+    color-mix(in srgb, var(--split-left) 80%, var(--split-right)) 72%,
+    var(--split-right) 100%
+  );
   --ink: #121212;
   --mute: #5c5c5c;
   --rule: #121212;
@@ -75,7 +85,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: var(--zh), var(--en);
-  background: var(--ground-2);
+  background: var(--split-grad);
   color: var(--ink);
 }
 
@@ -83,7 +93,7 @@ body {
   min-height: calc(100vh - 72px);
   /* no top pad — sticky header sits flush under top-nav */
   padding: 0 clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3rem);
-  background: var(--ground-2);
+  background: var(--split-grad);
   overflow-x: clip;
 }
 
@@ -923,18 +933,8 @@ a.gantry:focus-visible {
   }
 }
 
-/* —— v0.23 header: full-bleed sticky · flush under nav · soft L→R ground blend —— */
+/* —— v0.24 header: shared page wash · flush under nav · train bar —— */
 .pin-scene {
-  --split-left: var(--ground-2); /* #e8e9eb — matches body/page */
-  --split-right: #dce4ec; /* soft cool tint, close to ground-2 */
-  --split-grad: linear-gradient(
-    90deg,
-    var(--split-left) 0%,
-    var(--split-left) 42%,
-    color-mix(in srgb, var(--split-left) 70%, var(--split-right)) 62%,
-    color-mix(in srgb, var(--split-left) 25%, var(--split-right)) 82%,
-    var(--split-right) 100%
-  );
   position: relative;
   width: 100vw;
   max-width: 100vw;
@@ -942,7 +942,6 @@ a.gantry:focus-visible {
   margin-right: calc(50% - 50vw);
   box-sizing: border-box;
   height: 145vh;
-  /* same wash as sticky so pin scroll area / edges stay continuous */
   background: var(--split-grad);
 }
 
@@ -958,10 +957,26 @@ a.gantry:focus-visible {
   justify-content: stretch;
   min-height: clamp(18rem, 42vh, 28rem);
   gap: clamp(0.75rem, 2vw, 1.5rem);
-  padding: 0.85rem clamp(1rem, 2.5vw, 2rem) 1rem;
+  padding: 0.85rem clamp(1rem, 2.5vw, 2rem) 2.1rem;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden; /* clip train; avoid nested scroll */
   background: var(--split-grad);
+}
+
+/* placeholder MTR train — solid bar (Island-line blue); replace with graphic later */
+.train-bar {
+  position: absolute;
+  left: 0;
+  bottom: 1rem;
+  width: 8.5rem;
+  height: 0.85rem;
+  border-radius: 0.15rem;
+  background: #007dc5; /* MTR Island Line — readable on ground wash */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  transform: translateX(-110%);
+  will-change: transform;
+  pointer-events: none;
+  z-index: 6;
 }
 
 /* Left 大半：創科站 */
@@ -1035,9 +1050,8 @@ a.gantry:focus-visible {
 }
 
 @supports not (background: color-mix(in srgb, white 50%, black)) {
-  .pin-scene,
-  .pin-sticky {
-    background: linear-gradient(90deg, #e8e9eb 0%, #e8e9eb 42%, #e4e7eb 62%, #dfe5eb 82%, #dce4ec 100%);
+  :root {
+    --split-grad: linear-gradient(90deg, #e8e9eb 0%, #e8e9eb 48%, #e6e8ec 72%, #e5e8ec 100%);
   }
 }
 
@@ -1091,6 +1105,10 @@ a.gantry:focus-visible {
     height: auto;
     gap: 8px;
   }
+
+  .train-bar {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1104,6 +1122,9 @@ a.gantry:focus-visible {
   .pin-sticky .station-board {
     transform: none !important;
     opacity: 1 !important;
+  }
+  .train-bar {
+    display: none;
   }
 }
 
