@@ -2,100 +2,16 @@
 <html lang="zh-Hant-HK">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>職員區 · 創科站</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="staff.css" />
+  <meta http-equiv="refresh" content="0;url=/InnoTech-Station/" />
+  <title>重新導向</title>
+  <script>
+    // Old public staff path retired. Send to site home — do not advertise the private entry.
+    location.replace("/InnoTech-Station/");
+  </script>
 </head>
 <body>
-  <div id="staff-gate"></div>
-
-  <div id="staff-app" hidden>
-    <div class="wrap">
-      <header class="topbar">
-        <a class="topbar__brand" href="./">職員區 · 創科站</a>
-        <div class="topbar__spacer"></div>
-        <div class="topbar__actions">
-          <button type="button" class="btn btn-ghost btn-sm" id="btn-change-pw">更改密碼</button>
-          <button type="button" class="btn btn-sm" id="btn-logout">登出</button>
-        </div>
-      </header>
-
-      <h1>私人工具</h1>
-      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。資料只存本機瀏覽器。</p>
-
-      <div class="card-grid">
-        <a class="app-card" href="leaderboard/">
-          <p class="app-card__title">班別龍虎榜</p>
-          <p class="app-card__desc">自建班別、自行輸入同學名、每堂加分同排行。名單唔會預載。</p>
-          <p class="app-card__arrow">開啟 →</p>
-        </a>
-        <a class="app-card" href="progress/">
-          <p class="app-card__title">課堂進度</p>
-          <p class="app-card__desc">可編輯嘅進度內容區，方便之後更新顯示。唔存學生個人資料。</p>
-          <p class="app-card__arrow">開啟 →</p>
-        </a>
-      </div>
-
-      <p class="footnote">靜態 GitHub Pages 嘅前端密碼唔係銀行級保安；靠私人連結＋密碼＋資料留喺本機瀏覽器。</p>
-    </div>
-  </div>
-
-  <div class="dialog-backdrop" id="pw-dialog" hidden>
-    <div class="dialog" role="dialog" aria-labelledby="pw-dialog-title">
-      <h2 id="pw-dialog-title">更改密碼</h2>
-      <label class="field"><span>舊密碼</span><input type="password" id="pw-old" autocomplete="current-password" /></label>
-      <label class="field"><span>新密碼</span><input type="password" id="pw-new" autocomplete="new-password" /></label>
-      <label class="field"><span>確認新密碼</span><input type="password" id="pw-new2" autocomplete="new-password" /></label>
-      <p class="err" id="pw-err" hidden></p>
-      <div class="row">
-        <button type="button" class="btn btn-primary" id="pw-save">儲存</button>
-        <button type="button" class="btn" id="pw-cancel">取消</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="auth.js"></script>
-  <script>
-    StaffAuth.requireAuth();
-
-    document.getElementById("btn-logout").addEventListener("click", function () {
-      StaffAuth.logout();
-      location.reload();
-    });
-
-    var dlg = document.getElementById("pw-dialog");
-    document.getElementById("btn-change-pw").addEventListener("click", function () {
-      document.getElementById("pw-err").hidden = true;
-      document.getElementById("pw-old").value = "";
-      document.getElementById("pw-new").value = "";
-      document.getElementById("pw-new2").value = "";
-      dlg.hidden = false;
-    });
-    document.getElementById("pw-cancel").addEventListener("click", function () {
-      dlg.hidden = true;
-    });
-    document.getElementById("pw-save").addEventListener("click", function () {
-      var err = document.getElementById("pw-err");
-      var n1 = document.getElementById("pw-new").value;
-      var n2 = document.getElementById("pw-new2").value;
-      if (n1 !== n2) {
-        err.hidden = false;
-        err.textContent = "兩次新密碼唔一致";
-        return;
-      }
-      StaffAuth.changePassword(document.getElementById("pw-old").value, n1)
-        .then(function () {
-          dlg.hidden = true;
-        })
-        .catch(function (e) {
-          err.hidden = false;
-          err.textContent = e.message || "更改失敗";
-        });
-    });
-  </script>
+  <p><a href="/InnoTech-Station/">返回創科站</a></p>
 </body>
 </html>
+

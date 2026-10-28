@@ -648,3 +648,26 @@ h2 {
 .week-card.is-filled .week-card__badge {
   background: #dbeafe;
 }
+
+/* Google Sign-In gate extras */
+.gsi-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0 0.5rem;
+  min-height: 44px;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: #eef2f7;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+}

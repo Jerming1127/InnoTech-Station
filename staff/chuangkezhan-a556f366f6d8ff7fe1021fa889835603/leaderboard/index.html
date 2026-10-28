@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>班別龍虎榜 · 職員區</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../staff.css" />
+</head>
+<body>
+  <div id="staff-gate"></div>
+
+  <div id="staff-app" hidden>
+    <div class="wrap">
+      <header class="topbar">
+        <a class="topbar__brand" href="../">← 職員區</a>
+        <div class="topbar__spacer"></div>
+        <div class="topbar__actions">
+          <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
+          <label class="btn btn-sm" style="cursor:pointer;margin:0">
+            匯入 JSON
+            <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
+          </label>
+          <span class="user-chip" id="staff-user-chip" hidden></span>
+          <button type="button" class="btn btn-sm" id="btn-logout">登出</button>
+        </div>
+      </header>
+
+      <h1>班別龍虎榜</h1>
+      <p class="muted">同學名由你自行輸入／管理；本頁唔預載任何真實名單。資料只存本機。</p>
+
+      <section class="card">
+        <p class="section-label">班別</p>
+        <div class="row" style="margin-bottom:0.75rem">
+          <label class="field" style="margin:0;flex:1;min-width:10rem">
+            <span class="sr-only">選擇班別</span>
+            <select id="class-select"></select>
+          </label>
+          <button type="button" class="btn btn-primary" id="btn-new-class">新增班別</button>
+          <button type="button" class="btn btn-danger btn-sm" id="btn-del-class">刪除班別</button>
+        </div>
+      </section>
+
+      <section class="card" id="panel-roster">
+        <h2>名單</h2>
+        <div class="row" style="margin-bottom:0.75rem">
+          <label class="field" style="margin:0;flex:1;min-width:10rem">
+            <span class="sr-only">新同學名</span>
+            <input type="text" id="student-name" placeholder="輸入同學名後按加入" autocomplete="off" />
+          </label>
+          <button type="button" class="btn btn-primary" id="btn-add-student">加入</button>
+        </div>
+        <ul class="list" id="student-list"></ul>
+        <p class="empty" id="roster-empty">尚未加入同學。請自行輸入名字。</p>
+      </section>
+
+      <section class="card" id="panel-lesson">
+        <h2>本堂加分</h2>
+        <div class="row-fields cols-2">
+          <label class="field">
+            <span>日期</span>
+            <input type="date" id="lesson-date" />
+          </label>
+          <label class="field">
+            <span>課堂標題（選填）</span>
+            <input type="text" id="lesson-title" placeholder="例如：專題匯報" autocomplete="off" />
+          </label>
+        </div>
+        <label class="field">
+          <span>分數</span>
+          <input type="number" id="lesson-points" value="1" min="1" max="100" step="1" />
+        </label>
+        <p class="section-label">選擇要加分嘅同學</p>
+        <div class="chip-wrap" id="pick-students"></div>
+        <label class="field">
+          <span>備註（選填）</span>
+          <input type="text" id="lesson-note" placeholder="簡短說明" autocomplete="off" />
+        </label>
+        <button type="button" class="btn btn-good" id="btn-award">確認加分</button>
+        <p class="ok" id="award-msg" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2>龍虎榜</h2>
+        <div class="toolbar">
+          <button type="button" class="btn btn-sm" id="btn-refresh-rank">重新整理</button>
+        </div>
+        <table class="rank-table" id="rank-table">
+          <thead>
+            <tr><th class="rank-num">#</th><th>同學</th><th class="pts">總分</th></tr>
+          </thead>
+          <tbody id="rank-body"></tbody>
+        </table>
+        <p class="empty" id="rank-empty">暫無分數記錄。</p>
+      </section>
+
+      <section class="card">
+        <h2>課堂紀錄</h2>
+        <ul class="list" id="lesson-log"></ul>
+        <p class="empty" id="log-empty">尚未有課堂紀錄。</p>
+      </section>
+
+      <p class="footnote">靜態 GitHub Pages：須 Google 登入＋允許名單。匯出檔請自行妥善保管。資料只存本機瀏覽器。</p>
+    </div>
+  </div>
+
+  <script src="../auth-config.js"></script>
+  <script src="../auth.js"></script>
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "innotech-staff-leaderboard";
+
+  function uid() {
+    return "id_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { classes: [], activeClassId: null };
+      var data = JSON.parse(raw);
+      if (!data || !Array.isArray(data.classes)) return { classes: [], activeClassId: null };
+      return data;
+    } catch (e) {
+      return { classes: [], activeClassId: null };
+    }
+  }
+
+  function save(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  var state = load();
+
+  function activeClass() {
+    if (!state.activeClassId) return null;
+    for (var i = 0; i < state.classes.length; i++) {
+      if (state.classes[i].id === state.activeClassId) return state.classes[i];
+    }
+    return null;
+  }
+
+  function totalsFor(cls) {
+    var map = {};
+    (cls.students || []).forEach(function (s) {
+      map[s.id] = 0;
+    });
+    (cls.lessons || []).forEach(function (les) {
+      (les.awards || []).forEach(function (a) {
+        if (map[a.studentId] !== undefined) map[a.studentId] += Number(a.points) || 0;
+      });
+    });
+    return map;
+  }
+
+  function ensureDateInput() {
+    var el = document.getElementById("lesson-date");
+    if (!el.value) {
+      var d = new Date();
+      var m = String(d.getMonth() + 1).padStart(2, "0");
+      var day = String(d.getDate()).padStart(2, "0");
+      el.value = d.getFullYear() + "-" + m + "-" + day;
+    }
+  }
+
+  function renderClassSelect() {
+    var sel = document.getElementById("class-select");
+    sel.innerHTML = "";
+    if (!state.classes.length) {
+      var opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "（尚未有班別）";
+      sel.appendChild(opt);
+      state.activeClassId = null;
+      return;
+    }
+    var found = false;
+    state.classes.forEach(function (c) {
+      var o = document.createElement("option");
+      o.value = c.id;
+      o.textContent = c.name;
+      if (c.id === state.activeClassId) {
+        o.selected = true;
+        found = true;
+      }
+      sel.appendChild(o);
+    });
+    if (!found) {
+      state.activeClassId = state.classes[0].id;
+      sel.value = state.activeClassId;
+      save(state);
+    }
+  }
+
+  function renderRoster() {
+    var cls = activeClass();
+    var list = document.getElementById("student-list");
+    var empty = document.getElementById("roster-empty");
+    list.innerHTML = "";
+    if (!cls || !(cls.students || []).length) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    cls.students.forEach(function (s) {
+      var li = document.createElement("li");
+      var name = document.createElement("span");
+      name.className = "list__name";
+      name.textContent = s.name;
+      li.appendChild(name);
+
+      var renameBtn = document.createElement("button");
+      renameBtn.type = "button";
+      renameBtn.className = "btn btn-sm";
+      renameBtn.textContent = "改名";
+      renameBtn.addEventListener("click", function () {
+        var n = prompt("新名字", s.name);
+        if (n == null) return;
+        n = String(n).trim();
+        if (!n) return;
+        s.name = n;
+        save(state);
+        renderAll();
+      });
+      li.appendChild(renameBtn);
+
+      var delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn btn-danger btn-sm";
+      delBtn.textContent = "移除";
+      delBtn.addEventListener("click", function () {
+        if (!confirm("移除「" + s.name + "」？相關加分紀錄會一併刪除。")) return;
+        cls.students = cls.students.filter(function (x) { return x.id !== s.id; });
+        (cls.lessons || []).forEach(function (les) {
+          les.awards = (les.awards || []).filter(function (a) { return a.studentId !== s.id; });
+        });
+        save(state);
+        renderAll();
+      });
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    });
+  }
+
+  function renderPick() {
+    var cls = activeClass();
+    var wrap = document.getElementById("pick-students");
+    wrap.innerHTML = "";
+    if (!cls || !(cls.students || []).length) {
+      wrap.innerHTML = '<p class="muted" style="margin:0">請先加入同學。</p>';
+      return;
+    }
+    cls.students.forEach(function (s) {
+      var label = document.createElement("label");
+      label.className = "chip";
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.value = s.id;
+      cb.addEventListener("change", function () {
+        label.classList.toggle("is-on", cb.checked);
+      });
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(s.name));
+      wrap.appendChild(label);
+    });
+  }
+
+  function renderRank() {
+    var cls = activeClass();
+    var body = document.getElementById("rank-body");
+    var empty = document.getElementById("rank-empty");
+    var table = document.getElementById("rank-table");
+    body.innerHTML = "";
+    if (!cls || !(cls.students || []).length) {
+      empty.hidden = false;
+      table.hidden = true;
+      return;
+    }
+    var totals = totalsFor(cls);
+    var rows = cls.students.map(function (s) {
+      return { name: s.name, pts: totals[s.id] || 0 };
+    });
+    rows.sort(function (a, b) {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      return a.name.localeCompare(b.name, "zh-Hant");
+    });
+    var any = rows.some(function (r) { return r.pts > 0; });
+    if (!any) {
+      empty.hidden = false;
+      table.hidden = true;
+      return;
+    }
+    empty.hidden = true;
+    table.hidden = false;
+    rows.forEach(function (r, i) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td class="rank-num">' +
+        (i + 1) +
+        "</td><td>" +
+        escapeHtml(r.name) +
+        '</td><td class="pts">' +
+        r.pts +
+        "</td>";
+      body.appendChild(tr);
+    });
+  }
+
+  function renderLog() {
+    var cls = activeClass();
+    var list = document.getElementById("lesson-log");
+    var empty = document.getElementById("log-empty");
+    list.innerHTML = "";
+    if (!cls || !(cls.lessons || []).length) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    var lessons = cls.lessons.slice().reverse();
+    lessons.forEach(function (les) {
+      var li = document.createElement("li");
+      var nameMap = {};
+      (cls.students || []).forEach(function (s) { nameMap[s.id] = s.name; });
+      var names = (les.awards || [])
+        .map(function (a) {
+          return (nameMap[a.studentId] || "？") + " +" + a.points;
+        })
+        .join("、");
+      var title = document.createElement("span");
+      title.className = "list__name";
+      title.textContent =
+        (les.date || "") +
+        (les.title ? " · " + les.title : "") +
+        (les.note ? "（" + les.note + "）" : "");
+      var meta = document.createElement("span");
+      meta.className = "list__meta";
+      meta.textContent = names || "（無人）";
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn btn-danger btn-sm";
+      del.textContent = "刪";
+      del.addEventListener("click", function () {
+        if (!confirm("刪除此堂紀錄？")) return;
+        cls.lessons = cls.lessons.filter(function (x) { return x.id !== les.id; });
+        save(state);
+        renderAll();
+      });
+      li.appendChild(title);
+      li.appendChild(meta);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderAll() {
+    renderClassSelect();
+    renderRoster();
+    renderPick();
+    renderRank();
+    renderLog();
+    ensureDateInput();
+    var has = !!activeClass();
+    document.getElementById("btn-del-class").disabled = !has;
+    document.getElementById("btn-add-student").disabled = !has;
+    document.getElementById("btn-award").disabled = !has;
+  }
+
+  function initUi() {
+    document.getElementById("btn-logout").addEventListener("click", function () {
+      StaffAuth.logout();
+      location.reload();
+    });
+
+    document.getElementById("class-select").addEventListener("change", function (e) {
+      state.activeClassId = e.target.value || null;
+      save(state);
+      renderAll();
+    });
+
+    document.getElementById("btn-new-class").addEventListener("click", function () {
+      var name = prompt("班別名稱（例如 1A）");
+      if (name == null) return;
+      name = String(name).trim();
+      if (!name) return;
+      var c = { id: uid(), name: name, students: [], lessons: [] };
+      state.classes.push(c);
+      state.activeClassId = c.id;
+      save(state);
+      renderAll();
+    });
+
+    document.getElementById("btn-del-class").addEventListener("click", function () {
+      var cls = activeClass();
+      if (!cls) return;
+      if (!confirm("刪除班別「" + cls.name + "」同埋所有名單／分數？")) return;
+      state.classes = state.classes.filter(function (c) { return c.id !== cls.id; });
+      state.activeClassId = state.classes.length ? state.classes[0].id : null;
+      save(state);
+      renderAll();
+    });
+
+    document.getElementById("btn-add-student").addEventListener("click", addStudent);
+    document.getElementById("student-name").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") addStudent();
+    });
+
+    function addStudent() {
+      var cls = activeClass();
+      if (!cls) {
+        alert("請先新增班別");
+        return;
+      }
+      var input = document.getElementById("student-name");
+      var name = String(input.value || "").trim();
+      if (!name) return;
+      cls.students = cls.students || [];
+      cls.students.push({ id: uid(), name: name });
+      input.value = "";
+      save(state);
+      renderAll();
+      input.focus();
+    }
+
+    document.getElementById("btn-award").addEventListener("click", function () {
+      var cls = activeClass();
+      if (!cls) return;
+      var checks = document.querySelectorAll("#pick-students input[type=checkbox]:checked");
+      if (!checks.length) {
+        alert("請選擇至少一位同學");
+        return;
+      }
+      var pts = parseInt(document.getElementById("lesson-points").value, 10);
+      if (!pts || pts < 1) pts = 1;
+      var awards = [];
+      checks.forEach(function (cb) {
+        awards.push({ studentId: cb.value, points: pts });
+      });
+      cls.lessons = cls.lessons || [];
+      cls.lessons.push({
+        id: uid(),
+        date: document.getElementById("lesson-date").value || "",
+        title: String(document.getElementById("lesson-title").value || "").trim(),
+        note: String(document.getElementById("lesson-note").value || "").trim(),
+        awards: awards,
+        createdAt: new Date().toISOString(),
+      });
+      save(state);
+      document.getElementById("lesson-note").value = "";
+      document.getElementById("lesson-title").value = "";
+      var msg = document.getElementById("award-msg");
+      msg.hidden = false;
+      msg.textContent = "已為 " + awards.length + " 位同學各加 " + pts + " 分。";
+      setTimeout(function () { msg.hidden = true; }, 2500);
+      renderAll();
+    });
+
+    document.getElementById("btn-refresh-rank").addEventListener("click", renderRank);
+
+    document.getElementById("btn-export").addEventListener("click", function () {
+      var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "innotech-leaderboard-backup.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById("import-file").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(String(reader.result || ""));
+          if (!data || !Array.isArray(data.classes)) throw new Error("格式不正確");
+          if (!confirm("匯入會覆蓋本機現有龍虎榜資料，確定？")) return;
+          state = data;
+          save(state);
+          renderAll();
+        } catch (err) {
+          alert("匯入失敗：" + (err.message || "未知錯誤"));
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    renderAll();
+  }
+
+  StaffAuth.requireAuth({ onUnlock: initUi });
+})();
+  </script>
+</body>
+</html>
