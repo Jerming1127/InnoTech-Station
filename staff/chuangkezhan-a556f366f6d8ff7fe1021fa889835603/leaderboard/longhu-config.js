@@ -32,9 +32,9 @@
       },
       {
         id: "ten",
-        title: "做啱十集",
+        title: "做啱實習",
         reasons: [
-          { id: "ten-done", label: "完成十集任務", points: 2 },
+          { id: "ten-done", label: "完成實習任務", points: 2 },
           { id: "ten-neat", label: "做得齊整正確", points: 3 },
           { id: "ten-bonus", label: "提早／額外完成", points: 4 },
           { id: "ten-retry", label: "改錯後做啱", points: 1 },

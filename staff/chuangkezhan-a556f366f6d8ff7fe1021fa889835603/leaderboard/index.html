@@ -19,10 +19,14 @@
         <a class="topbar__brand" href="../">← 職員區</a>
         <div class="topbar__spacer"></div>
         <div class="topbar__actions">
-          <button type="button" class="btn btn-sm" id="btn-export">匯出</button>
-          <label class="btn btn-sm" style="cursor:pointer;margin:0">
-            匯入
+          <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
+          <label class="btn btn-sm" style="cursor:pointer;margin:0" title="完整備份還原">
+            匯入 JSON
             <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
+          </label>
+          <label class="btn btn-sm" style="cursor:pointer;margin:0" title="只匯入同學名單">
+            匯入 CSV 名單
+            <input type="file" id="import-csv" accept="text/csv,.csv,text/plain" class="sr-only" />
           </label>
           <span class="user-chip" id="staff-user-chip" hidden></span>
           <button type="button" class="btn btn-sm" id="btn-logout">登出</button>
@@ -56,7 +60,7 @@
         </div>
         <ul class="list" id="student-list"></ul>
         <p class="empty" id="roster-empty">尚未加入同學。</p>
-        <p class="muted" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名先會開加分；或者喺名單撳「加分」。</p>
+        <p class="muted" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。CSV 名單：UTF-8、逗號分隔；第一行欄位名要有 <code>name</code> 或 <code>姓名</code>；可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）。完整備份請用「匯出／匯入 JSON」。</p>
       </section>
 
       <section class="card">
@@ -436,7 +440,7 @@
       var li = document.createElement("li");
       var name = document.createElement("span");
       name.className = "list__name";
-      name.textContent = s.name + " · " + (totals[s.id] || 0) + " pts";
+      name.textContent = s.name + " · " + (totals[s.id] || 0) + " 分";
       li.appendChild(name);
 
       var addBtn = document.createElement("button");
@@ -572,6 +576,89 @@
       a.download = "innotech-longhu-backup.json";
       a.click();
       URL.revokeObjectURL(a.href);
+    });
+
+
+    function parseCsv(text) {
+      text = String(text || "").replace(/^\uFEFF/, "");
+      var lines = text.split(/\r\n|\n|\r/).filter(function (ln) { return String(ln).trim().length; });
+      if (!lines.length) throw new Error("CSV 空白");
+      function splitRow(line) {
+        var out = [];
+        var cur = "";
+        var q = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (ch === '"') {
+            if (q && line[i + 1] === '"') { cur += '"'; i++; }
+            else q = !q;
+          } else if ((ch === "," || ch === "\t") && !q) {
+            out.push(cur);
+            cur = "";
+          } else cur += ch;
+        }
+        out.push(cur);
+        return out.map(function (s) { return String(s).trim(); });
+      }
+      var header = splitRow(lines[0]).map(function (h) { return h.toLowerCase(); });
+      var nameIdx = header.indexOf("name");
+      if (nameIdx < 0) nameIdx = header.indexOf("姓名");
+      if (nameIdx < 0) nameIdx = header.indexOf("學生");
+      if (nameIdx < 0) nameIdx = header.indexOf("同學");
+      if (nameIdx < 0) throw new Error("找不到欄位 name／姓名（第一行要有欄位名）");
+      var classIdx = header.indexOf("class");
+      if (classIdx < 0) classIdx = header.indexOf("班別");
+      if (classIdx < 0) classIdx = header.indexOf("classid");
+      var rows = [];
+      for (var r = 1; r < lines.length; r++) {
+        var cols = splitRow(lines[r]);
+        var nm = (cols[nameIdx] || "").trim();
+        if (!nm) continue;
+        var cls = classIdx >= 0 ? (cols[classIdx] || "").trim() : "";
+        rows.push({ name: nm, classRaw: cls });
+      }
+      if (!rows.length) throw new Error("沒有有效姓名列");
+      return rows;
+    }
+
+    function resolveClassId(raw) {
+      var s = String(raw || "").trim().toLowerCase().replace(/\s+/g, "");
+      if (!s) return state.activeClassId;
+      var hit = null;
+      CLASSES.forEach(function (c) {
+        if (c.id === s || c.short.toLowerCase() === s || c.name.toLowerCase() === s) hit = c.id;
+      });
+      return hit;
+    }
+
+    document.getElementById("import-csv").addEventListener("change", function (e) {
+      var file = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var rows = parseCsv(String(reader.result || ""));
+          var added = 0;
+          var skipped = 0;
+          rows.forEach(function (row) {
+            var cid = resolveClassId(row.classRaw);
+            if (!cid || !state.classes[cid]) { skipped++; return; }
+            var b = state.classes[cid];
+            b.students = b.students || [];
+            var dup = b.students.some(function (s) { return s.name === row.name; });
+            if (dup) { skipped++; return; }
+            b.students.push({ id: uid(), name: row.name });
+            added++;
+          });
+          save();
+          renderAll();
+          alert("CSV 名單完成：新加入 " + added + " 人" + (skipped ? "；略過 " + skipped + " 行（班別無效／重名／空白）" : ""));
+        } catch (err) {
+          alert("CSV 匯入失敗：" + (err.message || "未知錯誤"));
+        }
+      };
+      reader.readAsText(file);
     });
 
     document.getElementById("import-file").addEventListener("change", function (e) {
