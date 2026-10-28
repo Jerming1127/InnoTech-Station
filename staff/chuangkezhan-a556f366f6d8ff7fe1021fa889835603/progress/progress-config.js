@@ -1,21 +1,16 @@
 /**
- * 上課日子教學進度表 — Google Sheet (read-only) + week×class matrix.
+ * 上課日子教學進度表 — Google Sheet (read-only) + week matrix.
+ * No student names in this file.
  *
- * HOW TO PLUG A SHEET CSV URL:
- * 1. Open your school Google Sheet for progress (學校帳戶).
- * 2. Layout expected (first sheet / gid you publish) — weeks as rows, classes as columns:
- *      Row 1 header: 週次, 1A, 1B, 1C, 2A, 2B, 3B
- *      Rows: W1…W18（或 第1週…第18週）— first column = week label
- *      Cells = that week’s progress text per class (plain).
+ * HOW TO PLUG A SHEET (share-link，唔使 Publish to web):
+ * 1. Open your school Google Sheet for 進度表 (學校帳戶).
+ * 2. Expected layout: week rows × class columns, or week / class / progress text.
  *      (Legacy class×week CSV still parsed as fallback.)
- * 3. Publish CSV (pick one):
- *    A) File → Share → Publish to web → choose the sheet tab → CSV → Publish
- *       Copy the published CSV link.
- *    B) Or use gviz / export pattern (sheet must be viewable by link):
+ * 3. Share →「知道連結的使用者可檢視」(Anyone with the link → Viewer).
+ *    唔使 File → Publish to web。
+ * 4. Paste export URL into SHEET_CSV_URL:
  *       https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=<GID>
- * 4. Paste that URL into SHEET_CSV_URL below.
- * 5. Reload progress page. CORS: Google export/publish CSV usually works from
- *    browser fetch; if blocked, host a mirror or use a CORS-friendly publish URL.
+ * 5. Reload progress page. Tries: fetch export → fetch gviz CSV → gviz JSONP.
  *
  * Empty SHEET_CSV_URL → local editable grid (localStorage), with on-screen note.
  *
@@ -25,8 +20,11 @@
   "use strict";
 
   global.ProgressConfig = {
-    /** Published CSV / export URL — leave "" until ready */
-    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFHMUA1qKnAvReYlkLGCvwYIHcDwPeUwZBgAukORsEtFOCKhmApf5m4gJzTfJ_cOO_Onmh0Jy_cAMe/pub?gid=915310866&single=true&output=csv",
+    /** Share-link export URL (Anyone with link can view) — leave "" until ready */
+    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1dDLJ5Gfi2n9v9m4ylofpfwSBSEhctOYLc0S5SxOwyVU/export?format=csv&gid=915310866",
+
+    /** Optional last-resort publish CSV if share-link not set yet (can clear once Share works) */
+    SHEET_CSV_FALLBACK: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQFHMUA1qKnAvReYlkLGCvwYIHcDwPeUwZBgAukORsEtFOCKhmApf5m4gJzTfJ_cOO_Onmh0Jy_cAMe/pub?gid=915310866&single=true&output=csv",
 
     WEEK_COUNT: 18,
 

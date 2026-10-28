@@ -2,7 +2,7 @@
  * 龍虎榜 — reason catalogs + class tabs + optional Google Sheet CSV.
  * No real student names in this file.
  *
- * HOW TO PLUG A SHEET CSV URL:
+ * HOW TO PLUG A SHEET (share-link，唔使 Publish to web):
  * 1. Open your school Google Sheet for 龍虎榜 (學校帳戶).
  * 2. Expected layout (UTF-8 CSV, comma-separated):
  *      Row 1 headers (any order; extras ignored):
@@ -13,21 +13,23 @@
  *      Example row:
  *        學號,name,class,score
  *        S001,同學甲,1A,12
- * 3. Publish CSV (pick one):
- *    A) File → Share → Publish to web → choose the sheet tab → CSV → Publish
- *       Copy the published CSV link.
- *    B) Or export URL (sheet must be viewable by link):
+ * 3. Share →「知道連結的使用者可檢視」(Anyone with the link → Viewer).
+ *    唔使 File → Publish to web。
+ * 4. Paste export URL into SHEET_CSV_URL:
  *       https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=<GID>
- * 4. Paste that URL into SHEET_CSV_URL below.
- * 5. Reload 龍虎榜. When URL is set → roster+scores load read-only from Sheet.
+ *    （Sheet ID 喺瀏覽器網址 /d/<SHEET_ID>/；gid 喺分頁 #gid=）
+ * 5. Reload 龍虎榜. Page tries: fetch export → fetch gviz CSV → gviz JSONP.
  *    Empty SHEET_CSV_URL → localStorage editable Rank + file CSV／JSON import.
  */
 (function (global) {
   "use strict";
 
   global.LonghuConfig = {
-    /** Published CSV / export URL — leave "" until ready */
-    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTTb9Ftd7xz_veWy0RIhIvURKeeoEQQ7HwNpHZmrk6hsJfUry5bWW5TjkVJEW4CPVl34oS9VcdcAIRQ/pub?gid=255525742&single=true&output=csv",
+    /** Share-link export URL (Anyone with link can view) — leave "" until ready */
+    SHEET_CSV_URL: "https://docs.google.com/spreadsheets/d/1rV9XoqPy8Py3U01z8UdilzE-j-VqYkR3i8Gluvtck64/export?format=csv&gid=255525742",
+
+    /** Optional last-resort publish CSV if share-link not set yet (can clear once Share works) */
+    SHEET_CSV_FALLBACK: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTTb9Ftd7xz_veWy0RIhIvURKeeoEQQ7HwNpHZmrk6hsJfUry5bWW5TjkVJEW4CPVl34oS9VcdcAIRQ/pub?gid=255525742&single=true&output=csv",
 
     /** Fixed class tabs — 龍虎榜 deliberately excludes 1C */
     CLASSES: [

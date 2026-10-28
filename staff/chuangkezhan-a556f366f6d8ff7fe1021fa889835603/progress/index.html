@@ -53,7 +53,7 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js"></script>
-  <script src="progress-config.js?v=SHEET1"></script>
+  <script src="progress-config.js?v=SHARE1"></script>
   <script>
 (function () {
   "use strict";
@@ -64,6 +64,7 @@
   var WEEK_COUNT = cfg.WEEK_COUNT || 18;
   var CLASSES = cfg.CLASSES || [];
   var sheetUrl = String(cfg.SHEET_CSV_URL || "").trim();
+  var sheetFallback = String(cfg.SHEET_CSV_FALLBACK || "").trim();
   var sheetMode = false;
   var sheetDataOk = false;
   var saveTimer = null;
@@ -435,11 +436,155 @@
     showNote(
       "無法載入 Sheet（" +
         (err && err.message ? err.message : "錯誤") +
-        "）。請檢查 CSV 網址／發佈設定／CORS，然後撳「重新載入 Sheet」。",
+        "）。請確認 Sheet 已 Share →「知道連結的使用者可檢視」，並檢查 export URL／CORS，然後撳「重新載入 Sheet」。",
       true
     );
     setStamp();
     renderMatrix();
+  }
+
+
+  function parseSheetRef(url) {
+    var u = String(url || "");
+    var id = null;
+    var gid = null;
+    var m = u.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (m && m[1] !== "e") id = m[1];
+    var g = u.match(/[?&#]gid=([0-9]+)/);
+    if (g) gid = g[1];
+    return { id: id, gid: gid };
+  }
+
+  function csvEscapeCell(s) {
+    s = String(s == null ? "" : s);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function assertCsvText(text) {
+    text = String(text || "");
+    var head = text.slice(0, 200).replace(/^\uFEFF/, "");
+    if (/^\s*</.test(head) || /accounts\.google\.com/i.test(head) || /ServiceLogin/i.test(head)) {
+      throw new Error("需要登入／Sheet 未設「知道連結的使用者可檢視」");
+    }
+    if (!head.trim()) throw new Error("CSV 空白");
+    return text;
+  }
+
+  function fetchCsvText(url) {
+    return fetch(url, { cache: "no-store", mode: "cors", credentials: "omit" }).then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.text();
+    }).then(assertCsvText);
+  }
+
+  function gvizTableToCsv(data) {
+    var table = data && data.table;
+    if (!table) throw new Error("gviz 無 table");
+    function cellVal(c) {
+      if (!c) return "";
+      if (c.f != null && String(c.f) !== "") return String(c.f);
+      if (c.v == null) return "";
+      return String(c.v);
+    }
+    var cols = table.cols || [];
+    var rows = table.rows || [];
+    var headers = cols.map(function (col) { return col.label || col.id || ""; });
+    var start = 0;
+    if (headers.every(function (h) { return !String(h).trim(); }) && rows.length) {
+      headers = (rows[0].c || []).map(cellVal);
+      start = 1;
+    }
+    var lines = [headers.map(csvEscapeCell).join(",")];
+    for (var i = start; i < rows.length; i++) {
+      var cells = rows[i].c || [];
+      var vals = [];
+      for (var j = 0; j < headers.length; j++) vals.push(csvEscapeCell(cellVal(cells[j])));
+      lines.push(vals.join(","));
+    }
+    return assertCsvText(lines.join("\n"));
+  }
+
+  function fetchGvizJsonp(sheetId, gid) {
+    return new Promise(function (resolve, reject) {
+      var cb = "_sheetGviz" + Date.now() + "_" + Math.floor(Math.random() * 1e6);
+      var script = document.createElement("script");
+      var done = false;
+      function cleanup() {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      var timer = setTimeout(function () {
+        cleanup();
+        reject(new Error("gviz JSONP timeout"));
+      }, 20000);
+      window[cb] = function (payload) {
+        cleanup();
+        try {
+          resolve(gvizTableToCsv(payload));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      script.async = true;
+      script.onerror = function () {
+        cleanup();
+        reject(new Error("gviz JSONP network error"));
+      };
+      var src =
+        "https://docs.google.com/spreadsheets/d/" +
+        encodeURIComponent(sheetId) +
+        "/gviz/tq?tqx=out:json;responseHandler:" +
+        cb;
+      if (gid != null && gid !== "") src += "&gid=" + encodeURIComponent(gid);
+      script.src = src;
+      document.head.appendChild(script);
+    });
+  }
+
+  function buildSheetCandidates(primary, fallback) {
+    var urls = [];
+    function add(u) {
+      if (!u) return;
+      u = String(u).trim();
+      if (!u) return;
+      if (urls.indexOf(u) < 0) urls.push(u);
+    }
+    add(primary);
+    var ref = parseSheetRef(primary);
+    if (ref.id) {
+      add(
+        "https://docs.google.com/spreadsheets/d/" +
+          ref.id +
+          "/export?format=csv" +
+          (ref.gid != null ? "&gid=" + ref.gid : "")
+      );
+      add(
+        "https://docs.google.com/spreadsheets/d/" +
+          ref.id +
+          "/gviz/tq?tqx=out:csv" +
+          (ref.gid != null ? "&gid=" + ref.gid : "")
+      );
+    }
+    add(fallback);
+    return { urls: urls, ref: ref };
+  }
+
+  function loadSheetCsvText(primary, fallback) {
+    var pack = buildSheetCandidates(primary, fallback);
+    function nextFetch(i) {
+      if (i >= pack.urls.length) {
+        if (pack.ref.id) return fetchGvizJsonp(pack.ref.id, pack.ref.gid);
+        return Promise.reject(new Error("Failed to fetch"));
+      }
+      return fetchCsvText(pack.urls[i]).catch(function () {
+        return nextFetch(i + 1);
+      });
+    }
+    return nextFetch(0);
   }
 
   function loadSheet() {
@@ -449,11 +594,7 @@
     }
     setChromeForMode();
     document.getElementById("mode-stamp").textContent = "載入 Sheet…";
-    fetch(sheetUrl, { cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.text();
-      })
+    loadSheetCsvText(sheetUrl, sheetFallback)
       .then(function (text) {
         enterSheetMode(applyCsv(text));
       })
