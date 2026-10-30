@@ -40,14 +40,9 @@
       box-shadow: 0 12px 40px rgba(0,0,0,.35);
     }
     h1 {
-      margin: 0 0 4px;
+      margin: 0 0 20px;
       font-size: 1.45rem;
       font-weight: 700;
-    }
-    .ver {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
     }
     ol {
       margin: 0 0 22px;
@@ -94,18 +89,11 @@
       background: rgba(239,68,68,.12);
       border-radius: 8px;
     }
-    .foot {
-      margin-top: 18px;
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-align: center;
-    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>巴士報站 · 一鍵燒錄</h1>
-    <div class="ver">韌體版本 1.4.7 · CYD ESP32（4MB）</div>
 
     <ol>
       <li>請用 <strong>Chrome</strong> 或 <strong>Edge</strong> 開啟本頁（不支援 Safari／Firefox）。</li>
@@ -125,8 +113,6 @@
         此瀏覽器不支援 Web Serial。請改用 Chrome 或 Edge，並以 HTTPS／localhost 開啟。
       </span>
     </esp-web-install-button>
-
-    <p class="foot">ESP Web Tools · 分區：bootloader 0x1000 · app 0x10000 · LittleFS 0x3D0000</p>
   </div>
 </body>
 </html>

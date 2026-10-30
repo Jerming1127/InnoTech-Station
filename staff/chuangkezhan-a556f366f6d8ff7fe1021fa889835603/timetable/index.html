@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../staff.css" />
+  <link rel="stylesheet" href="../staff.css?v=1" />
 </head>
 <body>
   <div id="staff-gate"></div>
@@ -25,17 +25,14 @@
       </header>
 
       <h1>一週時間表</h1>
-      <p class="muted">分頁：星期日（鎖匙＋小息當值）｜逢星期一至五課堂。Inno Tech 唔寫 ITLC。唔顯示學生姓名。</p>
 
       <div class="tt-tabs" id="tt-tabs" role="tablist" aria-label="日子"></div>
       <div class="tt-panel card" id="tt-panel" role="tabpanel"></div>
-
-      <p class="footnote">資料來自 timetable-config.js。鎖匙只列已知；空白＝待主人填。</p>
     </div>
   </div>
 
   <script src="../auth-config.js"></script>
-  <script src="../auth.js"></script>
+  <script src="../auth.js?v=1"></script>
   <script src="timetable-config.js"></script>
   <script>
 (function () {
@@ -81,7 +78,6 @@
     var keys = cfg.KEYS || [];
     var html = "";
     html += "<h2 class=\"tt-panel__title\">星期日 · 總覽</h2>";
-    html += "<p class=\"muted\" style=\"margin-top:0\">鎖匙表、小息當值同週間概覽。課堂詳情見「逢星期×」分頁。</p>";
 
     html += "<h3 class=\"tt-subh\">鎖匙表</h3>";
     html += "<ul class=\"tt-keys\">";
@@ -132,7 +128,7 @@
     html += "<h2 class=\"tt-panel__title\">" + escapeHtml(day.label) + "</h2>";
     if (day.breakDuty) {
       html +=
-        "<p class=\"tt-break-banner\">小息一：主人需要當值（本日本暫定小息當值日；時間可稍後補）</p>";
+        "<p class=\"tt-break-banner\">小息一：主人需要當值</p>";
     }
     html += "<ul class=\"tt-slots\">";
     (day.slots || []).forEach(function (slot) {

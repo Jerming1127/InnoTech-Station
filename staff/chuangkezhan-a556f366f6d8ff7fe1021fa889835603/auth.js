@@ -209,7 +209,6 @@
           : '<p class="err" id="gate-setup-warn">尚未設定 Google OAuth Client ID。請喺 auth-config.js 填入 Client ID 後再試。</p>') +
         '<div id="gsi-btn-wrap" class="gsi-btn-wrap"></div>' +
         '<p class="err" id="gate-err" hidden></p>' +
-        '<p class="footnote">靜態 GitHub Pages：前端允許名單可被閱讀原始碼嘅人睇到；仍然比共用密碼難被學生隨手 hack。資料只存本機瀏覽器。</p>' +
         "</div>";
 
       if (!ready) return;

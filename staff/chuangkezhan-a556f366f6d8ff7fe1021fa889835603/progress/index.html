@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../staff.css" />
+  <link rel="stylesheet" href="../staff.css?v=1" />
 </head>
 <body>
   <div id="staff-gate"></div>
@@ -33,7 +33,6 @@
       <div class="prog-hero">
         <div>
           <h1>上課日子教學進度表</h1>
-          <p class="muted" style="margin:0.25rem 0 0">18 週 × 六班一覽（含 1C；列＝週次、欄＝班別）。讀取用 Sheet share-link CSV；寫入經 Apps Script。未設 Sheet 則本機可編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
@@ -47,12 +46,11 @@
         </table>
       </div>
 
-      <p class="footnote">讀取：share-link CSV。寫入：部署 Apps Script 後填 APPS_SCRIPT_URL（見 ../apps-script/README.md）。唔存學生姓名；須 Google 登入。</p>
     </div>
   </div>
 
   <script src="../auth-config.js"></script>
-  <script src="../auth.js"></script>
+  <script src="../auth.js?v=1"></script>
   <script src="progress-config.js?v=WRITE1"></script>
   <script>
 (function () {
@@ -209,7 +207,7 @@
       return;
     }
     if (!state.updatedAt) {
-      el.textContent = "本機模式 · 改完自動儲存";
+      el.textContent = "本機模式";
       return;
     }
     try {
@@ -471,7 +469,7 @@
       state.__week9Seeded = false;
     }
     setChromeForMode();
-    showNote(note || "設定 Sheet CSV 網址後自動載入（見 progress-config.js）。而家用本機可編輯格。");
+    showNote(note || "");
     setStamp();
     renderMatrix();
   }
@@ -481,11 +479,7 @@
     sheetDataOk = true;
     state = grid;
     setChromeForMode();
-    if (canWriteSheet()) {
-      showNote("已從 Google Sheet CSV 載入。改格會自動寫回 Sheet（debounce）。");
-    } else {
-      showNote("已從 Google Sheet CSV 載入（唯讀）。未接寫入：部署 Apps Script 後填 APPS_SCRIPT_URL／WRITE_TOKEN（見 apps-script/README.md）。");
-    }
+    showNote("");
     setStamp();
     renderMatrix();
   }
