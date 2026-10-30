@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=0.15-demo-pin3" />
+  <link rel="stylesheet" href="styles.css?v=0.30" />
   <style>
     /* —— lightweight scroll-pin demo (no GSAP) —— */
     .demo-banner {
@@ -60,15 +60,6 @@
       margin-top: 0.75rem;
       font-size: clamp(1.35rem, 3vw, 2rem);
     }
-    .pin-hint {
-      margin: 1.75rem 0 0;
-      font-family: var(--zh), var(--en);
-      font-size: 0.9rem;
-      letter-spacing: 0.06em;
-      color: var(--mute);
-      opacity: 0.85;
-      transition: opacity 0.2s ease;
-    }
     .pin-progress {
       position: absolute;
       left: 50%;
@@ -92,12 +83,6 @@
       margin: 0 auto;
       padding-top: 0.5rem;
     }
-    .pin-after__label {
-      margin: 0 0 1rem;
-      font-family: var(--zh), var(--en);
-      font-size: 0.85rem;
-      color: var(--mute);
-    }
 
     @media (max-width: 720px) {
       .pin-sticky { top: 64px; height: calc(100vh - 64px); }
@@ -114,14 +99,13 @@
         transform: none !important;
         opacity: 1 !important;
       }
-      .pin-progress, .pin-hint { display: none; }
+      .pin-progress { display: none; }
     }
   </style>
 </head>
 <body>
   <p class="demo-banner">
-    Demo v2 · 1.1 屏 · 大站牌 · 有用連結 · 2026-10-25 15:19 HKT ·
-    <a href="./">返主頁</a>
+    Demo · <a href="./">返主頁</a>
   </p>
 
   <nav class="top-nav" aria-label="主導航" id="top-nav">
@@ -144,7 +128,6 @@
           <h1 class="station-board__zh">創科站</h1>
           <p class="station-board__en">InnoTech</p>
         </header>
-        <p class="pin-hint" id="pin-hint">向下滾 · 站牌先卡住，再鬆開</p>
         <div class="pin-progress" aria-hidden="true">
           <span class="pin-progress__bar" id="pin-bar"></span>
         </div>
@@ -152,10 +135,9 @@
     </section>
 
     <div class="pin-after">
-      <p class="pin-after__label">↓ 已鬆開 · Flag + 有用連結</p>
       <section class="junction" aria-label="主目錄">
         <nav class="nav-grid" aria-label="暫定分頁">
-          <a class="flag" href="./#classroom" title="Classroom · 課堂示範 · 幹綫 1">
+          <a class="flag" href="./#classroom">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -168,7 +150,7 @@
               </span>
             </span>
           </a>
-          <a class="flag" href="./#practice" title="Practice · 互動練習 · 幹綫 2">
+          <a class="flag" href="./#practice">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -181,7 +163,7 @@
               </span>
             </span>
           </a>
-          <a class="flag" href="./#resources" title="Resources · 教學資源 · 幹綫 3">
+          <a class="flag" href="./#resources">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -194,7 +176,7 @@
               </span>
             </span>
           </a>
-          <a class="flag" href="./#gallery" title="Gallery · 學生作品 · 幹綫 4">
+          <a class="flag" href="./#gallery">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -209,7 +191,7 @@
           </a>
         </nav>
         <nav class="gantry-wrap" aria-label="有用連結">
-          <a class="gantry" href="./#links" title="Useful Links · 有用連結" aria-label="Useful Links · 有用連結">
+          <a class="gantry" href="./#links" aria-label="Useful Links · 有用連結">
             <div class="gantry__top">
               <div class="gantry__side gantry__side--left"></div>
               <span class="gantry__text"><span class="en">Useful Links</span><span class="zh">有用連結</span></span>
@@ -253,15 +235,9 @@
             </div>
           </a>
         </nav>
-
-        <p class="junction__note">Demo · 1.1 屏 pin · 站牌放大 · 已補有用連結 · 正式站未改。</p>
       </section>
     </div>
 
-    <footer class="foot">
-      <span class="foot__dot" aria-hidden="true"></span>
-      Demo scroll-pin · 草稿
-    </footer>
   </div>
 
   <script>
@@ -272,7 +248,6 @@
   var scene = document.getElementById('pin-scene');
   var board = document.getElementById('pin-board');
   var bar = document.getElementById('pin-bar');
-  var hint = document.getElementById('pin-hint');
   if (!scene || !board) return;
 
   var ticking = false;
@@ -290,7 +265,6 @@
     board.style.transform = 'scale(' + scale.toFixed(4) + ')';
     board.style.opacity = String((1 - p * 0.12).toFixed(3));
     if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
-    if (hint) hint.style.opacity = String(Math.max(0, 1 - p * 1.4).toFixed(3));
   }
 
   function onScroll() {

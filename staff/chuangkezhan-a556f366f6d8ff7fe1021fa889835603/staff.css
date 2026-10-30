@@ -96,13 +96,6 @@ h2 {
   font-size: 0.95rem;
 }
 
-.footnote {
-  margin: 1.25rem 0 0;
-  font-size: 0.78rem;
-  color: var(--muted);
-  line-height: 1.45;
-}
-
 .err {
   color: var(--danger);
   font-size: 0.9rem;
@@ -177,18 +170,7 @@ h2 {
 .app-card__title {
   font-size: 1.25rem;
   font-weight: 700;
-  margin: 0 0 0.35rem;
-}
-.app-card__desc {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-.app-card__arrow {
-  margin-top: 0.85rem;
-  font-size: 0.88rem;
-  color: var(--accent);
-  font-weight: 600;
 }
 
 /* Forms */
@@ -691,14 +673,6 @@ h2 {
 .longhu-hero .stamp {
   font-size: 0.85rem;
   color: var(--muted);
-}
-.longhu-kicker {
-  margin: 0;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #b45309;
 }
 
 .longhu-tabs {

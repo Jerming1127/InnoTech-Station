@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../staff.css" />
+  <link rel="stylesheet" href="../staff.css?v=1" />
 </head>
 <body>
   <div id="staff-gate"></div>
@@ -21,11 +21,11 @@
         <div class="topbar__actions">
           <button type="button" class="btn btn-sm" id="btn-reload-sheet" hidden>重新載入 Sheet</button>
           <button type="button" class="btn btn-sm" id="btn-export">匯出 JSON</button>
-          <label class="btn btn-sm" id="btn-import-json-wrap" style="cursor:pointer;margin:0" title="完整備份還原">
+          <label class="btn btn-sm" id="btn-import-json-wrap" style="cursor:pointer;margin:0">
             匯入 JSON
             <input type="file" id="import-file" accept="application/json,.json" class="sr-only" />
           </label>
-          <label class="btn btn-sm" id="btn-import-csv-wrap" style="cursor:pointer;margin:0" title="只匯入同學名單">
+          <label class="btn btn-sm" id="btn-import-csv-wrap" style="cursor:pointer;margin:0">
             匯入 CSV 名單
             <input type="file" id="import-csv" accept="text/csv,.csv,text/plain" class="sr-only" />
           </label>
@@ -36,9 +36,7 @@
 
       <div class="longhu-hero">
         <div>
-          <p class="longhu-kicker">創科站 · Classroom Rank</p>
           <h1>龍虎榜</h1>
-          <p class="muted" style="margin:0.25rem 0 0">班別只有 1A／1B／2A／2B／3B（無 1C）。讀取用 Sheet share-link CSV；寫入經 Apps Script（見 longhu-config.js）。未設 Sheet 則本機編輯。</p>
         </div>
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
@@ -50,11 +48,11 @@
       <section class="longhu-stage" id="rank-stage">
         <div class="podium" id="podium" aria-label="Top 3 Rank"></div>
         <div class="rank-rail" id="rank-rail" aria-label="Rank list"></div>
-        <p class="empty" id="rank-empty" hidden>尚未有同學。喺下面加入名字先。</p>
+        <p class="empty" id="rank-empty" hidden>尚未有同學。</p>
       </section>
 
       <section class="card" id="roster-card">
-        <p class="section-label" id="roster-label">名單（自行輸入）</p>
+        <p class="section-label" id="roster-label">名單</p>
         <div class="row" style="margin-bottom:0.75rem" id="roster-add-row">
           <label class="field" style="margin:0;min-width:6rem;max-width:8rem">
             <span class="sr-only">學號</span>
@@ -62,7 +60,7 @@
           </label>
           <label class="field" style="margin:0;flex:1;min-width:10rem">
             <span class="sr-only">同學名</span>
-            <input type="text" id="student-name" placeholder="輸入同學名後按加入" autocomplete="off" />
+            <input type="text" id="student-name" placeholder="同學名" autocomplete="off" />
           </label>
           <button type="button" class="btn btn-primary" id="btn-add-student">加入</button>
         </div>
@@ -80,7 +78,6 @@
           </table>
         </div>
         <p class="empty" id="roster-empty">尚未加入同學。</p>
-        <p class="muted" id="roster-hint" style="margin:0.75rem 0 0;font-size:0.82rem">提示：喺 Rank 區點名開加分，或名單撳「加分」。本機 CSV：UTF-8；最左可選 <code>學號</code>／<code>id</code>／<code>studentId</code>，必填 <code>name</code>／<code>姓名</code>，可選 <code>class</code>／<code>班別</code>（1A／1B／2A／2B／3B）、<code>score</code>／<code>分數</code>。Sheet 模式見 longhu-config.js。</p>
       </section>
 
       <section class="card">
@@ -89,7 +86,6 @@
         <p class="empty" id="log-empty">暫無紀錄。</p>
       </section>
 
-      <p class="footnote">Sheet 讀取：share-link CSV。寫入：部署 Apps Script 後填 APPS_SCRIPT_URL（見 ../apps-script/README.md）。未接寫入時請直接改 Sheet。須 Google 登入。</p>
     </div>
   </div>
 
@@ -100,7 +96,7 @@
       <p class="muted" id="award-who" style="margin-top:0"></p>
       <div class="catalog-tabs" id="catalog-tabs"></div>
       <div class="reason-grid" id="reason-grid"></div>
-      <p class="section-label" style="margin-top:0.85rem">分數（1–4）</p>
+      <p class="section-label" style="margin-top:0.85rem">分數</p>
       <div class="pts-row" id="pts-row"></div>
       <p class="err" id="award-err" hidden></p>
       <div class="row" style="margin-top:1rem">
@@ -111,7 +107,7 @@
   </div>
 
   <script src="../auth-config.js"></script>
-  <script src="../auth.js"></script>
+  <script src="../auth.js?v=1"></script>
   <script src="longhu-config.js?v=WRITE1"></script>
   <script>
 (function () {
@@ -284,7 +280,7 @@
       el.textContent = canWriteSheet() ? "Sheet 模式（可寫入）" : "Sheet 模式（唯讀）";
       return;
     }
-    el.textContent = "本機模式 · 可加分／編輯名單";
+    el.textContent = "本機模式";
   }
 
   function setChromeForMode() {
@@ -296,20 +292,12 @@
     var cw = document.getElementById("btn-import-csv-wrap");
     var addRow = document.getElementById("roster-add-row");
     var label = document.getElementById("roster-label");
-    var hint = document.getElementById("roster-hint");
     if (reload) reload.hidden = !locked;
     if (exp) exp.hidden = locked;
     if (jw) jw.hidden = locked;
     if (cw) cw.hidden = locked;
     if (addRow) addRow.hidden = locked;
-    if (label) {
-      if (!locked) label.textContent = "名單（自行輸入）";
-      else if (canWriteSheet()) label.textContent = "名單（Sheet · 可加分）";
-      else label.textContent = "名單（Sheet 唯讀）";
-    }
-    if (hint) {
-      hint.hidden = locked;
-    }
+    if (label) label.textContent = "名單";
     setStamp();
   }
 
@@ -847,7 +835,7 @@
     sheetMode = false;
     sheetDataOk = false;
     setChromeForMode();
-    showNote(note || "設定 Sheet CSV 網址後自動載入（見 longhu-config.js）。而家用本機可編輯／加分。");
+    showNote(note || "");
     renderAll();
   }
 
@@ -869,13 +857,7 @@
     sheetDataOk = true;
     state = next;
     setChromeForMode();
-    var base = metaNote || ("已從 Google Sheet（share-link）載入 · 可重新載入。");
-    if (!canWriteSheet()) {
-      base += " 未接寫入：部署 Apps Script 後填 APPS_SCRIPT_URL／WRITE_TOKEN（見 apps-script/README.md）。";
-    } else {
-      base += " 可喺榜上加分，即時寫入 Sheet。";
-    }
-    showNote(base);
+    showNote(metaNote || "");
     renderAll();
   }
 
@@ -1036,14 +1018,7 @@
       .then(function (text) {
         var next = applySheetCsv(text);
         var m = next.__sheetMeta || {};
-        enterSheetMode(
-          next,
-          "已從 Google Sheet（share-link）載入 · " +
-            (m.added || 0) +
-            " 人" +
-            (m.skipped ? "（略過 " + m.skipped + " 行）" : "") +
-            "。"
-        );
+        enterSheetMode(next, m.skipped ? "略過 " + m.skipped + " 行。" : "");
       })
       .catch(function (err) {
         enterSheetFailure(err);

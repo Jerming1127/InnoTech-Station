@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=0.29" />
+  <link rel="stylesheet" href="styles.css?v=0.30" />
 </head>
 <body>
   <nav class="top-nav" aria-label="主導航" id="top-nav">
@@ -47,7 +47,7 @@
           <p class="station-board__en">InnoTech</p>
         </header>
         <nav class="nav-grid nav-grid--stack" aria-label="暫定分頁">
-          <a class="flag" href="#classroom" title="Classroom · 課堂示範 · 幹綫 1">
+          <a class="flag" href="#classroom">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -61,7 +61,7 @@
             </span>
           </a>
 
-          <a class="flag" href="#practice" title="Practice · 互動練習 · 幹綫 2">
+          <a class="flag" href="#practice">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -75,7 +75,7 @@
             </span>
           </a>
 
-          <a class="flag" href="#resources" title="Resources · 教學資源 · 幹綫 3">
+          <a class="flag" href="#resources">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -89,7 +89,7 @@
             </span>
           </a>
 
-          <a class="flag" href="#gallery" title="Gallery · 學生作品 · 幹綫 4">
+          <a class="flag" href="#gallery">
             <img class="flag__plate" src="flag-left-blank-transparent.png" alt="" width="461" height="138" />
             <span class="flag__overlay">
               <span class="flag__text">
@@ -121,7 +121,7 @@
       <section class="junction" aria-label="主目錄">
         <!-- v0.15 Gantry：Useful Links／有用連結；Flag Left 已移入 sticky header -->
         <nav class="gantry-wrap" aria-label="有用連結">
-          <a class="gantry" href="#links" title="Useful Links · 有用連結" aria-label="Useful Links · 有用連結">
+          <a class="gantry" href="#links" aria-label="Useful Links · 有用連結">
             <div class="gantry__top">
               <div class="gantry__side gantry__side--left"></div>
               <span class="gantry__text"><span class="en">Useful Links</span><span class="zh">有用連結</span></span>
@@ -165,22 +165,18 @@
             </div>
           </a>
         </nav>
-
-        <p class="junction__note">分頁名稱暫定 · Flag 導向牌喺 sticky header（左站名／右四行）· Gantry 高速掣跟 TPDM 金樣 v8</p>
       </section>
 
 
       <section class="board" id="resources" aria-label="教學資源">
         <div class="board__plate">
           <h2 class="board__h">教學資源</h2>
-          <p>Resources · 韌體／專案下載。</p>
           <ul class="resource-list">
             <li class="resource-card">
               <a class="resource-card__link" href="projects/hk-bus-eta-cyd/">
                 <span class="resource-card__title">巴士報站 · HK Bus ETA CYD</span>
                 <span class="ver-badge">v1.4.7</span>
               </a>
-              <p class="resource-card__desc">座枱 CYD 顯示九巴／城巴實時到站；手機 Wi‑Fi 設定；天文台溫度；LVF4 繁中 UI。</p>
               <p class="resource-card__acts">
                 <a href="projects/hk-bus-eta-cyd/">專案頁</a>
                 · <a href="projects/hk-bus-eta-cyd/flash/">一鍵燒錄</a>
@@ -194,14 +190,6 @@
       <section class="board" id="links" aria-label="有用連結">
         <div class="board__plate">
           <h2 class="board__h">有用連結</h2>
-          <p>Useful Links · 有用連結（內容稍後補上）。</p>
-        </div>
-      </section>
-
-      <section class="board" id="about">
-        <div class="board__plate">
-          <h2 class="board__h">本站說明</h2>
-          <p>呢度係創科／DT／電腦科網頁主頁草稿。站名同四個 Flag 導向牌喺全闊 sticky header（左大半創科站、右直排四牌、左→右漸變）；Flag 用透明 Flag Left 底圖 + CSS 叠中英字同幹綫盾；下排另有頁面寬 Gantry 高速掣（綠底 #006928、三線箭嘴、ExpresswayRed；金樣 v8 · Useful Links／有用連結）。</p>
         </div>
       </section>
     </main>
@@ -209,7 +197,6 @@
     <footer class="foot">
       <span class="foot__dot" aria-hidden="true"></span>
       <div class="foot__meta">
-        <p class="foot__line">GitHub Pages · 靜態站 · 草稿 v0.29 · LRT train larger</p>
         <p class="foot__credit">輕鐵側視圖 © <span lang="en">K.Y.Chung</span>／南粵急行 · <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" rel="license noopener" target="_blank">CC BY-NC-ND 4.0</a></p>
       </div>
     </footer>

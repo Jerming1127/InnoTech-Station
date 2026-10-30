@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="staff.css" />
+  <link rel="stylesheet" href="staff.css?v=1" />
 </head>
 <body>
   <div id="staff-gate"></div>
@@ -25,32 +25,23 @@
       </header>
 
       <h1>職員區</h1>
-      <p class="muted">唔喺公開首頁／導覽；請用私人連結分享。須 Google 登入。龍虎榜同教學進度表優先讀學校 Google Sheet CSV（唯讀）；未設網址則本機。另有一週時間表。</p>
 
       <div class="card-grid">
         <a class="app-card" href="leaderboard/">
           <p class="app-card__title">龍虎榜</p>
-          <p class="app-card__desc">1A／1B／2A／2B／3B Classroom Rank。優先學校 Google Sheet CSV（唯讀）；未設網址則本機加分／名單。無 1C。</p>
-          <p class="app-card__arrow">開啟 →</p>
         </a>
         <a class="app-card" href="progress/">
           <p class="app-card__title">上課日子教學進度表</p>
-          <p class="app-card__desc">18 週 × 六班（含 1C；列＝週次、欄＝班別）。優先學校 Google Sheet CSV（唯讀）；未設網址則本機編輯。</p>
-          <p class="app-card__arrow">開啟 →</p>
         </a>
         <a class="app-card" href="timetable/">
           <p class="app-card__title">一週時間表</p>
-          <p class="app-card__desc">星期一至五：時間／班別／科目／課室。常規週 seed；本機可參考。</p>
-          <p class="app-card__arrow">開啟 →</p>
         </a>
       </div>
-
-      <p class="footnote">靜態 GitHub Pages：前端允許名單可被閱讀原始碼嘅人睇到；仍然比共用密碼難被學生隨手 hack。</p>
     </div>
   </div>
 
   <script src="auth-config.js"></script>
-  <script src="auth.js"></script>
+  <script src="auth.js?v=1"></script>
   <script>
     StaffAuth.requireAuth();
     document.getElementById("btn-logout").addEventListener("click", function () {
