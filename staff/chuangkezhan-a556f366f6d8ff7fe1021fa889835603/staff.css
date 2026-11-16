@@ -658,6 +658,9 @@ h2 {
 .wrap--wide {
   width: min(1100px, 100% - 1.5rem);
 }
+.wrap--matrix {
+  width: min(1400px, calc(100% - 1.25rem));
+}
 
 .longhu-hero {
   display: flex;
@@ -929,15 +932,15 @@ h2 {
 .prog-matrix {
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 960px;
+  min-width: 1180px;
   width: 100%;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 .prog-matrix th,
 .prog-matrix td {
   border-bottom: 1px solid var(--line);
   border-right: 1px solid var(--line);
-  padding: 0.35rem;
+  padding: 0.28rem 0.3rem;
   vertical-align: top;
 }
 .prog-matrix thead th {
@@ -948,24 +951,53 @@ h2 {
   color: #fff;
   font-weight: 700;
   text-align: center;
-  padding: 0.55rem 0.35rem;
+  padding: 0.4rem 0.3rem;
   font-size: 0.75rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.prog-matrix thead tr.matrix-classes th:not([rowspan]) {
+  height: 2.2rem;
+}
+.prog-matrix thead tr.matrix-tracks th {
+  top: 2.2rem;
+  height: 1.65rem;
+  z-index: 2;
+  background: #314056;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.22rem 0.25rem;
+}
+.prog-matrix thead th[rowspan] {
+  z-index: 4;
+  vertical-align: middle;
+}
+.prog-matrix th.matrix-group-end,
+.prog-matrix td.matrix-group-end {
+  border-right: 2px solid #b7c3d1;
+}
+.prog-matrix thead th.matrix-group-end {
+  border-right-color: rgba(255, 255, 255, 0.32);
 }
 .prog-matrix .sticky-col {
   position: sticky;
   left: 0;
   z-index: 1;
   background: #f8fafc;
-  min-width: 5.5rem;
-  max-width: 6.5rem;
-  text-align: left;
+  min-width: 4.1rem;
+  max-width: 4.6rem;
+  text-align: center;
   font-weight: 700;
 }
-.prog-matrix thead .sticky-col {
-  z-index: 3;
+.prog-matrix thead th.sticky-col {
+  z-index: 5;
   background: #1a2332;
 }
-.matrix-class { display: block; font-size: 1rem; }
+.matrix-class { display: block; font-size: 0.95rem; }
+.matrix-class-head {
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+}
 .matrix-days {
   display: block;
   font-size: 0.68rem;
@@ -976,21 +1008,31 @@ h2 {
 .prog-matrix thead .matrix-days { color: #cbd5e1; }
 
 .matrix-cell {
-  min-width: 7.5rem;
-  max-width: 9rem;
+  min-width: 6.15rem;
   background: #fff;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.35;
+}
+.matrix-cell.is-workshop {
+  background: #f8fafc;
 }
 .matrix-cell.is-filled {
   background: #f0fdf4;
 }
+.matrix-cell.is-workshop.is-filled {
+  background: #ecfdf5;
+}
 .matrix-input {
   width: 100%;
-  min-height: 2.6rem;
+  min-height: 2.35rem;
   border: none;
   resize: vertical;
+  overflow: hidden;
   font: inherit;
+  line-height: 1.35;
   background: transparent;
-  padding: 0.2rem;
+  padding: 0.15rem;
   color: var(--ink);
 }
 .matrix-input:focus {
