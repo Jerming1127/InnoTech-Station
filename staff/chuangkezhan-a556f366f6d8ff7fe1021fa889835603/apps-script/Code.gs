@@ -21,6 +21,7 @@ function doGet(e) {
     ok: true,
     service: 'innotech-staff-write',
     boards: ['longhu', 'progress'],
+    progressTracks: ['電腦', '工場', '數學'],
     hint: 'POST JSON {token, board, action, ...}'
   });
 }
@@ -112,22 +113,175 @@ function handleLonghu_(action, body) {
 
 function handleProgress_(action, body) {
   var sh = openSheetByGid_(prop_('PROGRESS_SHEET_ID'), prop_('PROGRESS_GID'));
-  var map = headerMap_(sh);
 
   if (action === 'setcell' || action === 'set_cell') {
-    var cls = normClass_(body.class || body.className);
+    var parsed = parseClassHeader_(body.class || body.className);
+    var cls = parsed ? parsed.class : normClass_(body.class || body.className);
     if (!ALLOWED_CLASSES_PROGRESS[cls]) throw new Error('班別無效');
-    if (!map[cls]) throw new Error('Sheet 未有欄「' + cls + '」');
+    var want = normTrack_(body.track || body.sub || '');
+    if (!want && parsed && parsed.track) want = parsed.track;
+    if (!want) {
+      if (body.track) throw new Error('track 只接受 電腦／工場／數學');
+      want = legacyProgressTrack_(cls);
+    }
+    var layout = progressLayout_(sh);
+    var col = 0;
+    var i;
+    for (i = 0; i < layout.cols.length; i++) {
+      if (layout.cols[i].class === cls && layout.cols[i].track === want) {
+        col = layout.cols[i].col;
+        break;
+      }
+    }
+    if (!col) throw new Error('Sheet 未有欄「' + cls + ' ' + want + '」');
     var week = Number(body.week);
     if (!(week >= 1 && week <= 18)) throw new Error('week 必須 1–18');
     var text = body.text != null ? String(body.text) : (body.value != null ? String(body.value) : '');
     var row = findProgressWeekRow_(sh, week);
     if (!row) throw new Error('搵唔到第 ' + week + ' 週列');
-    sh.getRange(row, map[cls]).setValue(text);
-    return { ok: true, action: 'setCell', week: week, class: cls, row: row };
+    sh.getRange(row, col).setValue(text);
+    return {
+      ok: true,
+      action: 'setCell',
+      week: week,
+      class: cls,
+      track: want,
+      row: row,
+      col: col
+    };
   }
 
   throw new Error('progress action 只接受 setCell');
+}
+
+/**
+ * Two header rows: class (forward-filled across a merge) + 電腦/工場/數學.
+ * Legacy single header maps 1B→工場, 2A→電腦, 1C→數學, other classes→電腦.
+ */
+function progressLayout_(sh) {
+  var lastCol = Math.max(sh.getLastColumn(), 1);
+  var row1 = sh.getRange(1, 1, 1, lastCol).getValues()[0];
+  var row2 = [];
+  if (sh.getLastRow() >= 2) {
+    row2 = sh.getRange(2, 1, 1, lastCol).getValues()[0];
+  }
+  var twoRow = rowIsTrackHeader_(row2) || (!rowIsWeekLabel_(row2[0]) && headerLooksPaired_(row1));
+  var cols = [];
+  var lastCls = '';
+  var seen = {};
+  var c;
+  for (c = 1; c < row1.length; c++) {
+    var cell = String(row1[c] || '').trim();
+    var parsed = parseClassHeader_(cell);
+    if (parsed) lastCls = parsed.class;
+    else if (cell) lastCls = '';
+    if (!lastCls || !ALLOWED_CLASSES_PROGRESS[lastCls]) continue;
+    var track = '';
+    if (twoRow) {
+      track = normTrack_(row2[c]);
+      if (!track && parsed && parsed.track) track = parsed.track;
+      if (!track && lastCls === '1C') track = '數學';
+      if (!track) {
+        var n = seen[lastCls] || 0;
+        var pair = progressTracksFor_(lastCls);
+        if (pair[n]) track = pair[n];
+      }
+    } else {
+      track = (parsed && parsed.track) || legacyProgressTrack_(lastCls);
+    }
+    if (!track) continue;
+    if (!trackAllowedFor_(lastCls, track)) continue;
+    seen[lastCls] = (seen[lastCls] || 0) + 1;
+    cols.push({ col: c + 1, class: lastCls, track: track });
+  }
+  return { twoRow: twoRow, cols: cols };
+}
+
+function progressTracksFor_(cls) {
+  if (cls === '1C') return ['數學'];
+  return ['電腦', '工場'];
+}
+
+function trackAllowedFor_(cls, track) {
+  var list = progressTracksFor_(cls);
+  var i;
+  for (i = 0; i < list.length; i++) {
+    if (list[i] === track) return true;
+  }
+  return false;
+}
+
+function legacyProgressTrack_(cls) {
+  if (cls === '1B') return '工場';
+  if (cls === '2A') return '電腦';
+  if (cls === '1C') return '數學';
+  return '電腦';
+}
+
+function normTrack_(v) {
+  var s = String(v || '').replace(/\s+/g, '');
+  if (!s) return '';
+  var map = {
+    '電腦': '電腦',
+    '电脑': '電腦',
+    'PC': '電腦',
+    '工場': '工場',
+    '工廠': '工場',
+    '工厂': '工場',
+    '數學': '數學',
+    '数学': '數學',
+    'MATH': '數學'
+  };
+  if (map[s]) return map[s];
+  var up = s.toUpperCase();
+  if (map[up]) return map[up];
+  return '';
+}
+
+function parseClassHeader_(raw) {
+  var compact = String(raw || '').replace(/\s+/g, '');
+  if (!compact) return null;
+  var m = compact.match(/^(1A|1B|1C|2A|2B|3B)/i);
+  if (!m) return null;
+  var cls = m[1].toUpperCase();
+  if (!ALLOWED_CLASSES_PROGRESS[cls]) return null;
+  return { class: cls, track: normTrack_(compact.slice(m[1].length)) };
+}
+
+function rowIsWeekLabel_(label) {
+  var s = String(label || '').trim();
+  if (/^w\s*\d+/i.test(s)) return true;
+  if (/^\d+$/.test(s)) return true;
+  if (/第\s*\d+\s*週/.test(s)) return true;
+  return false;
+}
+
+function rowIsTrackHeader_(row) {
+  if (!row || !row.length || rowIsWeekLabel_(row[0])) return false;
+  var hits = 0;
+  var i;
+  for (i = 1; i < row.length; i++) {
+    if (normTrack_(row[i])) hits++;
+  }
+  return hits >= 2;
+}
+
+function headerLooksPaired_(header) {
+  var last = '';
+  var pairs = 0;
+  var i;
+  for (i = 1; i < header.length; i++) {
+    var cell = String(header[i] || '').trim();
+    var parsed = parseClassHeader_(cell);
+    if (!cell) {
+      if (last) pairs++;
+      continue;
+    }
+    if (parsed && parsed.class === last) pairs++;
+    if (parsed) last = parsed.class;
+    else last = '';
+  }
+  return pairs >= 2;
 }
 
 function findLonghuRow_(sh, map, body) {

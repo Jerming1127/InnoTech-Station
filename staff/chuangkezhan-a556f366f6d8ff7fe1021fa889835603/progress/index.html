@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../staff.css?v=1" />
+  <link rel="stylesheet" href="../staff.css?v=2" />
 </head>
 <body>
   <div id="staff-gate"></div>
 
   <div id="staff-app" hidden>
-    <div class="wrap wrap--wide">
+    <div class="wrap wrap--wide wrap--matrix">
       <header class="topbar">
         <a class="topbar__brand" href="../">← 職員區</a>
         <div class="topbar__spacer"></div>
@@ -40,7 +40,7 @@
       <p class="sheet-note" id="sheet-note" hidden></p>
 
       <div class="matrix-scroll">
-        <table class="prog-matrix" id="prog-matrix" aria-label="週次 × 班別進度">
+        <table class="prog-matrix" id="prog-matrix" aria-label="週次 × 班別（電腦、工場、數學）進度">
           <thead id="matrix-head"></thead>
           <tbody id="matrix-body"></tbody>
         </table>
@@ -51,12 +51,13 @@
 
   <script src="../auth-config.js"></script>
   <script src="../auth.js?v=1"></script>
-  <script src="progress-config.js?v=WRITE1"></script>
+  <script src="progress-config.js?v=TRACKS1"></script>
   <script>
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "innotech-staff-progress-matrix-v1";
+  var STORAGE_KEY = "innotech-staff-progress-matrix-v2";
+  var LEGACY_V1 = "innotech-staff-progress-matrix-v1";
   var LEGACY_V3 = "innotech-staff-progress-v3";
   var cfg = window.ProgressConfig || {};
   var WEEK_COUNT = cfg.WEEK_COUNT || 18;
@@ -97,8 +98,8 @@
     });
   }
 
-  function queueProgressCell(week, classShort, text) {
-    var key = classShort + ":" + week;
+  function queueProgressCell(week, classShort, track, text) {
+    var key = classShort + ":" + track + ":" + week;
     if (cellWriteTimers[key]) clearTimeout(cellWriteTimers[key]);
     document.getElementById("mode-stamp").textContent = "寫入 Sheet…";
     cellWriteTimers[key] = setTimeout(function () {
@@ -106,11 +107,12 @@
         action: "setCell",
         week: week,
         class: classShort,
+        track: track,
         text: text,
       })
         .then(function () {
           setStamp();
-          showNote("已寫入 Sheet：第" + week + "週 · " + classShort, false);
+          showNote("已寫入 Sheet：第" + week + "週 · " + classShort + " " + track, false);
         })
         .catch(function (err) {
           setStamp();
@@ -119,13 +121,82 @@
     }, 600);
   }
 
+  function tracksOf(c) {
+    if (c && c.tracks && c.tracks.length) return c.tracks.slice();
+    return ["電腦", "工場"];
+  }
+
+  function classById(id) {
+    var found = null;
+    CLASSES.forEach(function (c) {
+      if (c.id === id) found = c;
+    });
+    return found;
+  }
+
+  function legacyTrackFor(classId) {
+    var map = cfg.LEGACY_TRACK || {};
+    if (map[classId]) return map[classId];
+    var c = classById(classId);
+    var tracks = tracksOf(c);
+    if (tracks.length === 1) return tracks[0];
+    return "電腦";
+  }
+
   function blankGrid() {
     var cells = {};
     CLASSES.forEach(function (c) {
       cells[c.id] = {};
-      for (var w = 1; w <= WEEK_COUNT; w++) cells[c.id][w] = "";
+      tracksOf(c).forEach(function (track) {
+        cells[c.id][track] = {};
+        for (var w = 1; w <= WEEK_COUNT; w++) cells[c.id][track][w] = "";
+      });
     });
-    return { version: 1, cells: cells, updatedAt: null };
+    return { version: 2, cells: cells, updatedAt: null };
+  }
+
+  function isPlainObject(v) {
+    return !!v && typeof v === "object" && !Array.isArray(v);
+  }
+
+  function bucketMode(bucket) {
+    if (!isPlainObject(bucket)) return "empty";
+    var keys = Object.keys(bucket);
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      if (exactTrack(keys[i])) return "tracks";
+    }
+    for (i = 0; i < keys.length; i++) {
+      if (/^\d+$/.test(keys[i])) return "weeks";
+    }
+    return "empty";
+  }
+
+  /** Copy stored cells. Legacy week maps land on LEGACY_TRACK so old text stays visible. */
+  function applyStoredCells(grid, cells) {
+    if (!cells || typeof cells !== "object") return grid;
+    CLASSES.forEach(function (c) {
+      var bucket = cells[c.id];
+      var mode = bucketMode(bucket);
+      if (mode === "tracks") {
+        tracksOf(c).forEach(function (track) {
+          var weeks = bucket[track];
+          if (!isPlainObject(weeks)) return;
+          for (var w = 1; w <= WEEK_COUNT; w++) {
+            if (weeks[w] != null) grid.cells[c.id][track][w] = String(weeks[w]);
+          }
+        });
+        return;
+      }
+      if (mode === "weeks") {
+        var track = legacyTrackFor(c.id);
+        if (!grid.cells[c.id][track]) return;
+        for (var w2 = 1; w2 <= WEEK_COUNT; w2++) {
+          if (bucket[w2] != null) grid.cells[c.id][track][w2] = String(bucket[w2]);
+        }
+      }
+    });
+    return grid;
   }
 
   function softMigrateV3(raw) {
@@ -139,48 +210,52 @@
         }
       });
       if (!match || !Array.isArray(oc.weeks)) return;
+      var track = legacyTrackFor(match.id);
       oc.weeks.forEach(function (ow) {
         if (!ow || !ow.n || ow.n < 1 || ow.n > WEEK_COUNT) return;
         var parts = [];
         if (ow.label) parts.push(ow.label);
         if (ow.dates) parts.push(ow.dates);
         if (ow.body) parts.push(ow.body);
-        grid.cells[match.id][ow.n] = parts.join(" · ");
+        grid.cells[match.id][track][ow.n] = parts.join(" · ");
       });
     });
     return grid;
   }
 
-  function loadLocal() {
+  function readStoredGrid(key) {
     try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        var data = JSON.parse(raw);
-        if (data && data.cells) {
-          var base = blankGrid();
-          CLASSES.forEach(function (c) {
-            if (!data.cells[c.id]) return;
-            for (var w = 1; w <= WEEK_COUNT; w++) {
-              if (data.cells[c.id][w] != null) base.cells[c.id][w] = String(data.cells[c.id][w]);
-            }
-          });
-          base.updatedAt = data.updatedAt || null;
-          return base;
-        }
-      }
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data || !data.cells) return null;
+      var grid = blankGrid();
+      applyStoredCells(grid, data.cells);
+      grid.updatedAt = data.updatedAt || null;
+      return grid;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function loadLocal() {
+    var v3grid = null;
+    try {
       var v3 = localStorage.getItem(LEGACY_V3);
-      if (v3) {
-        try { return softMigrateV3(JSON.parse(v3)); } catch (e) {}
-      }
+      if (v3) v3grid = softMigrateV3(JSON.parse(v3));
     } catch (e) {}
-    return blankGrid();
+    return readStoredGrid(STORAGE_KEY) || readStoredGrid(LEGACY_V1) || v3grid || blankGrid();
   }
 
   function persistLocal(immediate) {
     if (sheetMode) return;
     function write() {
       state.updatedAt = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: 2,
+        cells: state.cells,
+        updatedAt: state.updatedAt,
+      }));
       setStamp();
     }
     if (immediate) {
@@ -280,12 +355,44 @@
     return rows;
   }
 
+  function exactTrack(raw) {
+    var s = String(raw || "").replace(/\s+/g, "");
+    if (!s) return "";
+    var map = {
+      "電腦": "電腦",
+      "电脑": "電腦",
+      "PC": "電腦",
+      "pc": "電腦",
+      "工場": "工場",
+      "工廠": "工場",
+      "工厂": "工場",
+      "數學": "數學",
+      "数学": "數學",
+      "MATH": "數學",
+      "math": "數學",
+    };
+    if (map[s]) return map[s];
+    var up = s.toUpperCase();
+    if (map[up]) return map[up];
+    return "";
+  }
+
+  /** "1A", "1C 數學", "1C數學" → { short, track }. */
+  function parseClassHeader(raw) {
+    var compact = String(raw || "").replace(/\s+/g, "");
+    if (!compact) return null;
+    var m = compact.match(/^(1A|1B|1C|2A|2B|3B)/i);
+    if (!m) return null;
+    var short = m[1].toUpperCase();
+    return { short: short, track: exactTrack(compact.slice(m[1].length)) };
+  }
+
   function findClassByShort(short) {
-    var s = String(short || "").trim().toUpperCase();
-    if (!s) return null;
+    var parsed = parseClassHeader(short);
+    if (!parsed) return null;
     var found = null;
     CLASSES.forEach(function (c) {
-      if (c.short === s || s.indexOf(c.short) === 0) found = c;
+      if (c.short === parsed.short) found = c;
     });
     return found;
   }
@@ -308,6 +415,41 @@
     return hits >= 2;
   }
 
+  function rowLooksLikeWeek(row) {
+    var label = String((row && row[0]) || "").trim();
+    if (/^w\s*\d+/i.test(label)) return true;
+    if (/^\d+$/.test(label)) return true;
+    if (/第\s*\d+\s*週/.test(label)) return true;
+    return false;
+  }
+
+  function rowLooksLikeTrackHeader(row) {
+    if (!row || rowLooksLikeWeek(row)) return false;
+    var hits = 0;
+    for (var i = 1; i < row.length; i++) {
+      if (exactTrack(row[i])) hits++;
+    }
+    return hits >= 2;
+  }
+
+  /** Merged (1A, "") or repeated (1A, 1A) class headers — at least one pair. */
+  function headerLooksPaired(header) {
+    var last = "";
+    var pairs = 0;
+    for (var i = 1; i < header.length; i++) {
+      var cell = String(header[i] || "").trim();
+      var parsed = parseClassHeader(cell);
+      if (!cell) {
+        if (last) pairs++;
+        continue;
+      }
+      if (parsed && parsed.short === last) pairs++;
+      if (parsed) last = parsed.short;
+      else last = "";
+    }
+    return pairs >= 2;
+  }
+
   function applyCsv(text) {
     var rows = parseCsv(text);
     if (!rows.length) throw new Error("CSV 空白");
@@ -315,20 +457,48 @@
     var header = rows[0].map(function (x) { return String(x || "").trim(); });
     var h0 = header[0] || "";
 
-    /* Preferred: weeks × classes — header 週次/week + 1A…3B columns */
+    /* Weeks × classes. Two-row header: class spans + 電腦/工場 (1C = 數學). */
     if (headerLooksLikeClasses(header) || /週|week|^w$/i.test(h0)) {
       var classCols = [];
-      for (var c = 1; c < header.length; c++) {
-        var cls = findClassByShort(header[c]);
-        if (cls) classCols.push({ col: c, cls: cls });
+      var twoRow = rows.length > 1 && !rowLooksLikeWeek(rows[1]) &&
+        (rowLooksLikeTrackHeader(rows[1]) || headerLooksPaired(header));
+      var trackRow = twoRow ? rows[1] : null;
+      var startData = twoRow ? 2 : 1;
+      var lastShort = "";
+      var seen = {};
+      for (var c = 1; c < Math.max(header.length, trackRow ? trackRow.length : 0); c++) {
+        var cell = header[c] || "";
+        var parsed = parseClassHeader(cell);
+        if (parsed) lastShort = parsed.short;
+        else if (String(cell).trim()) lastShort = "";
+        if (!lastShort) continue;
+        var cls = findClassByShort(lastShort);
+        if (!cls) continue;
+        var track = "";
+        if (twoRow) {
+          track = exactTrack(trackRow[c]);
+          if (!track && parsed && parsed.track) track = parsed.track;
+          if (!track && lastShort === "1C") track = "數學";
+          if (!track) {
+            var classTracks = tracksOf(cls);
+            var n = seen[lastShort] || 0;
+            if (classTracks[n]) track = classTracks[n];
+          }
+        } else {
+          track = (parsed && parsed.track) || legacyTrackFor(cls.id);
+        }
+        if (!track) continue;
+        if (tracksOf(cls).indexOf(track) < 0) continue;
+        seen[lastShort] = (seen[lastShort] || 0) + 1;
+        classCols.push({ col: c, cls: cls, track: track });
       }
       if (!classCols.length) throw new Error("CSV 未辨識班別欄");
-      for (var r = 1; r < rows.length; r++) {
-        var week = parseWeekNum(rows[r][0], r);
+      for (var r = startData; r < rows.length; r++) {
+        var week = parseWeekNum(rows[r][0], r - startData + 1);
         if (!week) continue;
         classCols.forEach(function (cc) {
           var val = rows[r][cc.col];
-          grid.cells[cc.cls.id][week] = val == null ? "" : String(val);
+          grid.cells[cc.cls.id][cc.track][week] = val == null ? "" : String(val);
         });
       }
       return grid;
@@ -348,9 +518,11 @@
     for (var r2 = 1; r2 < rows.length; r2++) {
       var cls2 = findClassByShort(rows[r2][0]);
       if (!cls2) continue;
+      var legacyTrack = legacyTrackFor(cls2.id);
+      if (!grid.cells[cls2.id][legacyTrack]) continue;
       weekCols.forEach(function (wc) {
         var val2 = rows[r2][wc.col];
-        grid.cells[cls2.id][wc.week] = val2 == null ? "" : String(val2);
+        grid.cells[cls2.id][legacyTrack][wc.week] = val2 == null ? "" : String(val2);
       });
     }
     return grid;
@@ -360,12 +532,22 @@
     var seeds = cfg.WEEK9_DEFAULTS || {};
     var changed = false;
     Object.keys(seeds).forEach(function (cid) {
-      if (!grid.cells[cid]) grid.cells[cid] = {};
-      var cur = grid.cells[cid][9];
-      if (cur == null || !String(cur).trim()) {
-        grid.cells[cid][9] = String(seeds[cid]);
-        changed = true;
+      var spec = seeds[cid];
+      if (spec == null) return;
+      if (typeof spec === "string") {
+        var only = {};
+        only[legacyTrackFor(cid)] = spec;
+        spec = only;
       }
+      if (!grid.cells[cid]) grid.cells[cid] = {};
+      Object.keys(spec).forEach(function (track) {
+        if (!grid.cells[cid][track]) grid.cells[cid][track] = {};
+        var cur = grid.cells[cid][track][9];
+        if (cur == null || !String(cur).trim()) {
+          grid.cells[cid][track][9] = String(spec[track]);
+          changed = true;
+        }
+      });
     });
     grid.__week9Seeded = changed;
     return grid;
@@ -373,30 +555,79 @@
 
   var state = applyWeek9Defaults(loadLocal());
 
+  var fitResizeTimer = null;
+  var fitResizeBound = false;
+
+  function fitArea(ta) {
+    ta.style.height = "auto";
+    ta.style.height = ta.scrollHeight + "px";
+  }
+
+  function fitAllAreas() {
+    var areas = document.querySelectorAll(".matrix-input");
+    for (var i = 0; i < areas.length; i++) fitArea(areas[i]);
+  }
+
+  function bindFitResize() {
+    if (fitResizeBound) return;
+    fitResizeBound = true;
+    window.addEventListener("resize", function () {
+      if (fitResizeTimer) clearTimeout(fitResizeTimer);
+      fitResizeTimer = setTimeout(fitAllAreas, 80);
+    });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(fitAllAreas);
+    }
+  }
+
   function renderMatrix() {
     var head = document.getElementById("matrix-head");
     var body = document.getElementById("matrix-body");
-    var hr = "<tr><th class=\"sticky-col\">週次</th>";
-    CLASSES.forEach(function (c) {
-      var days = c.days
-        ? '<span class="matrix-days">星期' + c.days + "</span>"
-        : "";
-      hr +=
-        "<th><span class=\"matrix-class\">" +
-        c.short +
-        "</span>" +
-        days +
-        "</th>";
-    });
-    hr += "</tr>";
-    head.innerHTML = hr;
+    head.innerHTML = "";
     body.innerHTML = "";
+
+    var classTr = document.createElement("tr");
+    classTr.className = "matrix-classes";
+    var trackTr = document.createElement("tr");
+    trackTr.className = "matrix-tracks";
+
+    var corner = document.createElement("th");
+    corner.className = "sticky-col";
+    corner.rowSpan = 2;
+    corner.scope = "col";
+    corner.textContent = "週次";
+    classTr.appendChild(corner);
+
+    CLASSES.forEach(function (c) {
+      var tracks = tracksOf(c);
+      var th = document.createElement("th");
+      th.className = "matrix-class-head matrix-group-end";
+      th.scope = "colgroup";
+      if (tracks.length === 1) {
+        th.rowSpan = 2;
+        th.textContent = c.header || (c.short + " " + tracks[0]);
+      } else {
+        th.colSpan = tracks.length;
+        th.textContent = c.short;
+        tracks.forEach(function (track, i) {
+          var sth = document.createElement("th");
+          sth.className = "matrix-track-head" + (i === tracks.length - 1 ? " matrix-group-end" : "");
+          sth.scope = "col";
+          sth.textContent = track;
+          trackTr.appendChild(sth);
+        });
+      }
+      classTr.appendChild(th);
+    });
+    head.appendChild(classTr);
+    head.appendChild(trackTr);
 
     for (var week = 1; week <= WEEK_COUNT; week++) {
       (function (wn) {
         var tr = document.createElement("tr");
         var th = document.createElement("th");
         th.className = "sticky-col";
+        th.scope = "row";
         th.innerHTML =
           '<span class="matrix-class">W' +
           wn +
@@ -406,37 +637,48 @@
         tr.appendChild(th);
 
         CLASSES.forEach(function (c) {
-          (function (cid, short) {
-            var td = document.createElement("td");
-            var val = (state.cells[cid] && state.cells[cid][wn]) || "";
-            if (sheetMode && !canWriteSheet()) {
-              td.className = "matrix-cell" + (val ? " is-filled" : "");
-              td.textContent = val;
-              td.title = val;
-            } else {
-              var ta = document.createElement("textarea");
-              ta.className = "matrix-input";
-              ta.rows = 2;
-              ta.value = val;
-              ta.setAttribute("aria-label", "第" + wn + "週 " + short);
-              ta.addEventListener("input", function () {
-                state.cells[cid][wn] = ta.value;
-                td.classList.toggle("is-filled", !!String(ta.value).trim());
-                if (sheetMode) {
-                  queueProgressCell(wn, short, ta.value);
-                } else {
-                  persistLocal();
-                }
-              });
-              td.className = "matrix-cell" + (val ? " is-filled" : "");
-              td.appendChild(ta);
-            }
-            tr.appendChild(td);
-          })(c.id, c.short);
+          var tracks = tracksOf(c);
+          tracks.forEach(function (track, ti) {
+            (function (cid, short, trackName, groupEnd) {
+              if (!state.cells[cid]) state.cells[cid] = {};
+              if (!state.cells[cid][trackName]) state.cells[cid][trackName] = {};
+              var td = document.createElement("td");
+              var val = state.cells[cid][trackName][wn] || "";
+              var tone = trackName === "工場" ? " is-workshop" : "";
+              var edge = groupEnd ? " matrix-group-end" : "";
+              if (sheetMode && !canWriteSheet()) {
+                td.className = "matrix-cell" + tone + edge + (val ? " is-filled" : "");
+                td.textContent = val;
+                td.title = val;
+              } else {
+                var ta = document.createElement("textarea");
+                ta.className = "matrix-input";
+                ta.rows = 2;
+                ta.value = val;
+                ta.setAttribute("aria-label", "第" + wn + "週 " + short + " " + trackName);
+                ta.addEventListener("input", function () {
+                  state.cells[cid][trackName][wn] = ta.value;
+                  td.classList.toggle("is-filled", !!String(ta.value).trim());
+                  fitArea(ta);
+                  if (sheetMode) {
+                    queueProgressCell(wn, short, trackName, ta.value);
+                  } else {
+                    persistLocal();
+                  }
+                });
+                td.className = "matrix-cell" + tone + edge + (val ? " is-filled" : "");
+                td.appendChild(ta);
+                fitArea(ta);
+              }
+              tr.appendChild(td);
+            })(c.id, c.short, track, ti === tracks.length - 1);
+          });
         });
         body.appendChild(tr);
       })(week);
     }
+    fitAllAreas();
+    bindFitResize();
   }
 
   function showNote(msg, isErr) {
@@ -545,7 +787,12 @@
     }
     var cols = table.cols || [];
     var rows = table.rows || [];
-    var headers = cols.map(function (col) { return col.label || col.id || ""; });
+    /* Keep blank labels blank so a merged class header can forward-fill.
+       Falling back to col.id ("B", "C"…) would look like a real header. */
+    var headers = cols.map(function (col) {
+      if (!col || col.label == null) return "";
+      return String(col.label);
+    });
     var start = 0;
     if (headers.every(function (h) { return !String(h).trim(); }) && rows.length) {
       headers = (rows[0].c || []).map(cellVal);
@@ -688,12 +935,7 @@
           if (!data || !data.cells) throw new Error("格式不正確");
           if (!confirm("匯入會覆蓋本機進度矩陣，確定？")) return;
           var base = blankGrid();
-          CLASSES.forEach(function (c) {
-            if (!data.cells[c.id]) return;
-            for (var w = 1; w <= WEEK_COUNT; w++) {
-              if (data.cells[c.id][w] != null) base.cells[c.id][w] = String(data.cells[c.id][w]);
-            }
-          });
+          applyStoredCells(base, data.cells);
           state = base;
           persistLocal(true);
           renderMatrix();
