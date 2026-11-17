@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>B 層提示卡・校園 Fun Day 接食物遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <span class="kicker">給老師決定是否派發</span>
+        <p class="wordmark">Fun Day</p>
+        <h1>B 層提示卡</h1>
+        <p>請按這個順序在 MIT RAISE Playground 補積木。左右移動請用「x 改變」，不要用「移動 10 步」，否則方向一改，左右就會亂。</p>
+      </div>
+      <div class="hero-photo">
+        <img src="images/00-game-stage.png" alt="遊戲畫面：校園操場背景，同學站在下方">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="step" id="start">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">B</div>
+        <h2>你的檔案一開始是這樣</h2>
+      </div>
+      <p>「同學」綠旗只做好位置、顯示和分數歸零；「食物」綠旗只做好隱藏。其餘積木要自己補上。</p>
+      <figure class="fig">
+        <img src="images/09-b-tongxue.png" alt="B 層同學角色：當綠旗被點下，設定 x、y，顯示，並把 score 設為 0，旁邊有要補的提示">
+        <figcaption>「同學」現在只有定位和分數歸零。</figcaption>
+      </figure>
+      <figure class="fig">
+        <img src="images/10-b-food.png" alt="B 層食物角色：當綠旗被點下只有隱藏，旁邊有要補的提示">
+        <figcaption>「食物」現在綠旗之後只有隱藏。</figcaption>
+      </figure>
+    </section>
+
+    <section class="step" id="blocks">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">1</div>
+        <h2>B 層要補的積木</h2>
+      </div>
+      <ol class="ol-steps">
+        <li>「食物」、當綠旗被點下：在「隱藏」之後，重複直到分數大於 49：等待 0.5 秒，移到 x 等於 −220 到 220 的隨機數、y 等於 190，建立自己的分身。</li>
+        <li>「食物」、當我被複製：造型改為 1 到 5 的隨機數，顯示，將 speed 設為 −5；重複直到 y 座標小於 −178，或碰到「同學」：y 改變 speed。跳出後，若碰到「同學」則分數改變 1；然後隱藏，刪除此分身。</li>
+        <li>「同學」、當綠旗被點下（接在定位、顯示、分數歸零之後）：使用模型（貼上網址），開啟視訊鏡頭，視訊透明度設為 80。按綠旗後要等綠色剔號。</li>
+        <li>當模型偵測到 Left：重複直到 Left 信心度小於 0.5：造型改為 Left，x 改變 −10；若 x 座標小於 −220，將 x 設為 −220。Right 同樣，x 改變 10，右邊界限為 220。</li>
+      </ol>
+      <div class="callout warn">
+        <p>完成後，記得先關掉 Teachable Machine 的 Input 鏡頭，再把模型網址貼進「使用模型」。</p>
+      </div>
+      <p><a href="index.html">返回學生筆記</a></p>
+    </section>
+  </main>
+
+  <footer class="note">
+    <p class="teacher">此頁是 B 層提示卡，教師可選擇不開放給 C 層學生。</p>
+  </footer>
+</body>
+</html>
