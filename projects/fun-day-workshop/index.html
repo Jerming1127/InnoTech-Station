@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>校園 Fun Day 接食物遊戲・學生筆記</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-copy">
+        <span class="kicker">學生筆記</span>
+        <p class="wordmark">Fun Day</p>
+        <h1>校園接食物遊戲</h1>
+        <p>角色「同學」站在畫面下方，食物由上面掉下來。你用身體向左或向右，鏡頭認得你，角色就會跟住走。接到一個食物加 1 分，分數到達 50 就勝利。</p>
+      </div>
+      <div class="hero-photo">
+        <img src="images/00-game-stage.png" alt="遊戲畫面：校園操場背景，同學站在下方，分數為 0">
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="步驟目錄">
+    <ol>
+      <li><a href="#s1">1. 流程圖</a></li>
+      <li><a href="#s2">2. 訓練姿勢模型</a></li>
+      <li><a href="#s3">3. 打開專案</a></li>
+      <li><a href="#s4">4. 計分規則</a></li>
+      <li><a href="#s5">5. 試玩</a></li>
+      <li><a href="#s6">遇到問題</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="step" id="s1">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">1</div>
+        <h2>用 prompt 產出流程圖</h2>
+      </div>
+      <p>把下面這句貼到課堂的 AI 工具，請它畫出遊戲的流程圖。看完圖之後，找出這三件事：食物怎樣出現、怎樣計分、怎樣用姿勢控制角色。</p>
+      <div class="prompt">
+        <pre id="prompt-text">我想做一個小學 Fun Day 接食物遊戲。角色站在畫面下方，食物會從上方隨機位置掉下來。玩家用身體向左或向右的姿勢控制角色左右移動。接到一個食物就加 1 分，分數到達 50 就勝利。請畫一張流程圖，清楚標示：遊戲開始要做什麼、食物怎樣出現和掉落、怎樣計分、姿勢怎樣變成左右移動、遊戲何時結束。</pre>
+        <button class="btn" type="button" id="copy-prompt">複製 prompt</button>
+      </div>
+    </section>
+
+    <section class="step" id="s2">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">2</div>
+        <h2>訓練姿勢模型（Teachable Machine）</h2>
+      </div>
+      <p>我哋用 <strong>Pose（姿勢）</strong> 專案來訓練模型，不要選 Image。兩個類別的名稱一定是 <strong>Left</strong> 和 <strong>Right</strong>，連大小寫都要一樣，這樣遊戲積木才會認得。</p>
+
+      <div class="substep">
+        <h3>2.1 打開網站，按 Get Started</h3>
+        <p>打開 <a href="https://teachablemachine.withgoogle.com/" target="_blank" rel="noopener">teachablemachine.withgoogle.com</a>，按藍色的 <strong>Get Started</strong>。</p>
+        <figure class="fig">
+          <img src="images/01-home.png" alt="Teachable Machine 首頁，中央有藍色 Get Started 按鈕">
+          <figcaption>按 Get Started 開始新專案。</figcaption>
+        </figure>
+      </div>
+
+      <div class="substep">
+        <h3>2.2 選 Pose Project</h3>
+        <p>會見到三個專案類型。請選右邊的 <strong>Pose Project</strong>（姿勢）。不要選 Image Project。</p>
+        <figure class="fig">
+          <img src="images/02-choose-pose.png" alt="New Project 畫面：Image Project、Audio Project 和 Pose Project 三張卡片，右邊是 Pose Project">
+          <figcaption>選 Pose Project。它會用鏡頭辨認你的身體姿勢。</figcaption>
+        </figure>
+      </div>
+
+      <div class="substep">
+        <h3>2.3 把兩個類別改名為 Left 和 Right</h3>
+        <p>按類別名稱旁邊的鉛筆，把兩個類別改成 <strong>Left</strong> 和 <strong>Right</strong>。名稱要和遊戲裡的積木一模一樣。</p>
+        <figure class="fig">
+          <img src="images/03-classes-left-right.png" alt="姿勢專案工作區，兩個類別已改名為 Left 和 Right，各有 Webcam 和 Upload 按鈕">
+          <figcaption>改好名稱之後，應該像這張圖一樣，看到 Left 和 Right。</figcaption>
+        </figure>
+      </div>
+
+      <div class="substep">
+        <h3>2.4 用鏡頭拍攝樣本</h3>
+        <p>按 <strong>Webcam</strong>。請讓整個上半身入鏡，背景儘量簡單，每部電腦只得你一個人入鏡。按住拍攝按鈕，<strong>每邊至少拍 20 張</strong>。兩邊的動作要明顯不同：一邊身體向左，一邊向右。</p>
+        <figure class="fig">
+          <img src="images/04-samples-ready.png" alt="Left 和 Right 兩個類別都已有姿勢樣本，中間的 Train Model 按鈕變成可按">
+          <figcaption>兩邊都有樣本之後，中間的 Train Model 會變成藍色，就可以訓練。課堂上請每邊至少拍 20 張，比示範圖更多會更穩。</figcaption>
+        </figure>
+      </div>
+
+      <div class="substep">
+        <h3>2.5 按 Train Model，再預覽</h3>
+        <p>按 <strong>Train Model</strong>，等訓練完成。然後用鏡頭預覽：身體向左時，Left 的長條應該明顯較高；向右時，Right 應該較高。如果分得唔清，就再補幾張樣本，再訓練一次。</p>
+        <figure class="fig">
+          <img src="images/05-preview-left.png" alt="訓練完成後的預覽：畫面出現姿勢骨架，Output 顯示 Left 為 100%，Right 為 0%">
+          <figcaption>預覽成功時，對應的類別會長條會明顯較高。課堂請用鏡頭測試；這張示範圖用圖片測試，效果一樣。</figcaption>
+        </figure>
+      </div>
+
+      <div class="substep">
+        <h3>2.6 匯出模型並複製網址</h3>
+        <p>按 <strong>Export Model</strong>。在視窗裡選擇 <strong>Upload (shareable link)</strong>，再按 <strong>Upload my model</strong>。上傳完成後，按網址旁邊的 <strong>Copy</strong>，按鈕會變成 Copied。請把網址貼在下面，等等要用。</p>
+        <figure class="fig">
+          <img src="images/06-export-dialog.png" alt="Export Model 視窗：已選 TensorFlow.js 和 Upload shareable link，並有 Upload my model 按鈕">
+          <figcaption>選 Upload (shareable link)，再按 Upload my model。你會得到一條屬於自己的網址，請複製，不要用別人的。</figcaption>
+        </figure>
+        <label class="urlbox">我的模型網址
+          <input type="url" name="model-url" placeholder="把複製到的網址貼在這裡" autocomplete="off">
+        </label>
+      </div>
+
+      <div class="substep">
+        <h3>2.7 關掉 Input 鏡頭</h3>
+        <p>轉去遊戲之前，一定要把 Preview 的 <strong>Input 撥到 OFF</strong>。如果這邊鏡頭還開著，Playground 就用不到鏡頭。</p>
+        <figure class="fig">
+          <img src="images/08-input-off.png" alt="Preview 面板的 Input 已撥到 OFF，輸出長條變成灰色">
+          <figcaption>確認 Input 顯示 OFF，預覽變灰，先可以去下一步。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="step" id="s3">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">3</div>
+        <h2>打開半完成專案</h2>
+      </div>
+      <ol class="ol-steps">
+        <li>打開 <a href="https://playground.raise.mit.edu/create/" target="_blank" rel="noopener">MIT RAISE Playground</a>。</li>
+        <li>按 <strong>File</strong>，再選 <strong>Load from your computer</strong>。</li>
+        <li>打開老師分給你的檔案（A 層、B 層或 C 層）。不要用 scratch.mit.edu。</li>
+        <li>如果瀏覽器問你是否允許鏡頭，請選擇允許。</li>
+        <li>把模型網址貼到「使用模型」積木，按綠旗，等綠色剔號出現後才開始玩。</li>
+      </ol>
+      <p><strong>我的層別</strong></p>
+      <div class="layers">
+        <div class="layer">
+          <label class="chk"><input type="radio" name="tier" value="A"> A 層</label>
+          <p>遊戲已砌好。請訓練模型，把網址貼到「使用模型」再試玩。選做勝利台詞或改 speed。</p>
+        </div>
+        <div class="layer std">
+          <label class="chk"><input type="radio" name="tier" value="B"> B 層</label>
+          <p>先補食物分身和一次計分，再接模型與左右移動。如老師有派發提示卡，可以按指示打開。</p>
+        </div>
+        <div class="layer">
+          <label class="chk"><input type="radio" name="tier" value="C"> C 層</label>
+          <p>只有背景、造型和變數 score、speed。請對照流程圖自己砌齊主要邏輯。先不要看提示卡。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="step" id="s4">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">4</div>
+        <h2>重要規則：每個食物只可以加 1 分</h2>
+      </div>
+      <div class="callout rule">
+        <h3>計分只加一次</h3>
+        <ul class="do">
+          <li class="yes">正確：在「食物」的分身裡，下落結束之後，若碰到「同學」，分數改變 1，然後隱藏並刪除分身。</li>
+          <li class="no">不正確：把「碰到就加分」放在角色的「重複直到」裡面。這樣一個食物可能加很多分，分數會一次過跳好多。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="step" id="s5">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">5</div>
+        <h2>試玩與延伸</h2>
+      </div>
+      <p>試玩一次，看你能不能接到 50 分。如果已經穩陣，可以選做：</p>
+      <div class="ext">
+        <label class="chk"><input type="checkbox"> 改快 speed</label>
+        <label class="chk"><input type="checkbox"> 勝利時說一句話</label>
+        <label class="chk"><input type="checkbox"> 接到時播 Pop</label>
+        <label class="chk"><input type="checkbox"> 加入鍵盤後備（左右鍵）</label>
+      </div>
+    </section>
+
+    <section class="step" id="s6">
+      <div class="step-head">
+        <div class="stamp" aria-hidden="true">?</div>
+        <h2>遇到問題時</h2>
+      </div>
+      <ul class="faq">
+        <li><strong>看不到鏡頭：</strong>先關掉 Teachable Machine 的 Input，再重新整理 Playground 並載入專案。</li>
+        <li><strong>按了綠旗但角色不動：</strong>先等綠色剔號；再檢查類別名是否正好是 Left 與 Right。</li>
+        <li><strong>分數一次跳很多：</strong>計分積木放錯了位置，請回到「步驟 4」檢查。</li>
+        <li><strong>訓練超過約 8 分鐘仍未完成：</strong>改用老師的示範模型，先玩到遊戲。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="note">
+    <p>45 分鐘小學編程工作坊・校園 Fun Day 接食物遊戲</p>
+  </footer>
+
+  <script>
+    const btn = document.getElementById("copy-prompt");
+    const text = document.getElementById("prompt-text");
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(text.textContent.trim());
+        btn.textContent = "已複製";
+        setTimeout(() => { btn.textContent = "複製 prompt"; }, 1600);
+      } catch (err) {
+        const range = document.createRange();
+        range.selectNodeContents(text);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        btn.textContent = "請手動複製";
+      }
+    });
+  </script>
+</body>
+</html>
