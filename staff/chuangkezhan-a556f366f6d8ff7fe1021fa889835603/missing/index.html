@@ -8,13 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../staff.css?v=3" />
+  <link rel="stylesheet" href="../staff.css?v=4" />
 </head>
 <body>
   <div id="staff-gate"></div>
 
   <div id="staff-app" hidden>
-    <div class="wrap wrap--wide">
+    <div class="wrap wrap--missing">
       <header class="topbar">
         <a class="topbar__brand" href="../">← 職員區</a>
         <div class="topbar__spacer"></div>
@@ -32,9 +32,20 @@
         <p class="stamp" id="mode-stamp">載入中…</p>
       </div>
 
-      <div class="miss-switch" id="miss-switch" role="tablist" aria-label="分組" hidden>
-        <button type="button" class="miss-tab is-active" id="miss-by-homework" role="tab" aria-selected="true">功課</button>
-        <button type="button" class="miss-tab" id="miss-by-student" role="tab" aria-selected="false">學生</button>
+      <div class="miss-toolbar" id="miss-toolbar">
+        <div class="miss-classes" id="miss-classes" role="tablist" aria-label="班別">
+          <button type="button" class="miss-tab is-active" data-class="all" role="tab" aria-selected="true">全部</button>
+          <button type="button" class="miss-tab" data-class="1A" role="tab" aria-selected="false">1A</button>
+          <button type="button" class="miss-tab" data-class="1B" role="tab" aria-selected="false">1B</button>
+          <button type="button" class="miss-tab" data-class="1C" role="tab" aria-selected="false">1C</button>
+          <button type="button" class="miss-tab" data-class="2A" role="tab" aria-selected="false">2A</button>
+          <button type="button" class="miss-tab" data-class="2B" role="tab" aria-selected="false">2B</button>
+          <button type="button" class="miss-tab" data-class="3B" role="tab" aria-selected="false">3B</button>
+        </div>
+        <div class="miss-switch" id="miss-switch" role="tablist" aria-label="分組">
+          <button type="button" class="miss-tab is-active" id="miss-by-homework" role="tab" aria-selected="true">功課</button>
+          <button type="button" class="miss-tab" id="miss-by-student" role="tab" aria-selected="false">學生</button>
+        </div>
       </div>
 
       <p class="sheet-note" id="sheet-note" hidden></p>
@@ -47,7 +58,7 @@
   <script src="../auth-config.js"></script>
   <script src="../auth.js?v=1"></script>
   <script src="missing-config.js?v=1"></script>
-  <script src="missing.js?v=1"></script>
+  <script src="missing.js?v=2"></script>
   <script>
     StaffAuth.requireAuth({ onUnlock: function () { MissingHomework.boot(); } });
   </script>

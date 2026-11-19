@@ -521,9 +521,21 @@
   }
 
   var mode = "homework";
+  var classFilter = "all";
   var rows = [];
   var status = "loading";
   var booted = false;
+
+  function filterRows(list, classId) {
+    var source = list || [];
+    var id = classId == null ? classFilter : classId;
+    if (!id || id === "all") return source.slice();
+    var out = [];
+    for (var i = 0; i < source.length; i++) {
+      if (source[i] && source[i].classId === id) out.push(source[i]);
+    }
+    return out;
+  }
 
   function el(id) {
     return document.getElementById(id);
@@ -559,8 +571,17 @@
       st.classList.toggle("is-active", mode === "student");
       st.setAttribute("aria-selected", mode === "student" ? "true" : "false");
     }
-    var sw = el("miss-switch");
-    if (sw) sw.hidden = status !== "ready";
+  }
+
+  function syncClassTabs() {
+    var bar = el("miss-classes");
+    if (!bar) return;
+    var buttons = bar.querySelectorAll("[data-class]");
+    for (var i = 0; i < buttons.length; i++) {
+      var on = buttons[i].getAttribute("data-class") === classFilter;
+      buttons[i].classList.toggle("is-active", on);
+      buttons[i].setAttribute("aria-selected", on ? "true" : "false");
+    }
   }
 
   function appendCount(parent, n) {
@@ -595,12 +616,15 @@
     head.appendChild(h2);
     appendCount(head, cls.count);
     section.appendChild(head);
+    var body = document.createElement("div");
+    body.className = "miss-assignments";
     cls.assignments.forEach(function (group) {
       var box = document.createElement("div");
       box.className = "miss-group";
       var title = document.createElement("div");
       title.className = "miss-group__title";
       var label = document.createElement("span");
+      label.className = "miss-group__label";
       label.textContent = group.homework;
       title.appendChild(label);
       appendCount(title, group.count);
@@ -609,8 +633,9 @@
       group.people.forEach(function (person) { appendPerson(list, person); });
       box.appendChild(title);
       box.appendChild(list);
-      section.appendChild(box);
+      body.appendChild(box);
     });
+    section.appendChild(body);
     return section;
   }
 
@@ -625,11 +650,13 @@
     head.appendChild(h2);
     appendCount(head, cls.count);
     section.appendChild(head);
+    var body = document.createElement("div");
+    body.className = "miss-students";
     cls.students.forEach(function (student) {
-      var box = document.createElement("div");
-      box.className = "miss-group";
+      var card = document.createElement("article");
+      card.className = "miss-student";
       var title = document.createElement("div");
-      title.className = "miss-group__title";
+      title.className = "miss-student__head";
       var who = document.createElement("span");
       who.className = "miss-who";
       if (student.no) {
@@ -642,16 +669,17 @@
       title.appendChild(who);
       appendCount(title, student.count);
       var list = document.createElement("ul");
-      list.className = "miss-people miss-people--titles";
+      list.className = "miss-titles";
       student.homework.forEach(function (titleText) {
         var li = document.createElement("li");
         li.textContent = titleText;
         list.appendChild(li);
       });
-      box.appendChild(title);
-      box.appendChild(list);
-      section.appendChild(box);
+      card.appendChild(title);
+      card.appendChild(list);
+      body.appendChild(card);
     });
+    section.appendChild(body);
     return section;
   }
 
@@ -660,12 +688,20 @@
     var empty = el("miss-empty");
     if (!board) return;
     board.innerHTML = "";
-    var groups = mode === "student" ? groupByStudent(rows) : groupByHomework(rows);
+    var visible = filterRows(rows);
+    var groups = mode === "student" ? groupByStudent(visible) : groupByHomework(visible);
     groups.forEach(function (cls) {
       board.appendChild(mode === "student" ? renderStudentClass(cls) : renderHomeworkClass(cls));
     });
     if (empty) empty.hidden = !(status === "ready" && !groups.length);
     syncTabs();
+    syncClassTabs();
+  }
+
+  function setClass(next) {
+    var id = String(next || "");
+    classFilter = CLASS_ORDER.indexOf(id) >= 0 ? id : "all";
+    paint();
   }
 
   function setMode(next) {
@@ -739,6 +775,19 @@
     var bySt = el("miss-by-student");
     if (byHw) byHw.addEventListener("click", function () { setMode("homework"); });
     if (bySt) bySt.addEventListener("click", function () { setMode("student"); });
+    var classBar = el("miss-classes");
+    if (classBar) {
+      classBar.addEventListener("click", function (ev) {
+        var node = ev.target;
+        while (node && node !== classBar) {
+          if (node.getAttribute && node.getAttribute("data-class")) {
+            setClass(node.getAttribute("data-class"));
+            return;
+          }
+          node = node.parentNode;
+        }
+      });
+    }
     load();
   }
 
@@ -746,6 +795,8 @@
     parse: parseMissingCsv,
     groupByHomework: groupByHomework,
     groupByStudent: groupByStudent,
+    filterRows: filterRows,
+    setClass: setClass,
     collectSheetUrls: collectSheetUrls,
     configuredUrl: configuredUrl,
     setRows: setRows,
