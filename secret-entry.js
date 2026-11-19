@@ -5,8 +5,13 @@
 (function () {
   "use strict";
 
-  var TARGET_URL =
-    "staff/chuangkezhan-a556f366f6d8ff7fe1021fa889835603/leaderboard/";
+  // Staff hub (index), not a tool subpage. Resolve from this script so a
+  // page in a subdirectory still lands on the hub. Deep links stay direct.
+  var scriptEl = document.currentScript;
+  var TARGET_URL = new URL(
+    "staff/chuangkezhan-a556f366f6d8ff7fe1021fa889835603/",
+    scriptEl && scriptEl.src ? scriptEl.src : document.baseURI
+  ).href;
   var LONG_MS = 650;
   var SHORT_MAX_MS = 320;
   var STEP_GAP_MS = 4500;
