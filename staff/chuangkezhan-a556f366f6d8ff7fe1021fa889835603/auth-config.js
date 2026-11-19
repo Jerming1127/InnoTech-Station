@@ -4,11 +4,12 @@
  * HOW TO FINISH SETUP (before live push):
  * 1. Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID
  *    Application type: Web application
- * 2. Authorized JavaScript origins:
+ * 2. Authorized JavaScript origins must include BOTH:
  *      https://jerming1127.github.io
+ *      https://innotech.jerming.uk
  *    (optional local test: http://localhost:<port>)
  * 3. Authorized redirect URIs: not required for GIS One Tap / button credential flow
- *    (if you add a redirect-based flow later, use the Pages origin above).
+ *    (if you add a redirect-based flow later, use both Pages origins above).
  * 4. Paste the Client ID below, replacing REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID.
  * 5. Add allowed staff Gmail addresses to ALLOWED_EMAILS (lowercase).
  *
