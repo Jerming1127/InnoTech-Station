@@ -2,6 +2,9 @@ Drop this folder's CONTENTS into:
   InnoTech-Station/projects/hk-bus-eta-cyd/flash/
 
 Public URL (HTTPS required for Web Serial):
+  https://innotech.jerming.uk/projects/hk-bus-eta-cyd/flash/
+
+The previous GitHub Pages URL still works, or redirects to the URL above:
   https://jerming1127.github.io/InnoTech-Station/projects/hk-bus-eta-cyd/flash/
 
 Must keep relative paths:

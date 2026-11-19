@@ -3,14 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta http-equiv="refresh" content="0;url=/InnoTech-Station/" />
   <title>重新導向</title>
   <script>
     // Old public staff path retired. Send to site home — do not advertise the private entry.
-    location.replace("/InnoTech-Station/");
+    // github.io project pages live under /InnoTech-Station/; the custom domain is the site root.
+    var home =
+      location.hostname === "jerming1127.github.io" ||
+      location.pathname.indexOf("/InnoTech-Station/") === 0
+        ? "/InnoTech-Station/"
+        : "/";
+    var meta = document.createElement("meta");
+    meta.httpEquiv = "refresh";
+    meta.content = "0;url=" + home;
+    document.head.appendChild(meta);
+    document.addEventListener("DOMContentLoaded", function () {
+      var link = document.getElementById("back-home");
+      if (link) link.setAttribute("href", home);
+    });
+    location.replace(home);
   </script>
 </head>
 <body>
-  <p><a href="/InnoTech-Station/">返回創科站</a></p>
+  <p><a id="back-home" href="../../">返回創科站</a></p>
 </body>
 </html>
