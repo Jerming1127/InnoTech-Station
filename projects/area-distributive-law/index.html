@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>從面積看分配律</title>
+<style>
+  :root {
+    --paper: #f3eee4;
+    --paper-2: #e8e0d2;
+    --ink: #161616;
+    --ink-soft: #3d3d3d;
+    --muted: #5a564c;
+    --whole: #e2cc7a;
+    --yellow: #f0d157;
+    --blue: #8ec5dc;
+    --cut: #c45c26;
+    --hatch: #6a8ea0;
+    --hatch-red: #c62828;
+    --cut-fill: #f6d6d0;
+    --btn: #161616;
+    --btn-face: #f3eee4;
+    --sans: "Microsoft JhengHei", "微軟正黑體", "Noto Sans TC", "Noto Sans CJK TC",
+            "Source Han Sans TC", "Source Han Sans TW", "PingFang TC", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    color: var(--ink);
+    font-family: var(--sans);
+    background:
+      radial-gradient(1200px 800px at 50% 0%, #f7f3ea 0%, var(--paper) 55%, var(--paper-2) 100%);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .7rem 1.4rem 0;
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1rem, 1.8vw, 1.35rem);
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+  .progress {
+    margin: 0;
+    font-size: clamp(1.05rem, 2vw, 1.45rem);
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .progress .now { color: var(--ink); font-size: 1.15em; }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: .2rem 1.2rem .4rem;
+    cursor: pointer;
+  }
+
+  .stage {
+    width: min(96vw, 1180px);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .fig {
+    width: 100%;
+    height: 100%;
+    max-height: 56vh;
+    overflow: visible;
+  }
+
+  .fig text {
+    fill: var(--ink);
+    font-family: var(--sans);
+    font-weight: 700;
+  }
+  .fig .var { font-style: italic; font-weight: 700; }
+  .fig .vertex {
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 700;
+  }
+  .fig .dim-label { font-size: 32px; }
+  .fig .piece-name { font-size: 40px; font-style: italic; }
+  .fig .area-in { font-size: 36px; }
+  .fig .op { font-size: 54px; font-weight: 700; }
+
+  #cut-line {
+    stroke: var(--cut);
+    stroke-width: 3.5;
+    stroke-dasharray: 10 8;
+    fill: none;
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  #scissors { opacity: 0; transition: opacity .35s ease; }
+
+  #rect-I, #rect-II {
+    fill: var(--whole);
+    transition: fill .4s ease, x .4s ease;
+  }
+  #outer-stroke {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 3.5;
+    transition: opacity .3s ease;
+  }
+  .piece-stroke {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 3.5;
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+
+  #dim-xy, #dim-k-whole { opacity: 1; transition: opacity .3s ease; }
+  #dim-x, #dim-y, #dim-k-I,
+  #label-I, #label-II, #area-I, #area-II, #area-whole {
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+
+  #scene-add, #scene-sub, #scene-num { transition: opacity .3s ease; }
+  #scene-sub, #scene-num { opacity: 0; pointer-events: none; }
+  #scene-add { opacity: 1; }
+
+  /* split: two coloured pieces, a little gap, own strokes */
+  body.is-split #rect-I { fill: var(--yellow); }
+  body.is-split #rect-II { fill: var(--blue); }
+  body.is-split #outer-stroke { opacity: 0; }
+  body.is-split .piece-stroke { opacity: 1; }
+  body.is-split #cut-line,
+  body.is-split #scissors { opacity: 1; }
+  body.is-split #dim-xy,
+  body.is-split #dim-k-whole { opacity: 0; }
+  body.is-split #dim-x,
+  body.is-split #dim-y,
+  body.is-split #dim-k-I { opacity: 1; }
+
+  body.show-whole-area #area-whole { opacity: 1; }
+  body.show-names #label-I,
+  body.show-names #label-II { opacity: 1; }
+  body.show-areas #area-I,
+  body.show-areas #area-II { opacity: 1; }
+  body.show-areas #label-I,
+  body.show-areas #label-II { transform: translateY(-18px); }
+
+  body.scene-sub #scene-add,
+  body.scene-num #scene-add { opacity: 0; pointer-events: none; }
+  body.scene-sub #scene-sub { opacity: 1; pointer-events: auto; }
+  body.scene-num #scene-num { opacity: 1; pointer-events: auto; }
+
+  .prompt {
+    flex: 0 0 auto;
+    margin: .15rem 0 0;
+    max-width: 26em;
+    text-align: center;
+    font-size: clamp(1.45rem, 3.1vw, 2.45rem);
+    font-weight: 700;
+    line-height: 1.45;
+    min-height: 2.9em;
+  }
+  .prompt .eq {
+    display: inline-block;
+    margin: 0 .05em;
+    font-size: 1.12em;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .prompt var, .eq var {
+    font-style: italic;
+    font-weight: 700;
+    font-family: var(--sans);
+  }
+  .prompt .rule {
+    display: block;
+    margin-top: .35em;
+    font-size: .78em;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: .7rem 1rem;
+    padding: .55rem 1.2rem 1rem;
+  }
+  footer .btns {
+    display: flex;
+    gap: .6rem;
+  }
+  button {
+    font-family: inherit;
+    font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1;
+    padding: .55rem 1.15rem;
+    border: 2.5px solid var(--btn);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover, button:focus-visible {
+    background: rgba(22, 22, 22, .06);
+    outline: none;
+  }
+  button:focus-visible { outline: 3px solid var(--cut); outline-offset: 2px; }
+  button#next {
+    background: var(--btn);
+    color: var(--btn-face);
+  }
+  button#next:hover, button#next:focus-visible {
+    background: #000;
+  }
+  button:disabled {
+    opacity: .32;
+    cursor: default;
+  }
+  button.ghost { border-color: #7a756a; color: var(--ink-soft); }
+  .hint {
+    margin: 0;
+    font-size: .9rem;
+    color: var(--muted);
+  }
+
+  @media (max-height: 700px) {
+    .fig { max-height: 50vh; }
+    .prompt { font-size: clamp(1.2rem, 2.6vw, 1.8rem); min-height: 2.4em; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body data-step="1" data-sub="0">
+  <header>
+    <h1>從面積看分配律</h1>
+    <p class="progress">第 <span class="now" id="step-now">1</span>／6 步</p>
+  </header>
+
+  <main id="main" aria-live="polite">
+    <div class="stage">
+      <svg class="fig" viewBox="0 0 960 500" role="img" aria-labelledby="prompt">
+        <defs>
+          <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="10" stroke="var(--hatch)" stroke-width="2.5"/>
+          </pattern>
+          <pattern id="hatch-red" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="12" stroke="var(--hatch-red)" stroke-width="2.6"/>
+          </pattern>
+        </defs>
+
+        <!-- 步驟 1–5、6.0：和的長方形 -->
+        <g id="scene-add">
+          <!-- 整段 (x+y) 標尺 -->
+          <g id="dim-xy">
+            <line x1="200" y1="118" x2="200" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="720" y1="118" x2="720" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="200" y1="128" x2="720" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label" x="460" y="104" text-anchor="middle">
+              (<tspan class="var">x</tspan> + <tspan class="var">y</tspan>)
+            </text>
+          </g>
+          <!-- 分拆後 x、y 標尺 -->
+          <g id="dim-x">
+            <line x1="200" y1="118" x2="200" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="400" y1="118" x2="400" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="200" y1="128" x2="400" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="300" y="104" text-anchor="middle">x</text>
+          </g>
+          <g id="dim-y">
+            <line x1="400" y1="118" x2="400" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="720" y1="118" x2="720" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="400" y1="128" x2="720" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="560" y="104" text-anchor="middle">y</text>
+          </g>
+
+          <!-- 左側 k（整塊） -->
+          <g id="dim-k-whole">
+            <line x1="172" y1="150" x2="188" y2="150" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="172" y1="360" x2="188" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="180" y1="150" x2="180" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="152" y="264" text-anchor="middle">k</text>
+          </g>
+          <g id="dim-k-I">
+            <line x1="172" y1="150" x2="188" y2="150" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="172" y1="360" x2="188" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="180" y1="150" x2="180" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="152" y="264" text-anchor="middle">k</text>
+          </g>
+
+          <rect id="rect-I" x="200" y="150" width="201" height="210"/>
+          <g id="wing-II">
+            <rect id="rect-II" x="400" y="150" width="320" height="210"/>
+            <rect class="piece-stroke" id="stroke-II" x="400" y="150" width="320" height="210"/>
+            <text id="label-II" class="piece-name" x="560" y="248" text-anchor="middle">II</text>
+            <text id="area-II" class="area-in" x="560" y="296" text-anchor="middle">
+              <tspan class="var">ky</tspan>
+            </text>
+            <text id="vertex-D" class="vertex" x="738" y="144">D</text>
+            <text id="vertex-C" class="vertex" x="738" y="388">C</text>
+          </g>
+          <rect id="outer-stroke" x="200" y="150" width="520" height="210"/>
+          <rect class="piece-stroke" x="200" y="150" width="200" height="210"/>
+
+          <g id="cut-g">
+            <line id="cut-line" x1="400" y1="150" x2="400" y2="360"/>
+            <g id="scissors" transform="translate(411 378)">
+              <circle cx="-7" cy="10" r="6.5" fill="none" stroke="var(--cut)" stroke-width="2.4"/>
+              <circle cx="7" cy="10" r="6.5" fill="none" stroke="var(--cut)" stroke-width="2.4"/>
+              <path d="M-3 5 L0 -8 L3 5" fill="none" stroke="var(--cut)" stroke-width="2.4" stroke-linejoin="round"/>
+              <line x1="0" y1="-8" x2="0" y2="4" stroke="var(--cut)" stroke-width="2.2"/>
+            </g>
+          </g>
+
+          <text id="vertex-A" class="vertex" x="178" y="144" text-anchor="end">A</text>
+          <text id="vertex-B" class="vertex" x="178" y="388" text-anchor="end">B</text>
+
+          <text id="area-whole" class="area-in" x="460" y="268" text-anchor="middle">
+            <tspan class="var">k</tspan>(<tspan class="var">x</tspan> + <tspan class="var">y</tspan>)
+          </text>
+          <text id="label-I" class="piece-name" x="300" y="248" text-anchor="middle">I</text>
+          <text id="area-I" class="area-in" x="300" y="296" text-anchor="middle">
+            <tspan class="var">kx</tspan>
+          </text>
+        </g>
+
+        <!-- 步驟 6.1：kx − ky = 右邊整段長 x，實線剩下 k(x−y)，虛線補上 y／ky。比例 x=330、y=110、(x−y)=220 -->
+        <g id="scene-sub">
+          <g id="sub-whole">
+            <line x1="28" y1="150" x2="44" y2="150" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="28" y1="350" x2="44" y2="350" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="36" y1="150" x2="36" y2="350" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="14" y="258" text-anchor="middle">k</text>
+            <line x1="52" y1="118" x2="52" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="382" y1="118" x2="382" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="52" y1="128" x2="382" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="217" y="104" text-anchor="middle">x</text>
+            <rect x="52" y="150" width="330" height="200" fill="var(--whole)" stroke="var(--ink)" stroke-width="3.5"/>
+            <text class="area-in" x="217" y="258" text-anchor="middle">
+              <tspan class="var">kx</tspan>
+            </text>
+          </g>
+          <text class="op" x="408" y="268" text-anchor="middle">−</text>
+          <g id="sub-cut">
+            <line x1="436" y1="118" x2="436" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="546" y1="118" x2="546" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="436" y1="128" x2="546" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="491" y="104" text-anchor="middle">y</text>
+            <rect x="436" y="150" width="110" height="200" fill="var(--cut-fill)" stroke="var(--ink)" stroke-width="3.5"/>
+            <rect x="436" y="150" width="110" height="200" fill="url(#hatch-red)" stroke="var(--ink)" stroke-width="3.5"/>
+            <text class="area-in" x="491" y="258" text-anchor="middle">
+              <tspan class="var">ky</tspan>
+            </text>
+          </g>
+          <text class="op" x="576" y="268" text-anchor="middle">=</text>
+          <g id="sub-remain">
+            <!-- 上緣虛線標 x，與左邊 kx 同闊 330 -->
+            <line x1="606" y1="118" x2="606" y2="138" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <line x1="936" y1="118" x2="936" y2="138" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <line x1="606" y1="128" x2="936" y2="128" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <text class="dim-label var" x="771" y="104" text-anchor="middle">x</text>
+            <!-- 實線剩下的一塊 -->
+            <rect x="606" y="150" width="220" height="200" fill="var(--yellow)" stroke="var(--ink)" stroke-width="3.5"/>
+            <text class="area-in" x="716" y="258" text-anchor="middle">
+              <tspan class="var">k</tspan>(<tspan class="var">x</tspan> − <tspan class="var">y</tspan>)
+            </text>
+            <!-- 虛線補上被減走的 y／ky，闊度與中間 ky 相同 -->
+            <rect x="826" y="150" width="110" height="200" fill="var(--cut-fill)" fill-opacity="0.45" stroke="var(--hatch-red)" stroke-width="3" stroke-dasharray="10 8"/>
+            <rect x="826" y="150" width="110" height="200" fill="url(#hatch-red)" fill-opacity="0.7" stroke="none"/>
+            <text class="area-in" x="881" y="258" text-anchor="middle" fill="var(--hatch-red)">
+              <tspan class="var">ky</tspan>
+            </text>
+            <!-- 底：（x−y）實線，y 虛線 -->
+            <line x1="606" y1="368" x2="606" y2="388" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="826" y1="368" x2="826" y2="388" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="606" y1="378" x2="826" y2="378" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label" x="716" y="422" text-anchor="middle">
+              (<tspan class="var">x</tspan> − <tspan class="var">y</tspan>)
+            </text>
+            <line x1="826" y1="368" x2="826" y2="388" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <line x1="936" y1="368" x2="936" y2="388" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <line x1="826" y1="378" x2="936" y2="378" stroke="var(--ink)" stroke-width="3" stroke-dasharray="8 7"/>
+            <text class="dim-label var" x="881" y="422" text-anchor="middle" fill="var(--hatch-red)">y</text>
+          </g>
+        </g>
+
+        <!-- 步驟 6.2–6.3：數字或負係數，沿用分割圖，標籤由 JS 改 -->
+        <g id="scene-num">
+          <g id="num-dim-x">
+            <line x1="200" y1="118" x2="200" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="400" y1="118" x2="400" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="200" y1="128" x2="400" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="300" y="104" text-anchor="middle">x</text>
+          </g>
+          <g id="num-dim-y" transform="translate(22 0)">
+            <line x1="400" y1="118" x2="400" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="720" y1="118" x2="720" y2="138" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="400" y1="128" x2="720" y2="128" stroke="var(--ink)" stroke-width="3"/>
+            <text class="dim-label var" x="560" y="104" text-anchor="middle">y</text>
+          </g>
+          <g id="num-k-I">
+            <line x1="172" y1="150" x2="188" y2="150" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="172" y1="360" x2="188" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <line x1="180" y1="150" x2="180" y2="360" stroke="var(--ink)" stroke-width="3"/>
+            <text id="num-k-I-t" class="dim-label" x="136" y="264" text-anchor="middle">3</text>
+          </g>
+          <rect x="200" y="150" width="200" height="210" fill="var(--yellow)" stroke="var(--ink)" stroke-width="3.5"/>
+          <g transform="translate(22 0)">
+            <rect x="400" y="150" width="320" height="210" fill="var(--blue)" stroke="var(--ink)" stroke-width="3.5"/>
+            <text id="num-area-II" class="area-in" x="560" y="268" text-anchor="middle">3y</text>
+            <text class="vertex" x="738" y="144">D</text>
+            <text class="vertex" x="738" y="388">C</text>
+          </g>
+          <text id="num-area-I" class="area-in" x="300" y="268" text-anchor="middle">3x</text>
+          <text class="vertex" x="178" y="144" text-anchor="end">A</text>
+          <text class="vertex" x="178" y="388" text-anchor="end">B</text>
+        </g>
+      </svg>
+    </div>
+    <p class="prompt" id="prompt">這個長方形的面積可以怎樣表示？</p>
+  </main>
+
+  <footer>
+    <div class="btns">
+      <button type="button" id="prev" disabled>上一步</button>
+      <button type="button" id="next">下一步</button>
+      <button type="button" id="reset" class="ghost">重設</button>
+      <button type="button" id="full" class="ghost">全螢幕</button>
+    </div>
+    <p class="hint">方向鍵或空白鍵翻頁，Home 重設。點畫面亦可到下一步。</p>
+  </footer>
+
+<script>
+(function () {
+  const body = document.body;
+  const promptEl = document.getElementById("prompt");
+  const stepNow = document.getElementById("step-now");
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
+  const resetBtn = document.getElementById("reset");
+  const fullBtn = document.getElementById("full");
+  const numKI = document.getElementById("num-k-I-t");
+  const numAI = document.getElementById("num-area-I");
+  const numAII = document.getElementById("num-area-II");
+  const wingII = document.getElementById("wing-II");
+  const dimY = document.getElementById("dim-y");
+  const cutG = document.getElementById("cut-g");
+
+  const eq = (html) => `<span class="eq">${html}</span>`;
+  const v = (s) => `<var>${s}</var>`;
+
+  /*
+    6 步；第 6 步內有 4 個小節（先問，再分三次揭示）。
+    subMax[step] = 該步最後的 sub 編號。
+  */
+  const subMax = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:3 };
+  let step = 1;
+  let sub = 0;
+
+  const prompts = {
+    "1.0": "這個長方形的面積可以怎樣表示？",
+    "2.0": "先把整塊看作一個長方形。面積是 " + eq(v("k") + "(" + v("x") + " + " + v("y") + ")") + "。",
+    "3.0": "沿虛線把長方形分成 I、II 兩塊。<br>這兩塊的面積分別是甚麼？",
+    "4.0": "長方形 I 的面積是 " + eq(v("kx")) + "，長方形 II 的面積是 " + eq(v("ky")) + "。",
+    "5.0": "整塊的面積等於 I 的面積加 II 的面積，所以 " +
+           eq(v("k") + "(" + v("x") + " + " + v("y") + ") = " + v("kx") + " + " + v("ky")) + "。",
+    "6.0": "想一想：如果把加號改成減號，會怎樣？如果 " + v("k") + " 換成數字，或是負數呢？",
+    "6.1": "長為 " + v("x") + " 的長方形，減去長為 " + v("y") + " 的一塊，剩下長為 (" + v("x") + " − " + v("y") + ")：" +
+           eq(v("kx") + " − " + v("ky") + " = " + v("k") + "(" + v("x") + " − " + v("y") + ")") + "。",
+    "6.2": "如果 " + v("k") + " 是數字，例如<br>" +
+           eq("3(" + v("x") + " + " + v("y") + ") = 3" + v("x") + " + 3" + v("y")) +
+           "，又例如 " +
+           eq("5(" + v("x") + " − " + v("y") + ") = 5" + v("x") + " − 5" + v("y")) + "。",
+    "6.3": "如果 " + v("k") + " 是負數，例如 " +
+           eq("−2(" + v("x") + " + " + v("y") + ") = −2" + v("x") + " − 2" + v("y")) +
+           "。<span class=\"rule\">括號外的因式須乘以括號內的每一項，並注意符號。</span>"
+  };
+
+  function render() {
+    body.dataset.step = String(step);
+    body.dataset.sub = String(sub);
+    stepNow.textContent = String(step);
+
+    body.classList.remove("is-split", "show-whole-area", "show-names", "show-areas", "scene-sub", "scene-num");
+    const splitOn = (step >= 3 && step <= 5) || (step === 6 && sub === 0);
+    const dx = splitOn ? "translate(22 0)" : "";
+    if (wingII) wingII.setAttribute("transform", dx);
+    if (dimY) dimY.setAttribute("transform", dx);
+    if (cutG) cutG.setAttribute("transform", splitOn ? "translate(11 0)" : "");
+
+    if (step === 2) body.classList.add("show-whole-area");
+    if (step >= 3 && step <= 5) {
+      body.classList.add("is-split", "show-names");
+    }
+    if (step === 4 || step === 5) body.classList.add("show-areas");
+    if (step === 6 && sub === 0) {
+      body.classList.add("is-split", "show-names", "show-areas");
+    }
+    if (step === 6 && sub === 1) body.classList.add("scene-sub");
+    if (step === 6 && sub >= 2) {
+      body.classList.add("scene-num");
+      if (sub === 2) {
+        numKI.textContent = "3";
+        numAI.innerHTML = "3<tspan class=\"var\">x</tspan>";
+        numAII.innerHTML = "3<tspan class=\"var\">y</tspan>";
+      } else {
+        numKI.textContent = "−2";
+        numAI.innerHTML = "−2<tspan class=\"var\">x</tspan>";
+        numAII.innerHTML = "−2<tspan class=\"var\">y</tspan>";
+      }
+    }
+
+    promptEl.innerHTML = prompts[step + "." + sub] || "";
+    prevBtn.disabled = (step === 1 && sub === 0);
+    nextBtn.disabled = (step === 6 && sub === subMax[6]);
+  }
+
+  function next() {
+    if (sub < subMax[step]) sub += 1;
+    else if (step < 6) { step += 1; sub = 0; }
+    else return;
+    render();
+  }
+  function prev() {
+    if (sub > 0) sub -= 1;
+    else if (step > 1) { step -= 1; sub = subMax[step]; }
+    else return;
+    render();
+  }
+  function reset() {
+    step = 1;
+    sub = 0;
+    render();
+  }
+
+  prevBtn.addEventListener("click", function (e) { e.stopPropagation(); prev(); });
+  nextBtn.addEventListener("click", function (e) { e.stopPropagation(); next(); });
+  resetBtn.addEventListener("click", function (e) { e.stopPropagation(); reset(); });
+  fullBtn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function () {});
+    } else {
+      document.exitFullscreen().catch(function () {});
+    }
+  });
+  document.getElementById("main").addEventListener("click", function () { next(); });
+
+  window.addEventListener("keydown", function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const k = e.key;
+    if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown" || k === " " || k === "Spacebar") {
+      e.preventDefault();
+      next();
+    } else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp" || k === "Backspace") {
+      e.preventDefault();
+      prev();
+    } else if (k === "Home") {
+      e.preventDefault();
+      reset();
+    }
+  });
+
+  document.addEventListener("fullscreenchange", function () {
+    fullBtn.textContent = document.fullscreenElement ? "離開全螢幕" : "全螢幕";
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
