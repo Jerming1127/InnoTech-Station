@@ -291,16 +291,71 @@
     * { transition: none !important; }
   }
   html.no-motion * { transition: none !important; }
+
+  #goals {
+    display: none;
+    width: min(90vw, 860px);
+    padding: .4rem .6rem 1rem;
+    text-align: left;
+  }
+  body.scene-goals .fig { display: none; }
+  body.scene-goals #goals { display: block; }
+  body.scene-goals .caption { display: none; }
+
+  #goals h2 {
+    margin: 0 0 .9rem;
+    font-size: clamp(1.4rem, 3vw, 2.15rem);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-align: center;
+  }
+  #goals .lead {
+    margin: 0 0 .75rem;
+    font-size: clamp(1.15rem, 2.3vw, 1.55rem);
+    font-weight: 700;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  #goals ol {
+    margin: 0 auto;
+    padding: 0 0 0 1.5em;
+    max-width: 42em;
+  }
+  #goals li {
+    margin: .55em 0;
+    font-size: clamp(1.15rem, 2.4vw, 1.7rem);
+    font-weight: 700;
+    line-height: 1.55;
+  }
+  #goals .eq {
+    display: inline-block;
+    margin: 0 .05em;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  #goals var {
+    font-style: italic;
+    font-weight: 700;
+    font-family: var(--sans);
+  }
 </style>
 </head>
-<body data-step="1" data-frame="0">
+<body data-step="0" data-frame="0">
   <header>
     <h1>從面積看分配律</h1>
-    <p class="progress">第 <span class="now" id="step-now">1</span>／7 步</p>
+    <p class="progress" id="progress">學習目標</p>
   </header>
 
   <main id="main" aria-live="polite">
     <div class="stage">
+      <section id="goals" aria-label="本課學習目標">
+        <h2>本課學習目標</h2>
+        <p class="lead">完成本課後，我能夠：</p>
+        <ol>
+          <li>用長方形分割，說明為甚麼 <span class="eq"><var>k</var>(<var>x</var> + <var>y</var>) = <var>kx</var> + <var>ky</var>。</span></li>
+          <li>正確展開 <span class="eq"><var>k</var>(<var>x</var> + <var>y</var>)</span> 和 <span class="eq"><var>k</var>(<var>x</var> − <var>y</var>)</span> 這類代數式，<br>並小心處理括號內的加減和正負號。</li>
+        </ol>
+      </section>
       <svg class="fig" viewBox="0 0 960 500" role="img" aria-labelledby="prompt">
         <defs>
           <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -499,7 +554,7 @@
 (function () {
   const body = document.body;
   const promptEl = document.getElementById("prompt");
-  const stepNow = document.getElementById("step-now");
+  const progressEl = document.getElementById("progress");
   const prevBtn = document.getElementById("prev");
   const nextBtn = document.getElementById("next");
   const resetBtn = document.getElementById("reset");
@@ -513,6 +568,11 @@
   const TOTAL = 7;
 
   const frames = [
+    {
+      major: 0, discuss: false, scene: "goals",
+      prompt: "",
+      flags: {}
+    },
     {
       major: 1, discuss: true, scene: "add",
       prompt: "這個長方形的長和闊分別是甚麼？",
@@ -659,12 +719,17 @@
     const flags = f.flags || {};
     body.dataset.step = String(f.major);
     body.dataset.frame = String(i);
-    stepNow.textContent = String(f.major);
+    if (f.scene === "goals") {
+      progressEl.textContent = "學習目標";
+    } else {
+      progressEl.innerHTML = "第 <span class=\"now\" id=\"step-now\">" + f.major + "</span>／" + TOTAL + " 步";
+    }
 
     body.classList.remove(
       "is-split", "show-whole-area", "show-names", "show-areas", "show-split-dims",
       "scene-sub", "scene-method", "show-sub-cut", "show-sub-remain",
-      "method-ex2", "show-arrow-1", "show-arrow-2", "show-method-eq", "has-discuss"
+      "method-ex2", "show-arrow-1", "show-arrow-2", "show-method-eq", "has-discuss",
+      "scene-goals"
     );
 
     const splitOn = !!flags.split;
@@ -678,6 +743,7 @@
     if (flags.names) body.classList.add("show-names");
     if (flags.splitDims) body.classList.add("show-split-dims");
     if (flags.areas) body.classList.add("show-areas");
+    if (f.scene === "goals") body.classList.add("scene-goals");
     if (f.scene === "sub") body.classList.add("scene-sub");
     if (flags.subCut) body.classList.add("show-sub-cut");
     if (flags.subRemain) body.classList.add("show-sub-remain");
